@@ -1,13 +1,11 @@
----
-title: "covid_conspiracies_markdown"
-author: "Michael Marshall"
-date: "20/10/2020"
-output: github_document
----
+covid\_conspiracies\_markdown
+================
+Michael Marshall
+20/10/2020
 
 ## Loading Packages and Data
 
-```{r, message = FALSE, warnings = FALSE}
+``` r
 pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled)
 
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
@@ -15,11 +13,33 @@ load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
 
 ## Summary and distribution of different COVID specific conspiracies
 
-```{r}
+``` r
 df %>% 
   select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
   map(summary)
+```
 
+    ## $W2_Conspiracy_Theory1
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    0.00    3.00   45.50   38.26   62.00  100.00    1472 
+    ## 
+    ## $W2_Conspiracy_Theory2
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    0.00   50.00   70.00   63.96   88.00  100.00    1472 
+    ## 
+    ## $W2_Conspiracy_Theory3
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    0.00    0.00    1.00   11.15    7.00  100.00    1472 
+    ## 
+    ## $W2_Conspiracy_Theory4
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    0.00    0.00    8.00   24.88   49.00  100.00    1472 
+    ## 
+    ## $W2_Conspiracy_Theory5
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##    0.00    0.00    2.00   14.73   18.00  100.00    1472
+
+``` r
 # plotting density of different covid conspiracies
 df %>% 
   select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
@@ -47,11 +67,21 @@ df %>%
   theme_ridges()
 ```
 
+    ## Warning: attributes are not identical across measure variables;
+    ## they will be dropped
+
+    ## Warning: Removed 7360 rows containing non-finite values (stat_density).
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
 ## Selecting variables for dataset
 
-Sorry, this is a lot of manual code, and if you can think of a quicker way I'd be happy to use it.  I tend to prefer reducing the number of variables to just those I expect to reasonably use, which the code below aims to achieve.  
+Sorry, this is a lot of manual code, and if you can think of a quicker
+way I’d be happy to use it. I tend to prefer reducing the number of
+variables to just those I expect to reasonably use, which the code below
+aims to achieve.
 
-```{r, message = FALSE, warning=FALSE}
+``` r
 df_names <- names(df)
 
 w2_vars <- c(
@@ -230,7 +260,11 @@ w3_vars <- c(
 vars <- c(w1_vars,w2_vars,w3_vars)
 
 mean(vars %in% df_names) # checking all variable names spelled correctly
+```
 
+    ## [1] 1
+
+``` r
 # selecting variables
 df_thin <- df %>% 
   select(one_of(vars))
@@ -238,9 +272,12 @@ df_thin <- df %>%
 
 ## Cleaning dataset
 
-The following code filters down to just those observations that have completed the battery of questions relating to COVID specific conspiracies.  It also creates a tibble counting the missing observations, which can be useful to have as an object.  
+The following code filters down to just those observations that have
+completed the battery of questions relating to COVID specific
+conspiracies. It also creates a tibble counting the missing
+observations, which can be useful to have as an object.
 
-```{r}
+``` r
 # filtering for completed dependent variable
 conspiracies <- df_thin %>% 
   filter(!is.na(W2_Conspiracy_Theory1) |
@@ -259,7 +296,14 @@ count_na <- function(x){
 conspiracies %>% 
   select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
   map_int(count_na)
+```
 
+    ## W2_Conspiracy_Theory1 W2_Conspiracy_Theory2 W2_Conspiracy_Theory3 
+    ##                     0                     0                     0 
+    ## W2_Conspiracy_Theory4 W2_Conspiracy_Theory5 
+    ##                     0                     0
+
+``` r
 missing <- tibble(
   variable = names(conspiracies),
   NAs = conspiracies %>% map_int(count_na)
@@ -268,9 +312,13 @@ missing <- tibble(
 #View(missing)
 ```
 
-The code below combines the two variables on the 2019 general election into a single variable that combines whether a respondent voted, and who they voted for.  It also turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everthing else as *NA*.  
+The code below combines the two variables on the 2019 general election
+into a single variable that combines whether a respondent voted, and who
+they voted for. It also turns the *preferred newspaper* variables into
+dummy variables, as they were previously coded as *1=Yes* and everthing
+else as *NA*.
 
-```{r}
+``` r
 # combining 2019 election variables into one, for parties and didn't votes
 pacman::p_load(forcats,labelled)
 
@@ -316,9 +364,10 @@ conspiracies[paper_vars] <- conspiracies[paper_vars] %>%
 
 ## Distribution of variables
 
-A for loop to look at distribution of potential independent variables (numeric only).  
+A for loop to look at distribution of potential independent variables
+(numeric only).
 
-```{r}
+``` r
 plot_vars <- conspiracies %>% 
   select(
     W1_Political_Scale:W1_Political_Fiscal,
@@ -349,9 +398,15 @@ for(i in seq_along(plot_vars)){
 }
 ```
 
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+
+    ## Warning: Removed 30 rows containing non-finite values (stat_density).
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-11.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-12.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-13.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-14.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-15.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-16.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-17.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-18.png)<!-- -->![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-6-19.png)<!-- -->
+
 ## Vote in 2019 election and conspiracy belief
 
-```{r}
+``` r
 conspiracies %>% 
   ggplot(aes(x = fct_reorder(W1_2019_GE_Full, W2_Conspiracy_Theory1),
              y = W2_Conspiracy_Theory1)) +
@@ -359,7 +414,11 @@ conspiracies %>%
   coord_flip() +
   labs(x = "Vote in 2019 GE",
        y = "Belief in Chinese Lab Origin")
+```
 
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 # filtering down for some of the main parties
 parties <- c("UKIP",
              "Did not vote.",
@@ -384,7 +443,13 @@ conspiracies %>%
                       position = "raincloud") +
   labs(x = "Vote in 2019 GE",
        y = "Belief in Chinese lab origin")
+```
 
+    ## Picking joint bandwidth of 12
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+
+``` r
 # interestingly, Conservatives have relatively high belief in Chinese lab conspiracy
 
 conspiracies %>% 
@@ -394,7 +459,11 @@ conspiracies %>%
   coord_flip() +
   labs(x = "Vote in 2019 GE",
        y = "Belief in 5G Origin")
+```
 
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+
+``` r
 conspiracies %>% 
   filter(W1_2019_GE_Full %in% parties) %>% 
   ggplot(aes(x = W2_Conspiracy_Theory3,
@@ -410,7 +479,13 @@ conspiracies %>%
                       position = "raincloud") +
   labs(x = "Vote in 2019 GE",
        y = "Belief in 5G origin")
+```
 
+    ## Picking joint bandwidth of 4.57
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+
+``` r
 conspiracies %>% 
   ggplot(aes(x = fct_reorder(W1_2019_GE_Full, W2_Conspiracy_Theory4),
              y = W2_Conspiracy_Theory4)) +
@@ -418,7 +493,11 @@ conspiracies %>%
   coord_flip() +
   labs(x = "Vote in 2019 GE",
        y = "Belief it is no worse than flu")
+```
 
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
+
+``` r
 conspiracies %>% 
   filter(W1_2019_GE_Full %in% parties) %>% 
   ggplot(aes(x = W2_Conspiracy_Theory4,
@@ -434,7 +513,13 @@ conspiracies %>%
                       position = "raincloud") +
   labs(x = "Vote in 2019 GE",
        y = "Belief it is no worse than flu")
+```
 
+    ## Picking joint bandwidth of 11
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
+
+``` r
 conspiracies %>% 
   ggplot(aes(x = fct_reorder(W1_2019_GE_Full, W2_Conspiracy_Theory5),
              y = W2_Conspiracy_Theory5)) +
@@ -444,3 +529,4 @@ conspiracies %>%
        y = "Belief in Vitamin C treatment")
 ```
 
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
