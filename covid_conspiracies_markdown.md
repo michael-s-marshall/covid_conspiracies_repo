@@ -6,7 +6,7 @@ Michael Marshall
 ## Loading Packages and Data
 
 ``` r
-pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled)
+pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps)
 
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
 ```
@@ -185,7 +185,7 @@ missing <- tibble(
 The code below combines the two variables on the 2019 general election
 into a single variable that combines whether a respondent voted, and who
 they voted for. It also turns the *preferred newspaper* variables into
-dummy variables, as they were previously coded as *1=Yes* and everthing
+dummy variables, as they were previously coded as *1=Yes* and everything
 else as *NA*.
 
 ``` r
@@ -388,3 +388,89 @@ conspiracies %>%
 ```
 
 ![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
+
+## Forward stepwise model selection
+
+``` r
+conspiracies_subset <- conspiracies %>% 
+  select(W1_Ethnicity,W1_Education,
+         W1_Income_2019,W1_CRT1:W1_CRT_test,
+         W1_EURef:W1_Political_Fiscal,
+         W1_ReligiousBelief_Total:W1_Authoritarianism_Total,
+         W1_Social_Dominance_Total:W2_Age_year,W2_Gender,
+         W2_Living_alone,W2_Employment,
+         W2_Trust_Body1:W2_Newspaper_prefer11,
+         W2_COVID19_anxiety,W2_Conspiracy_Theory1:W2_Conspiracy_Theory5,
+         W2_Nationalism_Total:W2_IOU_Total,
+         W1_2019_GE_Full)
+```
+
+``` r
+conspiracies_subset %>% 
+  ggplot(aes(x = W2_Conspiracy_Theory1)) +
+  geom_histogram(colour = "black", fill = "grey")
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+reg_fit <- regsubsets(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset,
+                      nvmax = 50, method = "forward")
+
+plot(summary(reg_fit)$adjr2, type = "o")
+```
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+coef(reg_fit, 22)
+```
+
+    ##                                                    (Intercept) 
+    ##                                                   -16.24062086 
+    ##                                                   W1_Education 
+    ##                                                    -1.36002623 
+    ##                                                        W1_CRT2 
+    ##                                                     2.19887803 
+    ##                                                        W1_CRT3 
+    ##                                                     2.37118794 
+    ##                                                        W1_CRT5 
+    ##                                                     2.75977660 
+    ##                                                       W1_EURef 
+    ##                                                    -3.15160031 
+    ##                                       W1_ReligiousBelief_Total 
+    ##                                                    -0.23264802 
+    ##                                      W1_Authoritarianism_Total 
+    ##                                                     0.59616204 
+    ##                                            W1_Conspiracy_Total 
+    ##                                                     0.51311429 
+    ##                                                 W2_Trust_Body6 
+    ##                                                     2.50660129 
+    ##                                           W2_Newspaper_prefer1 
+    ##                                                     9.20669881 
+    ##                                           W2_Newspaper_prefer6 
+    ##                                                    -4.90909330 
+    ##                                           W2_Newspaper_prefer9 
+    ##                                                     7.51638262 
+    ##                                             W2_COVID19_anxiety 
+    ##                                                     0.11782079 
+    ##                                          W2_Conspiracy_Theory2 
+    ##                                                    -0.12992731 
+    ##                                          W2_Conspiracy_Theory3 
+    ##                                                     0.22764430 
+    ##                                          W2_Conspiracy_Theory4 
+    ##                                                     0.09414414 
+    ##                                           W2_Nationalism_Total 
+    ##                                                     1.43079795 
+    ##                                                   W2_DAI_Total 
+    ##                                                     0.14809167 
+    ##                                           W1_2019_GE_FullGreen 
+    ##                                                    -7.84182486 
+    ## W1_2019_GE_FullIneligible because not a UK citizen or resident 
+    ##                                                    10.86332546 
+    ##                                       W1_2019_GE_FullSinn Féin 
+    ##                                                    35.66098295 
+    ##                                 W1_2019_GE_FullUlster Unionist 
+    ##                                                    29.98674854

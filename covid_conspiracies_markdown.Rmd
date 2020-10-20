@@ -8,7 +8,7 @@ output: github_document
 ## Loading Packages and Data
 
 ```{r, message = FALSE, warnings = FALSE}
-pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled)
+pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps)
 
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
 ```
@@ -138,7 +138,7 @@ missing <- tibble(
 #View(missing)
 ```
 
-The code below combines the two variables on the 2019 general election into a single variable that combines whether a respondent voted, and who they voted for.  It also turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everthing else as *NA*.  
+The code below combines the two variables on the 2019 general election into a single variable that combines whether a respondent voted, and who they voted for.  It also turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everything else as *NA*.  
 
 ```{r}
 # combining 2019 election variables into one, for parties and didn't votes
@@ -300,5 +300,38 @@ conspiracies %>%
   coord_flip() +
   labs(x = "Vote in 2019 GE",
        y = "Belief in Vitamin C treatment")
+```
+
+
+## Forward stepwise model selection
+
+```{r}
+conspiracies_subset <- conspiracies %>% 
+  select(W1_Ethnicity,W1_Education,
+         W1_Income_2019,W1_CRT1:W1_CRT_test,
+         W1_EURef:W1_Political_Fiscal,
+         W1_ReligiousBelief_Total:W1_Authoritarianism_Total,
+         W1_Social_Dominance_Total:W2_Age_year,W2_Gender,
+         W2_Living_alone,W2_Employment,
+         W2_Trust_Body1:W2_Newspaper_prefer11,
+         W2_COVID19_anxiety,W2_Conspiracy_Theory1:W2_Conspiracy_Theory5,
+         W2_Nationalism_Total:W2_IOU_Total,
+         W1_2019_GE_Full)
+```
+
+```{r}
+conspiracies_subset %>% 
+  ggplot(aes(x = W2_Conspiracy_Theory1)) +
+  geom_histogram(colour = "black", fill = "grey")
+
+```
+
+```{r}
+reg_fit <- regsubsets(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset,
+                      nvmax = 50, method = "forward")
+
+plot(summary(reg_fit)$adjr2, type = "o")
+
+coef(reg_fit, 22)
 ```
 
