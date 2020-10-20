@@ -10,6 +10,8 @@ output: github_document
 ```{r, message = FALSE, warnings = FALSE}
 pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled)
 
+setwd("~/PhD/Covid/conspiracies_project") ## CHANGE THIS TO YOURS
+
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
 ```
 
