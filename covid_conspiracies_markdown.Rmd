@@ -54,170 +54,40 @@ Sorry, this is a lot of manual code, and if you can think of a quicker way I'd b
 ```{r, message = FALSE, warning=FALSE}
 df_names <- names(df)
 
-w2_vars <- c(
-  "W2_Age_year",
-  "W2_Age_categories",
-  "W2_Gender",
-  "W2_Other_gender",
-  "W2_Gender_binary",
-  "W2_Employment",
-  "W2_Living_alone",
-  "W2_INFO_1",
-  "W2_INFO_2",
-  "W2_INFO_3",
-  "W2_INFO_4",
-  "W2_INFO_5",
-  "W2_INFO_6",
-  "W2_INFO_7",
-  "W2_INFO_8",
-  "W2_INFO_9",
-  "W2_TRUST_1",
-  "W2_TRUST_2",
-  "W2_TRUST_3",
-  "W2_TRUST_4",
-  "W2_TRUST_5",
-  "W2_TRUST_6",
-  "W2_TRUST_7",
-  "W2_TRUST_8",
-  "W2_TRUST_9",
-  "W2_COVID19_anxiety",
-  "W2_LOC1",
-  "W2_LOC2",
-  "W2_LOC3",
-  "W2_LOC4",
-  "W2_LOC5",
-  "W2_LOC6",
-  "W2_LOC7",
-  "W2_LOC8",
-  "W2_LOC9",
-  "W2_DAI1",
-  "W2_DAI2",
-  "W2_DAI3",
-  "W2_DAI4",
-  "W2_DAI5",
-  "W2_DAI6",
-  "W2_DAI7",
-  "W2_DAI8",
-  "W2_DAI9",
-  "W2_DAI10",
-  "W2_DAI11",
-  "W2_DAI12",
-  "W2_DAI13",
-  "W2_DAI14",
-  "W2_DAI15",
-  "W2_DAI16",
-  "W2_DAI17",
-  "W2_IOU1",
-  "W2_IOU2",
-  "W2_IOU3",
-  "W2_IOU4",
-  "W2_IOU5",
-  "W2_IOU6",
-  "W2_IOU7",
-  "W2_IOU8",
-  "W2_IOU9",
-  "W2_IOU10",
-  "W2_IOU11",
-  "W2_IOU12",
-  "W2_Nationalism1",
-  "W2_Nationalism2",
-  "W2_Trust_Body1",
-  "W2_Trust_Body2",
-  "W2_Trust_Body3",
-  "W2_Trust_Body4",
-  "W2_Trust_Body5",
-  "W2_Trust_Body6",
-  "W2_Trust_Body7",
-  "W2_Newspaper_prefer1",
-  "W2_Newspaper_prefer2",
-  "W2_Newspaper_prefer3",
-  "W2_Newspaper_prefer4",
-  "W2_Newspaper_prefer5",
-  "W2_Newspaper_prefer6",
-  "W2_Newspaper_prefer7",
-  "W2_Newspaper_prefer8",
-  "W2_Newspaper_prefer9",
-  "W2_Newspaper_prefer10",
-  "W2_Newspaper_prefer11",
-  "W2_Conspiracy_Theory1",
-  "W2_Conspiracy_Theory2",
-  "W2_Conspiracy_Theory3",
-  "W2_Conspiracy_Theory4",
-  "W2_Conspiracy_Theory5",
-  "W2_Nationalism_Total",
-  "W2_Paranoia_Total",
-  "W2_Dep_Total",
-  "W2_GAD_Total",
-  "W2_Internal_Total",
-  "W2_Chance_Total",
-  "W2_PO_Total",
-  "W2_DAI_Total",
-  "W2_ProspectiveAnx_Total",
-  "W2_InhibitoryAnx_Total",
-  "W2_IOU_Total"
-)
+w2_vars <- df %>% 
+  select(
+    W2_Age_year:W2_Gender_binary,
+    W2_Living_alone,W2_Employment,
+    W2_Nationalism1,W2_Nationalism2,
+    W2_Trust_Body1:W2_Newspaper_prefer11,
+    W2_COVID19_anxiety:W2_TRUST_9,
+    W2_Conspiracy_Theory1:W2_Conspiracy_Theory5,
+    W2_LOC1:W2_DAI17,W2_IOU1:W2_IOU12,W2_Nationalism_Total,
+    W2_Paranoia_Total,W2_Dep_Total,
+    W2_GAD_Total,W2_Internal_Total,
+    W2_Chance_Total,W2_PO_Total,
+    W2_DAI_Total,W2_ProspectiveAnx_Total,
+    W2_InhibitoryAnx_Total,W2_IOU_Total
+    ) %>% 
+  names()
 
-w1_vars <- c(
-  "pid",
-  "W1_Area_residence",
-  "W1_Ethnicity",
-  "W1_Education",
-  "W1_Education_binary",
-  "W1_Religion",
-  "W1_Hosuing_tenure",
-  "W1_Income_2019",
-  "W1_C19_Infected",
-  "W1_C19_Infected_Binary",
-  "W1_C19_SomeoneClose_Infected",
-  "W1_C19_SomeoneClose_Infected_Binary",
-  "W1_ReligiousBelief1",
-  "W1_ReligiousBelief2",
-  "W1_ReligiousBelief3",
-  "W1_ReligiousBelief4",
-  "W1_ReligiousBelief5",
-  "W1_ReligiousBelief6",
-  "W1_ReligiousBelief7",
-  "W1_ReligiousBelief8",
-  "W1_ReligiousBelief2_R",
-  "W1_ReligiousBelief4_R",
-  "W1_ReligiousBelief6_R",
-  "W1_ReligiousBelief8_R",
-  "W1_CRT1",
-  "W1_CRT2",
-  "W1_CRT3",
-  "W1_CRT4",
-  "W1_CRT5",
-  "W1_CRT_test",
-  "W1_Voted_GenElection",
-  "W1_Voted_Party",
-  "W1_EURef",
-  "W1_Political_Scale",
-  "W1_Political_Abortion_SSM",
-  "W1_Political_Fiscal",
-  "W1_Authoritarianism1",
-  "W1_Authoritarianism2",
-  "W1_Authoritarianism3",
-  "W1_Authoritarianism4",
-  "W1_Authoritarianism5",
-  "W1_Authoritarianism6",
-  "W1_Authoritarianism1_R",
-  "W1_Authoritarianism4_R",
-  "W1_Authoritarianism5_R",
-  "W1_MigrantAttitudes1",
-  "W1_MigrantAttitudes2",
-  "W1_MigrantAttitudes3",
-  "W1_Conspiracy_1",
-  "W1_Conspiracy_2",
-  "W1_Conspiracy_3",
-  "W1_Conspiracy_4",
-  "W1_Conspiracy_5",
-  "W1_ReligiousBelief_Total",
-  "W1_Authoritarianism_Total",
-  "W1_Social_Dominance_Mean",
-  "W1_Social_Dominance_Total",
-  "W1_Conspiracy_Total"
-)
-
+w1_vars <- df %>% 
+  select(
+    W1_Area_residence,W1_Ethnicity,
+    W1_Education:W1_Religion_binary,
+    W1_Hosuing_tenure,W1_Income_2019,
+    W1_C19_Infected:W1_C19_SomeoneClose_Infected_Binary,
+    W1_ReligiousBelief1:W1_ReligiousBelief8_R,
+    W1_CRT1:W1_CRT_test,
+    W1_Voted_GenElection:W1_Political_Fiscal,
+    W1_Authoritarianism1:W1_Authoritarianism5_R,
+    W1_MigrantAttitudes1:W1_Conspiracy_5,
+    W1_ReligiousBelief_Total,W1_Authoritarianism_Total,
+    W1_Social_Dominance_Mean,W1_Social_Dominance_Total,
+    W1_Conspiracy_Total
+  ) %>% 
+  names()
+         
 w3_vars <- c(
   "W3_ContactTracing",
   "W3_Smartphone",
@@ -227,7 +97,7 @@ w3_vars <- c(
   "W3_C19App4"
 )
 
-vars <- c(w1_vars,w2_vars,w3_vars)
+vars <- c("pid",w1_vars,w2_vars,w3_vars)
 
 mean(vars %in% df_names) # checking all variable names spelled correctly
 
@@ -272,7 +142,6 @@ The code below combines the two variables on the 2019 general election into a si
 
 ```{r}
 # combining 2019 election variables into one, for parties and didn't votes
-pacman::p_load(forcats,labelled)
 
 conspiracies <- conspiracies %>% 
   mutate(
@@ -287,17 +156,6 @@ conspiracies <- conspiracies %>%
       )
       )
     )
-
-W1_2019_GE_Full <- factor(
-  ifelse(
-    conspiracies$W1_Voted_GenElection_Name == "Voted.",
-    to_factor(conspiracies$W1_Voted_Party,
-              nolabel_to_na = TRUE),
-    to_factor(conspiracies$W1_Voted_GenElection,
-              nolabel_to_na = TRUE)
-    )
-)
-
 
 # making preferred newspaper a dummy variable (i.e. replacing NA with 0)
 na_to_zero <- function(x){
