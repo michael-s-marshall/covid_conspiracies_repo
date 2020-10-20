@@ -474,3 +474,155 @@ coef(reg_fit, 22)
     ##                                                    35.66098295 
     ##                                 W1_2019_GE_FullUlster Unionist 
     ##                                                    29.98674854
+
+``` r
+lab_mod <- lm(W2_Conspiracy_Theory1 ~ W1_Education +
+                W1_CRT2 +
+                W1_CRT3 +
+                W1_CRT5 +
+                W1_EURef +
+                W1_ReligiousBelief_Total +
+                W1_Authoritarianism_Total +
+                W1_Conspiracy_Total +
+                W2_Trust_Body6 +
+                W2_Newspaper_prefer1 +
+                W2_Newspaper_prefer6 +
+                W2_Newspaper_prefer9 +
+                W2_COVID19_anxiety +
+                W2_Conspiracy_Theory2 +
+                W2_Conspiracy_Theory3 +
+                W2_Conspiracy_Theory4 +
+                W2_Nationalism_Total +
+                W2_DAI_Total,
+              data = conspiracies_subset)
+
+summary(lab_mod)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = W2_Conspiracy_Theory1 ~ W1_Education + W1_CRT2 + 
+    ##     W1_CRT3 + W1_CRT5 + W1_EURef + W1_ReligiousBelief_Total + 
+    ##     W1_Authoritarianism_Total + W1_Conspiracy_Total + W2_Trust_Body6 + 
+    ##     W2_Newspaper_prefer1 + W2_Newspaper_prefer6 + W2_Newspaper_prefer9 + 
+    ##     W2_COVID19_anxiety + W2_Conspiracy_Theory2 + W2_Conspiracy_Theory3 + 
+    ##     W2_Conspiracy_Theory4 + W2_Nationalism_Total + W2_DAI_Total, 
+    ##     data = conspiracies_subset)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ## -73.78 -21.79  -3.37  20.27  84.04 
+    ## 
+    ## Coefficients:
+    ##                            Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)               -16.32168    9.37827  -1.740 0.082021 .  
+    ## W1_Education               -1.24819    0.43514  -2.868 0.004189 ** 
+    ## W1_CRT2                     2.07464    0.95882   2.164 0.030660 *  
+    ## W1_CRT3                     2.29810    1.15049   1.997 0.045972 *  
+    ## W1_CRT5                     2.55184    1.60431   1.591 0.111931    
+    ## W1_EURef                   -2.18381    0.96934  -2.253 0.024426 *  
+    ## W1_ReligiousBelief_Total   -0.27992    0.13514  -2.071 0.038517 *  
+    ## W1_Authoritarianism_Total   0.61290    0.21426   2.861 0.004294 ** 
+    ## W1_Conspiracy_Total         0.51218    0.08372   6.117 1.24e-09 ***
+    ## W2_Trust_Body6              2.34696    0.82102   2.859 0.004321 ** 
+    ## W2_Newspaper_prefer1        9.17970    1.73654   5.286 1.45e-07 ***
+    ## W2_Newspaper_prefer6       -4.24123    2.53942  -1.670 0.095120 .  
+    ## W2_Newspaper_prefer9        7.44767    2.42424   3.072 0.002168 ** 
+    ## W2_COVID19_anxiety          0.11408    0.03136   3.637 0.000286 ***
+    ## W2_Conspiracy_Theory2      -0.13519    0.02714  -4.981 7.14e-07 ***
+    ## W2_Conspiracy_Theory3       0.22383    0.04175   5.361 9.72e-08 ***
+    ## W2_Conspiracy_Theory4       0.09964    0.02731   3.649 0.000274 ***
+    ## W2_Nationalism_Total        1.55036    0.42537   3.645 0.000278 ***
+    ## W2_DAI_Total                0.14303    0.05669   2.523 0.011753 *  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 27.94 on 1353 degrees of freedom
+    ##   (34 observations deleted due to missingness)
+    ## Multiple R-squared:  0.3007, Adjusted R-squared:  0.2914 
+    ## F-statistic: 32.33 on 18 and 1353 DF,  p-value: < 2.2e-16
+
+``` r
+par(mfrow = c(2,2))
+plot(lab_mod)
+```
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+source("diagnostic_plots.R")
+
+av_ggplot(lab_mod)
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-5.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-6.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-7.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-8.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-9.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-10.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-11.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-12.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-13.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-14.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-15.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-16.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-17.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown_files/figure-gfm/unnamed-chunk-13-18.png)<!-- -->

@@ -335,3 +335,38 @@ plot(summary(reg_fit)$adjr2, type = "o")
 coef(reg_fit, 22)
 ```
 
+```{r}
+lab_mod <- lm(W2_Conspiracy_Theory1 ~ W1_Education +
+                W1_CRT2 +
+                W1_CRT3 +
+                W1_CRT5 +
+                W1_EURef +
+                W1_ReligiousBelief_Total +
+                W1_Authoritarianism_Total +
+                W1_Conspiracy_Total +
+                W2_Trust_Body6 +
+                W2_Newspaper_prefer1 +
+                W2_Newspaper_prefer6 +
+                W2_Newspaper_prefer9 +
+                W2_COVID19_anxiety +
+                W2_Conspiracy_Theory2 +
+                W2_Conspiracy_Theory3 +
+                W2_Conspiracy_Theory4 +
+                W2_Nationalism_Total +
+                W2_DAI_Total,
+              data = conspiracies_subset)
+
+summary(lab_mod)
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(lab_mod)
+```
+
+```{r}
+source("diagnostic_plots.R")
+
+av_ggplot(lab_mod)
+```
+
