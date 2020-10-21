@@ -172,6 +172,46 @@ conspiracies[paper_vars] <- conspiracies[paper_vars] %>%
   map_df(na_to_zero)
 ```
 
+The code below turns the a number of variables into factors that are currently stored as numeric.  And makes the value labels the levels in the factor.  
+
+```{r}
+factors <- conspiracies %>% 
+  select(W1_Ethnicity:W1_EURef,
+         W2_Gender:W2_Newspaper_prefer11) %>% 
+  names()
+
+for(i in seq_along(conspiracies[factors])){
+  conspiracies[factors][,i] <- to_factor(
+    conspiracies[factors][,i], nolabel_to_na = TRUE)
+}
+
+# unfortunately the loop doesn't work for the newspaper variables
+class(conspiracies$W2_Newspaper_prefer1)
+
+news <- conspiracies %>% 
+  select(W2_Newspaper_prefer1:W2_Newspaper_prefer11) %>% 
+  names()
+
+conspiracies[news] <- conspiracies[news] %>% 
+  map_df(as.factor)
+
+conspiracies[news] %>% map_chr(class)
+
+# the code chunk below just checks the loop only changed factor variables
+conspiracies %>% count(W1_Ethnicity)
+conspiracies %>% count(W1_EURef)
+conspiracies %>% count(W2_Gender)
+class(conspiracies$W2_Conspiracy_Theory1)
+class(conspiracies$W2_Nationalism_Total)
+summary(conspiracies$W1_Authoritarianism_Total)
+
+# dropping the transgender level in gender variable as no respondents
+conspiracies <- conspiracies %>% 
+  mutate(W2_Gender = fct_drop(W2_Gender))
+levels(conspiracies$W2_Gender)
+```
+
+
 ## Distribution of variables
 
 A for loop to look at distribution of potential independent variables (numeric only).  
@@ -303,7 +343,7 @@ conspiracies %>%
 ```
 
 
-## Forward stepwise model selection
+## Forward stepwise model selection and linear model
 
 ```{r}
 conspiracies_subset <- conspiracies %>% 
@@ -327,24 +367,138 @@ conspiracies_subset %>%
 ```
 
 ```{r}
+pacman::p_load(plm)
+model_matrix <- model.matrix(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset)
+detect.lindep(model_matrix)
+```
+
+
+```{r}
 reg_fit <- regsubsets(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset,
-                      nvmax = 50, method = "forward")
+                      nvmax = 60, method = "forward")
 
 plot(summary(reg_fit)$adjr2, type = "o")
 
-coef(reg_fit, 22)
+summary(reg_fit)$adjr2
+
+labels(coef(reg_fit, 38))
 ```
 
 ```{r}
-lab_mod <- lm(W2_Conspiracy_Theory1 ~ W1_Education +
-                W1_CRT2 +
-                W1_CRT3 +
-                W1_CRT5 +
-                W1_EURef +
+# creating necessary dummy variables
+conspiracies_subset$chinese <- ifelse(
+  conspiracies_subset$W1_Ethnicity == "Chinese", 1, 0
+)
+
+conspiracies_subset$afro_caribbean <- ifelse(
+  conspiracies_subset$W1_Ethnicity == "Afro-Caribbean", 1, 0
+)
+
+conspiracies_subset$gcse <- ifelse(
+  conspiracies_subset$W1_Education == "O-Level/GCSE or similar", 1, 0
+)
+
+conspiracies_subset$diploma <- ifelse(
+  conspiracies_subset$W1_Education == "Diploma", 1, 0
+)
+
+conspiracies_subset$income_25341_38740_pa <- ifelse(
+  conspiracies_subset$W1_Income_2019 == "£491 - £740 per week (equals about £2,111 - £3,230 per month or £25,341 - £38,740 per year)", 1, 0
+)
+
+conspiracies_subset$income_57931_plus_pa <- ifelse(
+  conspiracies_subset$W1_Income_2019 == "£1,112 or more per week (equals about £4,831 or more per month or £57,931 or more per year)", 1, 0
+)
+
+conspiracies_subset$CRT2_500_mins <- ifelse(
+  conspiracies_subset$W1_CRT2 == "500 minutes", 1, 0
+)
+
+conspiracies_subset$CRT3_24_days <- ifelse(
+  conspiracies_subset$W1_CRT3 == "24 days", 1, 0
+)
+
+conspiracies_subset$CRT3_12_days <- ifelse(
+  conspiracies_subset$W1_CRT3 == "12 days", 1, 0
+)
+
+conspiracies_subset$CRT5_8 <- ifelse(
+  conspiracies_subset$W1_CRT5 == "8", 1, 0
+)
+
+conspiracies_subset$remainer <- ifelse(
+  conspiracies_subset$W1_EURef == "Voted to stay in EU", 1, 0
+)
+
+conspiracies_subset$ref_not_citizen <- ifelse(
+  conspiracies_subset$W1_EURef == "Ineligible because not a UK citizen or resident", 1, 0
+)
+
+conspiracies_subset$living_alone <- ifelse(
+  conspiracies_subset$W2_Living_alone == "Yes", 1, 0
+)
+
+conspiracies_subset$unemployed_corona <- ifelse(
+  conspiracies_subset$W2_Employment == "Unemployed (becasue of coronavirus)",
+  1, 0
+)
+
+conspiracies_subset$trust_govt_moderate <- ifelse(
+  conspiracies_subset$W2_Trust_Body2 == "Trust moderately",
+  1, 0
+)
+
+conspiracies_subset$trust_science_moderate <- ifelse(
+  conspiracies_subset$W2_Trust_Body6 == "Trust moderately",
+  1, 0
+)
+
+conspiracies_subset$dont_trust_doctors <- ifelse(
+  conspiracies_subset$W2_Trust_Body7 == "Do not trust at all",
+  1, 0
+)
+
+conspiracies_subset$green <- ifelse(
+  conspiracies_subset$W1_2019_GE_Full == "Green", 1, 0
+)
+
+conspiracies_subset$ineligible_ge <- ifelse(
+  conspiracies_subset$W1_2019_GE_Full == "Ineligible because not a UK citizen or resident", 1, 0
+)
+
+conspiracies_subset$sinn_fein <- ifelse(
+  conspiracies_subset$W1_2019_GE_Full == "Sinn Féin", 1, 0
+)
+
+conspiracies_subset$ulster_unionist <- ifelse(
+  conspiracies_subset$W1_2019_GE_Full == "Ulster Unionist", 1, 0
+)
+
+```
+
+
+```{r}
+lab_mod <- lm(W2_Conspiracy_Theory1 ~ chinese +
+                afro_caribbean +
+                gcse + 
+                diploma +
+                income_25341_38740_pa +
+                income_57931_plus_pa +
+                CRT2_500_mins +
+                CRT3_24_days +
+                CRT3_12_days +
+                CRT5_8 +
+                remainer +
+                ref_not_citizen +
                 W1_ReligiousBelief_Total +
                 W1_Authoritarianism_Total +
+                W1_Social_Dominance_Total +
                 W1_Conspiracy_Total +
-                W2_Trust_Body6 +
+                living_alone +
+                unemployed_corona +
+                trust_govt_moderate +
+                trust_science_moderate +
+                dont_trust_doctors +
                 W2_Newspaper_prefer1 +
                 W2_Newspaper_prefer6 +
                 W2_Newspaper_prefer9 +
@@ -352,8 +506,16 @@ lab_mod <- lm(W2_Conspiracy_Theory1 ~ W1_Education +
                 W2_Conspiracy_Theory2 +
                 W2_Conspiracy_Theory3 +
                 W2_Conspiracy_Theory4 +
+                W2_Conspiracy_Theory5 +
                 W2_Nationalism_Total +
-                W2_DAI_Total,
+                W2_Paranoia_Total +
+                W2_Internal_Total +
+                W2_DAI_Total +
+                W2_IOU_Total +
+                green +
+                ineligible_ge +
+                sinn_fein +
+                ulster_unionist,
               data = conspiracies_subset)
 
 summary(lab_mod)
