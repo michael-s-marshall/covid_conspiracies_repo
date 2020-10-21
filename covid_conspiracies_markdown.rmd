@@ -1,5 +1,5 @@
 ---
-title: "covid_conspiracies_markdown2"
+title: "covid_conspiracies_markdown"
 author: "Michael Marshall"
 date: "21/10/2020"
 output: github_document
