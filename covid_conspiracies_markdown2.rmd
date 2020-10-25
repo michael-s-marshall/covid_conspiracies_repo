@@ -8,22 +8,31 @@ output: github_document
 ## Loading Packages and Data
 
 ```{r, message = FALSE, warnings = FALSE}
-pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps)
+pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps,
+               psych, corrr, cowplot, expss, haven, interplot,
+               interactions, jtools,labelled, pscl, psych, 
+               sjPlot, skimr)
 
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
+```
+
+## Rescaling variable
+
+```{r}
+## [rescale01] Function to rescale a variable from 0 to 1
+rescale01 <- function(x, ...) {
+  (x - min(x, ...)) / ((max(x, ...)) - min(x, ...))
+}
 ```
 
 ## Summary and distribution of different COVID specific conspiracies
 
 ```{r}
-df %>% 
-  select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
-  map(summary)
-
 # plotting density of different covid conspiracies
 df %>% 
-  select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
-  gather(conspiracy_code, belief, W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  gather(conspiracy_code, belief,
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
   mutate(
     conspiracy_code = as.factor(conspiracy_code),
     conspiracy = ifelse(
@@ -47,72 +56,13 @@ df %>%
   theme_ridges()
 ```
 
-## Selecting variables for dataset
-
-Sorry, this is a lot of manual code, and if you can think of a quicker way I'd be happy to use it.  I tend to prefer reducing the number of variables to just those I expect to reasonably use, which the code below aims to achieve.  
-
-```{r, message = FALSE, warning=FALSE}
-df_names <- names(df)
-
-w2_vars <- df %>% 
-  select(
-    W2_Age_year:W2_Gender_binary,
-    W2_Living_alone,W2_Employment,
-    W2_Nationalism1,W2_Nationalism2,
-    W2_Trust_Body1:W2_Newspaper_prefer11,
-    W2_COVID19_anxiety:W2_TRUST_9,
-    W2_Conspiracy_Theory1:W2_Conspiracy_Theory5,
-    W2_LOC1:W2_DAI17,W2_IOU1:W2_IOU12,W2_Nationalism_Total,
-    W2_Paranoia_Total,W2_Dep_Total,
-    W2_GAD_Total,W2_Internal_Total,
-    W2_Chance_Total,W2_PO_Total,
-    W2_DAI_Total,W2_ProspectiveAnx_Total,
-    W2_InhibitoryAnx_Total,W2_IOU_Total
-    ) %>% 
-  names()
-
-w1_vars <- df %>% 
-  select(
-    W1_Area_residence,W1_Ethnicity,
-    W1_Education:W1_Religion_binary,
-    W1_Hosuing_tenure,W1_Income_2019,
-    W1_C19_Infected:W1_C19_SomeoneClose_Infected_Binary,
-    W1_ReligiousBelief1:W1_ReligiousBelief8_R,
-    W1_CRT1:W1_CRT_test,
-    W1_Voted_GenElection:W1_Political_Fiscal,
-    W1_Authoritarianism1:W1_Authoritarianism5_R,
-    W1_MigrantAttitudes1:W1_Conspiracy_5,
-    W1_ReligiousBelief_Total,W1_Authoritarianism_Total,
-    W1_Social_Dominance_Mean,W1_Social_Dominance_Total,
-    W1_Conspiracy_Total
-  ) %>% 
-  names()
-         
-w3_vars <- c(
-  "W3_ContactTracing",
-  "W3_Smartphone",
-  "W3_C19App1",
-  "W3_C19App2",
-  "W3_C19App3",
-  "W3_C19App4"
-)
-
-vars <- c("pid",w1_vars,w2_vars,w3_vars)
-
-mean(vars %in% df_names) # checking all variable names spelled correctly
-
-# selecting variables
-df_thin <- df %>% 
-  select(one_of(vars))
-```
-
 ## Cleaning dataset
 
 The following code filters down to just those observations that have completed the battery of questions relating to COVID specific conspiracies.  It also creates a tibble counting the missing observations, which can be useful to have as an object.  
 
 ```{r}
 # filtering for completed dependent variable
-conspiracies <- df_thin %>% 
+conspiracies <- df %>% 
   filter(!is.na(W2_Conspiracy_Theory1) |
            !is.na(W2_Conspiracy_Theory2) |
            !is.na(W2_Conspiracy_Theory3) |
@@ -127,7 +77,7 @@ count_na <- function(x){
 }
 
 conspiracies %>% 
-  select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
   map_int(count_na)
 
 missing <- tibble(
@@ -145,16 +95,16 @@ The code below combines the two variables on the 2019 general election into a si
 
 conspiracies <- conspiracies %>% 
   mutate(
-    W1_Voted_Party_Name = to_factor(conspiracies$W1_Voted_Party,
-                                    nolabel_to_na = TRUE),
-    W1_Voted_GenElection_Name = to_factor(conspiracies$W1_Voted_GenElection,
-                                          nolabel_to_na = TRUE),
+    W1_Voted_Party_Name = to_factor(
+      conspiracies$W1_Voted_Party,
+      nolabel_to_na = TRUE),
+    W1_Voted_GenElection_Name = to_factor(
+      conspiracies$W1_Voted_GenElection,
+      nolabel_to_na = TRUE),
     W1_2019_GE_Full = factor(ifelse(
       W1_Voted_GenElection_Name == "Voted.",
       as.character(W1_Voted_Party_Name),
-      as.character(W1_Voted_GenElection_Name)
-      )
-      )
+      as.character(W1_Voted_GenElection_Name)))
     )
 
 # making preferred newspaper a dummy variable (i.e. replacing NA with 0)
@@ -165,52 +115,249 @@ na_to_zero <- function(x){
 } 
 
 paper_vars <- conspiracies %>%
-  select(W2_Newspaper_prefer1:W2_Newspaper_prefer11) %>% 
+  dplyr::select(W2_Newspaper_prefer1:W2_Newspaper_prefer11) %>% 
   names()
 
 conspiracies[paper_vars] <- conspiracies[paper_vars] %>% 
   map_df(na_to_zero)
 ```
 
-The code below turns the a number of variables into factors that are currently stored as numeric.  And makes the value labels the levels in the factor.  
-
 ```{r}
-factors <- conspiracies %>% 
-  select(W1_Ethnicity:W1_EURef,
-         W2_Gender:W2_Newspaper_prefer11) %>% 
-  names()
-
-for(i in seq_along(conspiracies[factors])){
-  conspiracies[factors][,i] <- to_factor(
-    conspiracies[factors][,i], nolabel_to_na = TRUE)
-}
-
-# unfortunately the loop doesn't work for the newspaper variables
-class(conspiracies$W2_Newspaper_prefer1)
-
-news <- conspiracies %>% 
-  select(W2_Newspaper_prefer1:W2_Newspaper_prefer11) %>% 
-  names()
-
-conspiracies[news] <- conspiracies[news] %>% 
-  map_df(as.factor)
-
-conspiracies[news] %>% map_chr(class)
-
-# the code chunk below just checks the loop only changed factor variables
-conspiracies %>% count(W1_Ethnicity)
-conspiracies %>% count(W1_EURef)
-conspiracies %>% count(W2_Gender)
-class(conspiracies$W2_Conspiracy_Theory1)
-class(conspiracies$W2_Nationalism_Total)
-summary(conspiracies$W1_Authoritarianism_Total)
-
-# dropping the transgender level in gender variable as no respondents
-conspiracies <- conspiracies %>% 
-  mutate(W2_Gender = fct_drop(W2_Gender))
-levels(conspiracies$W2_Gender)
+# Creating IVs
+# [nat] nationalism
+nat_keys <- list(nationalism = cs(W2_Nationalism1,W2_Nationalism2))
+nat_test <- scoreItems(nat_keys, conspiracies, min = 1, max = 5)
+head(nat_test$scores)
+nat_test$alpha  # Scale alpha
+conspiracies$nat <- rescale01(nat_test$scores, na.rm = TRUE)
+conspiracies$nat <- c(conspiracies$nat)  # Ensure variable is numeric and not matrix class
+describe(conspiracies$nat)
 ```
 
+```{r}
+## [imm.econ] Anti-immigrant sentiment - Economy 
+table(conspiracies$W1_MigrantAttitudes1)
+conspiracies$imm_econ <- rescale01(abs(
+  conspiracies$W1_MigrantAttitudes1 - 11))
+
+conspiracies %>% 
+  dplyr::select(W1_MigrantAttitudes1, imm_econ) %>%
+  correlate()
+
+## [imm.res] Anti-immigrant sentiment - Resources
+table(conspiracies$W1_MigrantAttitudes3)
+conspiracies$imm_res <- rescale01(conspiracies$W1_MigrantAttitudes3)
+conspiracies %>% 
+  dplyr::select(W1_MigrantAttitudes3, imm_res) %>%
+  correlate()
+
+## [imm.cul] Anti-immigrant sentiment - Culture
+table(conspiracies$W1_MigrantAttitudes2)
+conspiracies$imm_cul <- rescale01(abs(
+  conspiracies$W1_MigrantAttitudes2 - 11))
+
+conspiracies %>% 
+  dplyr::select(W1_MigrantAttitudes2, imm_cul) %>%
+  correlate()
+```
+
+```{r}
+# Right wing authoritarianism
+rwa_keys <- list(rwa = cs(W1_Authoritarianism1_R,
+                          W1_Authoritarianism2,
+                          W1_Authoritarianism3,
+                          W1_Authoritarianism4_R, 
+                          W1_Authoritarianism5_R,
+                          W1_Authoritarianism6))
+
+rwa_test <- scoreItems(rwa_keys, conspiracies, min = 1, max = 5)
+head(rwa_test$scores)
+summary(rwa_test$alpha)  # Scale alpha
+conspiracies$RWA <- rescale01(rwa_test$scores, na.rm = TRUE)
+conspiracies$RWA <- c(conspiracies$RWA)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies$RWA)
+```
+
+```{r}
+## [SDO] Social Dominance Orientation
+sdo_keys <- list(sdo = cs(W1_Social_Dominance1,
+                          W1_Social_Dominance2_R,
+                          W1_Social_Dominance3_R,
+                          W1_Social_Dominance4,
+                          W1_Social_Dominance5_R,
+                          W1_Social_Dominance6, 
+                          W1_Social_Dominance7,
+                          W1_Social_Dominance8_R))
+sdo_test <- scoreItems(sdo_keys, conspiracies, min = 1, max = 5)
+head(sdo_test$scores)
+summary(sdo_test$alpha)  # Scale alpha
+conspiracies$SDO <- rescale01(sdo_test$scores, na.rm = TRUE)
+conspiracies$SDO <- c(conspiracies$SDO)  # Ensure variable is numeric and not matrix class
+
+summary(conspiracies$SDO)
+```
+
+```{r}
+## [threat] Covid-19 related Threat
+summary(conspiracies$W2_COVID19_anxiety)
+conspiracies$threat <- rescale01(conspiracies$W2_COVID19_anxiety)
+conspiracies %>% 
+  dplyr::select(W2_COVID19_anxiety, threat) %>%
+  correlate()
+```
+
+```{r}
+## [right] Right-Wing political views
+table(conspiracies$W1_Political_Scale)
+conspiracies$right <- rescale01(conspiracies$W1_Political_Scale)
+conspiracies %>% 
+  dplyr::select(W1_Political_Scale, right) %>%
+  correlate()
+```
+
+```{r}
+## [soc.con] Social conservatism
+table(conspiracies$W1_Political_Abortion_SSM)
+conspiracies$soc_con <- rescale01(
+  conspiracies$W1_Political_Abortion_SSM)
+conspiracies %>% 
+  dplyr::select(W1_Political_Abortion_SSM, soc_con) %>%
+  correlate()
+```
+
+```{r}
+## [fis.con] Fiscal conservatism
+table(conspiracies$W1_Political_Fiscal)
+conspiracies$fis_con <- rescale01(conspiracies$W1_Political_Fiscal)
+conspiracies %>% 
+  dplyr::select(W1_Political_Fiscal, fis_con) %>%
+  correlate()
+```
+
+```{r}
+## [age.c] Age (in years)
+summary(conspiracies$W2_Age_year)
+conspiracies$age_sc <- rescale01(conspiracies$W2_Age_year)
+```
+
+
+```{r}
+factors <- c("W1_Ethnicity","W1_C19_Infected",
+             "W1_CRT1","W1_CRT2","W1_CRT3","W1_CRT4",
+             "W1_CRT5","W1_CRT_test","W1_BornUK","W1_EURef",
+             "W2_Gender_binary","W2_Living_alone","W2_Employment",
+             rep(str_c("W2_INFO_",seq(1,9,1))))
+```
+
+```{r}
+# turning the above list into factors with the levels as the spss labels
+#for(i in seq_along(conspiracies[factors])){
+#  conspiracies[factors][,i] <- to_factor(
+#    conspiracies[factors][,i], nolabel_to_na = TRUE)
+#}
+```
+
+```{r}
+# Making a binary for each CRT scale, baseline = correct answer
+conspiracies$CRT1 <- ifelse(
+  to_factor(conspiracies$W1_CRT1) != "5 pence", 1, 0
+)
+
+conspiracies$CRT2 <- ifelse(
+  to_factor(conspiracies$W1_CRT2) != "5 minutes", 1, 0
+)
+
+conspiracies$CRT3 <- ifelse(
+  to_factor(conspiracies$W1_CRT3) != "47 days", 1, 0
+)
+
+conspiracies$CRT4 <- ifelse(
+  to_factor(conspiracies$W1_CRT4) != "2nd", 1, 0
+)
+
+conspiracies$CRT5 <- ifelse(
+  to_factor(conspiracies$W1_CRT5) != "8", 1, 0
+)
+
+conspiracies$CRT_test <- ifelse(
+  to_factor(conspiracies$W1_CRT_test) == "None of them.", 1, 0
+) # baseline = heard of some of them OR all of them
+```
+
+```{r}
+# Making a binary for each CRT scale, 1 = most common wrong answer
+conspiracies$CRT1_wrong <- ifelse(
+  to_factor(conspiracies$W1_CRT1) == "10 pence", 1, 0
+)
+
+conspiracies$CRT2_wrong <- ifelse(
+  to_factor(conspiracies$W1_CRT2) == "100 minutes", 1, 0
+)
+
+conspiracies$CRT3_wrong <- ifelse(
+  to_factor(conspiracies$W1_CRT3) == "24 days", 1, 0
+)
+
+conspiracies$CRT4_wrong <- ifelse(
+  to_factor(conspiracies$W1_CRT4) == "1st", 1, 0
+)
+
+conspiracies$CRT5_wrong <- ifelse(
+  to_factor(conspiracies$W1_CRT5) == "7", 1, 0
+)
+```
+
+
+```{r}
+# setting the remaining factors as factors
+factors_2 <- c("W1_Income_2019","W1_Education_binary",
+               "W1_Housing_tenure",
+               rep(str_c("W2_Trust_Body",
+                         seq(1,7,1))))
+
+# below line can be removed once relevelled factors with long strings
+conspiracies[factors] <- conspiracies[factors] %>% 
+  map_df(as.factor)
+
+conspiracies[factors_2] <- conspiracies[factors_2] %>% 
+  map_df(as.factor)
+```
+
+```{r}
+# rescaling the remaing numeric variables
+numerics <- c("W1_ReligiousBelief_Total","W1_Conspiracy_Total",
+              "W2_Paranoia_Total","W2_Dep_Total","W2_GAD_Total",
+              "W2_Internal_Total","W2_Chance_Total","W2_PO_Total",
+              "W2_DAI_Total","W2_ProspectiveAnx_Total",
+              "W2_InhibitoryAnx_Total","W2_IOU_Total")
+
+conspiracies[numerics] <- conspiracies[numerics] %>% 
+  map_df(rescale01, na.rm = TRUE)
+```
+
+```{r}
+# creating scaled versions of each conspiracy belief
+conspiracies$conspiracy1_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory1, na.rm = TRUE
+)
+
+conspiracies$conspiracy2_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory2, na.rm = TRUE
+)
+
+conspiracies$conspiracy3_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory3, na.rm = TRUE
+)
+
+conspiracies$conspiracy4_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory4, na.rm = TRUE
+)
+
+conspiracies$conspiracy5_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory5, na.rm = TRUE
+)
+```
 
 ## Distribution of variables
 
@@ -218,10 +365,9 @@ A for loop to look at distribution of potential independent variables (numeric o
 
 ```{r}
 plot_vars <- conspiracies %>% 
-  select(
-    W1_Political_Scale:W1_Political_Fiscal,
-    W1_ReligiousBelief_Total:W1_Conspiracy_Total,
-    W2_Nationalism_Total:W2_IOU_Total
+  dplyr::select(
+    one_of(numerics),nat,imm_econ,imm_res,imm_cul,RWA,SDO,threat,right,
+    soc_con,fis_con,age_sc
     ) %>%
   names()
 
@@ -342,193 +488,724 @@ conspiracies %>%
        y = "Belief in Vitamin C treatment")
 ```
 
+# Modelling for belief in Chinese lab origin
 
-## Forward stepwise model selection and linear model
-
-```{r}
-conspiracies_subset <- conspiracies %>% 
-  select(W1_Ethnicity,W1_Education,
-         W1_Income_2019,W1_CRT1:W1_CRT_test,
-         W1_EURef:W1_Political_Fiscal,
-         W1_ReligiousBelief_Total:W1_Authoritarianism_Total,
-         W1_Social_Dominance_Total:W2_Age_year,W2_Gender,
-         W2_Living_alone,W2_Employment,
-         W2_Trust_Body1:W2_Newspaper_prefer11,
-         W2_COVID19_anxiety,W2_Conspiracy_Theory1:W2_Conspiracy_Theory5,
-         W2_Nationalism_Total:W2_IOU_Total,
-         W1_2019_GE_Full)
-```
+## DV Chinese lab conspiracy - singular IV models
 
 ```{r}
-conspiracies_subset %>% 
-  ggplot(aes(x = W2_Conspiracy_Theory1)) +
-  geom_histogram(colour = "black", fill = "grey")
+sdo_lab <- lm(W2_Conspiracy_Theory1 ~ SDO,
+              data = conspiracies)
 
-```
-
-```{r}
-pacman::p_load(plm)
-model_matrix <- model.matrix(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset)
-detect.lindep(model_matrix)
-```
-
-
-```{r}
-reg_fit <- regsubsets(W2_Conspiracy_Theory1 ~ ., data = conspiracies_subset,
-                      nvmax = 60, method = "forward")
-
-plot(summary(reg_fit)$adjr2, type = "o")
-
-summary(reg_fit)$adjr2
-
-labels(coef(reg_fit, 38))
-```
-
-```{r}
-# creating necessary dummy variables
-conspiracies_subset$chinese <- ifelse(
-  conspiracies_subset$W1_Ethnicity == "Chinese", 1, 0
-)
-
-conspiracies_subset$afro_caribbean <- ifelse(
-  conspiracies_subset$W1_Ethnicity == "Afro-Caribbean", 1, 0
-)
-
-conspiracies_subset$gcse <- ifelse(
-  conspiracies_subset$W1_Education == "O-Level/GCSE or similar", 1, 0
-)
-
-conspiracies_subset$diploma <- ifelse(
-  conspiracies_subset$W1_Education == "Diploma", 1, 0
-)
-
-conspiracies_subset$income_25341_38740_pa <- ifelse(
-  conspiracies_subset$W1_Income_2019 == "£491 - £740 per week (equals about £2,111 - £3,230 per month or £25,341 - £38,740 per year)", 1, 0
-)
-
-conspiracies_subset$income_57931_plus_pa <- ifelse(
-  conspiracies_subset$W1_Income_2019 == "£1,112 or more per week (equals about £4,831 or more per month or £57,931 or more per year)", 1, 0
-)
-
-conspiracies_subset$CRT2_500_mins <- ifelse(
-  conspiracies_subset$W1_CRT2 == "500 minutes", 1, 0
-)
-
-conspiracies_subset$CRT3_24_days <- ifelse(
-  conspiracies_subset$W1_CRT3 == "24 days", 1, 0
-)
-
-conspiracies_subset$CRT3_12_days <- ifelse(
-  conspiracies_subset$W1_CRT3 == "12 days", 1, 0
-)
-
-conspiracies_subset$CRT5_8 <- ifelse(
-  conspiracies_subset$W1_CRT5 == "8", 1, 0
-)
-
-conspiracies_subset$remainer <- ifelse(
-  conspiracies_subset$W1_EURef == "Voted to stay in EU", 1, 0
-)
-
-conspiracies_subset$ref_not_citizen <- ifelse(
-  conspiracies_subset$W1_EURef == "Ineligible because not a UK citizen or resident", 1, 0
-)
-
-conspiracies_subset$living_alone <- ifelse(
-  conspiracies_subset$W2_Living_alone == "Yes", 1, 0
-)
-
-conspiracies_subset$unemployed_corona <- ifelse(
-  conspiracies_subset$W2_Employment == "Unemployed (becasue of coronavirus)",
-  1, 0
-)
-
-conspiracies_subset$trust_govt_moderate <- ifelse(
-  conspiracies_subset$W2_Trust_Body2 == "Trust moderately",
-  1, 0
-)
-
-conspiracies_subset$trust_science_moderate <- ifelse(
-  conspiracies_subset$W2_Trust_Body6 == "Trust moderately",
-  1, 0
-)
-
-conspiracies_subset$dont_trust_doctors <- ifelse(
-  conspiracies_subset$W2_Trust_Body7 == "Do not trust at all",
-  1, 0
-)
-
-conspiracies_subset$green <- ifelse(
-  conspiracies_subset$W1_2019_GE_Full == "Green", 1, 0
-)
-
-conspiracies_subset$ineligible_ge <- ifelse(
-  conspiracies_subset$W1_2019_GE_Full == "Ineligible because not a UK citizen or resident", 1, 0
-)
-
-conspiracies_subset$sinn_fein <- ifelse(
-  conspiracies_subset$W1_2019_GE_Full == "Sinn Féin", 1, 0
-)
-
-conspiracies_subset$ulster_unionist <- ifelse(
-  conspiracies_subset$W1_2019_GE_Full == "Ulster Unionist", 1, 0
-)
-
-```
-
-
-```{r}
-lab_mod <- lm(W2_Conspiracy_Theory1 ~ chinese +
-                afro_caribbean +
-                gcse + 
-                diploma +
-                income_25341_38740_pa +
-                income_57931_plus_pa +
-                CRT2_500_mins +
-                CRT3_24_days +
-                CRT3_12_days +
-                CRT5_8 +
-                remainer +
-                ref_not_citizen +
-                W1_ReligiousBelief_Total +
-                W1_Authoritarianism_Total +
-                W1_Social_Dominance_Total +
-                W1_Conspiracy_Total +
-                living_alone +
-                unemployed_corona +
-                trust_govt_moderate +
-                trust_science_moderate +
-                dont_trust_doctors +
-                W2_Newspaper_prefer1 +
-                W2_Newspaper_prefer6 +
-                W2_Newspaper_prefer9 +
-                W2_COVID19_anxiety +
-                W2_Conspiracy_Theory2 +
-                W2_Conspiracy_Theory3 +
-                W2_Conspiracy_Theory4 +
-                W2_Conspiracy_Theory5 +
-                W2_Nationalism_Total +
-                W2_Paranoia_Total +
-                W2_Internal_Total +
-                W2_DAI_Total +
-                W2_IOU_Total +
-                green +
-                ineligible_ge +
-                sinn_fein +
-                ulster_unionist,
-              data = conspiracies_subset)
-
-summary(lab_mod)
-```
-
-```{r}
+summ(sdo_lab)
+ggplot(conspiracies,aes(x = SDO, y = W2_Conspiracy_Theory1)) +
+  geom_boxplot(aes(group = cut_width(SDO,0.1))) +
+  geom_smooth(method = "lm")
 par(mfrow = c(2,2))
-plot(lab_mod)
+plot(sdo_lab)
 ```
 
 ```{r}
-source("diagnostic_plots.R")
+rwa_lab <- lm(W2_Conspiracy_Theory1 ~ RWA,
+              data = conspiracies)
 
-av_ggplot(lab_mod)
+summ(rwa_lab)
+ggplot(conspiracies,aes(x = RWA, y = W2_Conspiracy_Theory1)) +
+  geom_boxplot(aes(group = cut_width(RWA,0.1))) +
+  geom_smooth(method = "lm")
+par(mfrow = c(2,2))
+plot(rwa_lab)
 ```
 
+```{r}
+daily_m_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Newspaper_prefer1,
+              data = conspiracies)
+
+summ(daily_m_lab)
+ggplot(conspiracies,aes(x = as.factor(W2_Newspaper_prefer1), 
+                        y = W2_Conspiracy_Theory1)) +
+  geom_boxplot() +
+  labs(x = "Daily Mail Reader")
+
+par(mfrow = c(2,2))
+plot(daily_m_lab)
+```
+
+```{r}
+social_m_lab <- lm(W2_Conspiracy_Theory1 ~ W2_INFO_5,
+              data = conspiracies)
+
+summ(social_m_lab)
+ggplot(conspiracies,aes(x = W2_INFO_5, 
+                        y = W2_Conspiracy_Theory1)) +
+  geom_boxplot() +
+  labs(x = "COVID-19 info from social media")
+
+par(mfrow = c(2,2))
+plot(social_m_lab)
+```
+
+```{r}
+# plotting RWA and SDO by conspiracy, facetted by social media
+
+conspiracies %>% 
+  ggplot(aes(x = SDO, y = W2_Conspiracy_Theory1)) +
+  geom_jitter(aes(colour = W2_INFO_5), alpha = 1/3) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~W2_INFO_5) +
+  labs(colour = "COVID-19 info from social media",
+       x = "Social Dominance Orientation",
+       y = "Belief in Chinese lab origin") +
+  theme(legend.position = "top")
+
+conspiracies %>% 
+  ggplot(aes(x = RWA, y = W2_Conspiracy_Theory1)) +
+  geom_jitter(aes(colour = W2_INFO_5), alpha = 1/3) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~W2_INFO_5) +
+  labs(colour = "COVID-19 info from social media",
+       x = "Right Wing Authoritarianism",
+       y = "Belief in Chinese lab origin") +
+  theme(legend.position = "top")
+```
+
+## DV Chinese lab conspiracy - socio-economic variables
+
+```{r}
+se_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_BornUK +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+summ(se_lab)
+plot_coefs(se_lab)
+par(mfrow = c(2,2))
+plot(se_lab)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media
+
+```{r}
+se_pol_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                   W1_Income_2019 +
+                   age_sc +
+                   right +
+                   soc_con +
+                   fis_con +
+                   nat +
+                   W2_Newspaper_prefer1 +
+                   W2_Newspaper_prefer5 +
+                   W2_Newspaper_prefer6 +
+                   W2_Newspaper_prefer9 +
+                   W2_INFO_5 +
+                   W2_INFO_9,
+                 data = conspiracies)
+
+#summary(se_pol_lab)
+summ(se_pol_lab, vifs = TRUE)
+plot_coefs(se_pol_lab)
+par(mfrow = c(2,2))
+plot(se_pol_lab)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
+
+```{r}
+# right and fis_con now dropped from modelling
+# due to VIF >= 2 and non-significant effect
+se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                   W1_Income_2019 +
+                   age_sc +
+                   #right +
+                   soc_con +
+                   #fis_con +
+                   nat +
+                   W2_Newspaper_prefer1 +
+                   W2_Newspaper_prefer5 +
+                   W2_Newspaper_prefer6 +
+                   W2_Newspaper_prefer9 +
+                   W2_INFO_5 +
+                   W2_INFO_9 +
+                   SDO +
+                   RWA +
+                   W2_DAI_Total +
+                   W2_IOU_Total,
+                 data = conspiracies)
+
+#summary(se_polpsych_lab)
+summ(se_polpsych_lab, vifs = TRUE)
+plot_coefs(se_polpsych_lab)
+par(mfrow = c(2,2))
+plot(se_polpsych_lab)
+```
+
+
+```{r}
+# looking for potential multicollinearity with DAI
+cor_mat <- model.matrix(se_polpsych_lab) %>% as.data.frame()
+
+cor_vec <- rep(NA,ncol(cor_mat))
+for(i in seq_along(cor_mat)){
+  cor_vec[i] <- cor(cor_mat$W2_DAI_Total,cor_mat[,i])
+}
+
+tibble(cor_vec,
+       names(cor_mat)) %>% 
+  arrange(desc(cor_vec)) # IOU moderately positively correlated
+```
+
+```{r}
+# looking for multicollinearity with soc_con
+cor_vec2 <- rep(NA,ncol(cor_mat))
+for(i in seq_along(cor_mat)){
+  cor_vec2[i] <- cor(cor_mat$soc_con,cor_mat[,i])
+}
+
+tibble(cor_vec2,
+       names(cor_mat)) %>% 
+  arrange(desc(cor_vec2)) # RWA moderately correlated with soc_con
+```
+
+## DV Chinese lab belief - model above minus soc_con and IOU
+
+```{r}
+se_polpsych_lab_2 <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                   W1_Income_2019 +
+                   age_sc +
+                   #right +
+                   #soc_con +
+                   #fis_con +
+                   nat +
+                   W2_Newspaper_prefer1 +
+                   W2_Newspaper_prefer5 +
+                   W2_Newspaper_prefer6 +
+                   W2_Newspaper_prefer9 +
+                   W2_INFO_5 +
+                   W2_INFO_9 +
+                   SDO +
+                   RWA +
+                   #W2_IOU_Total +
+                   W2_DAI_Total,
+                 data = conspiracies)
+
+#summary(se_polpsych_lab_2)
+summ(se_polpsych_lab_2, vifs = TRUE)
+plot_coefs(se_polpsych_lab_2)
+par(mfrow = c(2,2))
+plot(se_polpsych_lab_2)
+```
+
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT
+
+```{r}
+multi_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9 +
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5,
+                 data = conspiracies)
+
+#summary(multi_lab)
+summ(multi_lab, vifs = TRUE)
+plot_coefs(multi_lab)
+par(mfrow = c(2,2))
+plot(multi_lab)
+```
+
+## DV Chinese lab belief - model above minus soc_con and IOU
+
+```{r}
+multi_lab_2 <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  #soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9 +
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  #W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5,
+                 data = conspiracies)
+
+#summary(multi_lab_2)
+summ(multi_lab_2, vifs = TRUE)
+plot_coefs(multi_lab_2)
+par(mfrow = c(2,2))
+plot(multi_lab_2)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+```{r}
+full_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  #soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9 +
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  #W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5 +
+                  W1_Conspiracy_Total +
+                  conspiracy2_sc +
+                  conspiracy3_sc +
+                  conspiracy4_sc +
+                  conspiracy5_sc,
+                 data = conspiracies)
+
+#summary(full_lab)
+summ(full_lab, vifs = TRUE)
+plot_coefs(full_lab)
+par(mfrow = c(2,2))
+plot(full_lab)
+```
+
+# Modelling for belief in 5G origin conspiracy
+
+## Plots of DV, incl. log+1 transformation
+
+```{r}
+conspiracies %>% 
+  ggplot(aes(x = W2_Conspiracy_Theory3)) +
+  geom_histogram(colour = "darkgrey", fill = "lightblue")
+
+conspiracies %>% 
+  ggplot(aes(x = log(W2_Conspiracy_Theory3 + 1))) +
+  geom_histogram(colour = "darkgrey", fill = "lightblue")
+```
+
+## DV 5G conspiracy - singular IV models
+
+```{r}
+sdo_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ SDO,
+              data = conspiracies)
+
+summ(sdo_5g)
+ggplot(conspiracies,aes(x = SDO, 
+                        y = log(W2_Conspiracy_Theory3 + 1))) +
+  geom_boxplot(aes(group = cut_width(SDO,0.1))) +
+  geom_smooth(method = "lm")
+par(mfrow = c(2,2))
+plot(sdo_5g)
+```
+
+```{r}
+rwa_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ RWA,
+              data = conspiracies)
+
+summ(rwa_5g)
+ggplot(conspiracies,aes(x = RWA, y = log(W2_Conspiracy_Theory3 + 1))) +
+  geom_boxplot(aes(group = cut_width(RWA,0.1))) +
+  geom_smooth(method = "lm")
+par(mfrow = c(2,2))
+plot(rwa_5g)
+```
+
+```{r}
+daily_m_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ 
+                   W2_Newspaper_prefer1,
+              data = conspiracies)
+
+summ(daily_m_5g)
+ggplot(conspiracies,aes(x = as.factor(W2_Newspaper_prefer1), 
+                        y = log(W2_Conspiracy_Theory3 + 1))) +
+  geom_boxplot() +
+  labs(x = "Daily Mail Reader")
+
+par(mfrow = c(2,2))
+plot(daily_m_5g)
+```
+
+```{r}
+social_m_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ W2_INFO_5,
+              data = conspiracies)
+
+summ(social_m_5g)
+ggplot(conspiracies,aes(x = W2_INFO_5, 
+                        y = log(W2_Conspiracy_Theory3 + 1))) +
+  geom_boxplot() +
+  labs(x = "COVID-19 info from social media")
+
+par(mfrow = c(2,2))
+plot(social_m_5g)
+```
+
+```{r}
+# plotting RWA and SDO by conspiracy, facetted by social media
+
+conspiracies %>% 
+  ggplot(aes(x = SDO, y = log(W2_Conspiracy_Theory3 + 1), 
+             colour = W2_INFO_5)) +
+  geom_jitter(alpha = 1/3) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~W2_INFO_5) +
+  labs(colour = "COVID-19 info from social media",
+       x = "Social Dominance Orientation",
+       y = "Belief in 5G origin") +
+  theme(legend.position = "top")
+
+conspiracies %>% 
+  ggplot(aes(x = RWA, y = log(W2_Conspiracy_Theory3 + 1), 
+             colour = W2_INFO_5)) +
+  geom_jitter(alpha = 1/3) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~W2_INFO_5) +
+  labs(colour = "COVID-19 info from social media",
+       x = "Right Wing Authoritarianism",
+       y = "Belief in 5G origin") +
+  theme(legend.position = "top")
+```
+
+## DV 5G conspiracy - socio-economic variables
+
+```{r}
+se_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_BornUK +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+summ(se_5g)
+plot_coefs(se_5g)
+par(mfrow = c(2,2))
+plot(se_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media
+
+```{r}
+se_pol_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ W1_Education_binary +
+                   W1_Income_2019 +
+                   age_sc +
+                   right +
+                   soc_con +
+                   fis_con +
+                   nat +
+                   W2_Newspaper_prefer1 +
+                   W2_Newspaper_prefer5 +
+                   W2_Newspaper_prefer6 +
+                   W2_Newspaper_prefer9 +
+                   W2_INFO_5 +
+                   W2_INFO_9,
+                 data = conspiracies)
+
+#summary(se_pol_5g)
+summ(se_pol_5g, vifs = TRUE)
+plot_coefs(se_pol_5g)
+par(mfrow = c(2,2))
+plot(se_pol_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
+
+```{r}
+# right and fis_con now dropped from modelling
+# due to VIF >= 2 and non-significant effect
+se_polpsych_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+                       W1_Education_binary +
+                       W1_Income_2019 +
+                       age_sc +
+                       #right +
+                       soc_con +
+                       #fis_con +
+                       nat +
+                       W2_Newspaper_prefer1 +
+                       W2_Newspaper_prefer5 +
+                       W2_Newspaper_prefer6 +
+                       W2_Newspaper_prefer9 +
+                       W2_INFO_5 +
+                       W2_INFO_9 +
+                       SDO +
+                       RWA +
+                       W2_DAI_Total +
+                       W2_IOU_Total,
+                     data = conspiracies)
+
+#summary(se_polpsych_5g)
+summ(se_polpsych_5g, vifs = TRUE)
+plot_coefs(se_polpsych_5g)
+par(mfrow = c(2,2))
+plot(se_polpsych_5g)
+```
+
+```{r}
+#av_ggplot(se_polpsych_5g)
+```
+
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT
+
+```{r}
+multi_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9 +
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5,
+                 data = conspiracies)
+
+#summary(multi_5g)
+summ(multi_5g, vifs = TRUE)
+plot_coefs(multi_5g)
+par(mfrow = c(2,2))
+plot(multi_5g)
+```
+
+## DV 5G belief, socio-economic + pol-psych, dropping soc_con and IOU
+
+```{r}
+se_polpsych_5g_2 <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+                         W1_Education_binary +
+                         W1_Income_2019 +
+                         age_sc +
+                         #right +
+                         #soc_con +
+                         #fis_con +
+                         nat +
+                         W2_Newspaper_prefer1 +
+                         W2_Newspaper_prefer5 +
+                         W2_Newspaper_prefer6 +
+                         W2_Newspaper_prefer9 +
+                         W2_INFO_5 +
+                         W2_INFO_9 +
+                         SDO +
+                         RWA +
+                         #W2_IOU_Total +
+                         W2_DAI_Total,
+                       data = conspiracies)
+
+#summary(se_polpsych_5g_2)
+summ(se_polpsych_5g_2, vifs = TRUE)
+plot_coefs(se_polpsych_5g_2)
+par(mfrow = c(2,2))
+plot(se_polpsych_5g_2)
+```
+
+## DV 5G belief, multivariate model, dropping soc_con and IOU
+
+```{r}
+multi_5g_2 <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+                         W1_Education_binary +
+                         W1_Income_2019 +
+                         age_sc +
+                         #right +
+                         #soc_con +
+                         #fis_con +
+                         nat +
+                         W2_Newspaper_prefer1 +
+                         W2_Newspaper_prefer5 +
+                         W2_Newspaper_prefer6 +
+                         W2_Newspaper_prefer9 +
+                         W2_INFO_5 +
+                         W2_INFO_9 +
+                         SDO +
+                         RWA +
+                         #W2_IOU_Total +
+                         W2_DAI_Total + 
+                         threat +
+                         CRT1 +
+                         CRT2 +
+                         CRT3 +
+                         CRT4 +
+                         CRT5,
+                       data = conspiracies)
+
+#summary(multi_5g_2)
+summ(multi_5g_2, vifs = TRUE)
+plot_coefs(multi_5g_2)
+par(mfrow = c(2,2))
+plot(multi_5g_2)
+```
+
+
+## DV 5G conspiracy - multivariate and interaction model (not incl. conspiracy controls)
+
+```{r}
+int_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+                         W1_Education_binary +
+                         W1_Income_2019 +
+                         age_sc +
+                         #right +
+                         #soc_con +
+                         #fis_con +
+                         nat +
+                         W2_Newspaper_prefer1 +
+                         W2_Newspaper_prefer5 +
+                         W2_Newspaper_prefer6 +
+                         W2_Newspaper_prefer9 +
+                         W2_INFO_5:SDO +
+                         W2_INFO_9 +
+                         #SDO +
+                         RWA +
+                         #W2_IOU_Total +
+                         W2_DAI_Total + 
+                         threat +
+                         CRT1 +
+                         CRT2 +
+                         CRT3 +
+                         CRT4 +
+                         CRT5,
+                       data = conspiracies)
+
+#summary(int_5g)
+summ(int_5g, vifs = TRUE)
+plot_coefs(int_5g)
+par(mfrow = c(2,2))
+plot(int_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+```{r}
+full_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+               W1_Education_binary +
+               W1_Income_2019 +
+               age_sc +
+               #right +
+               #soc_con +
+               #fis_con +
+               nat +
+               W2_Newspaper_prefer1 +
+               W2_Newspaper_prefer5 +
+               W2_Newspaper_prefer6 +
+               W2_Newspaper_prefer9 +
+               W2_INFO_5:SDO +
+               W2_INFO_9 +
+               #SDO +
+               RWA +
+               #W2_IOU_Total +
+               W2_DAI_Total +
+               threat +
+               CRT1 +
+               CRT2 +
+               CRT3 +
+               CRT4 +
+               CRT5 +
+               W1_Conspiracy_Total +
+               conspiracy1_sc +
+               conspiracy2_sc +
+               conspiracy4_sc +
+               conspiracy5_sc,
+             data = conspiracies)
+
+#summary(full_5g)
+summ(full_5g, vifs = TRUE)
+plot_coefs(full_5g)
+par(mfrow = c(2,2))
+plot(full_5g)
+```
+
+# Parsimonious models
+
+## Chinese lab belief
+
+```{r}
+pars_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                 W1_Income_2019 +
+                 nat +
+                 W2_Newspaper_prefer1 +
+                 W2_Newspaper_prefer9 +
+                 W2_INFO_5 +
+                 W2_INFO_9 +
+                 SDO +
+                 RWA +
+                 W2_DAI_Total +
+                 threat +
+                 CRT3 +
+                 W1_Conspiracy_Total +
+                 conspiracy2_sc +
+                 conspiracy3_sc +
+                 conspiracy4_sc,
+              data = conspiracies)
+
+summ(pars_lab)
+plot_coefs(pars_lab)
+par(mfrow = c(2,2))
+plot(pars_lab)
+```
+
+## 5G origin belief
+
+```{r}
+pars_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
+               W1_Income_2019 +
+               W2_INFO_5:SDO +
+               W2_DAI_Total +
+               CRT1 +
+               CRT5 +
+               conspiracy1_sc +
+               conspiracy4_sc +
+               conspiracy5_sc,
+             data = conspiracies)
+
+#summary(pars_5g)
+summ(pars_5g, vifs = TRUE)
+plot_coefs(pars_5g)
+par(mfrow = c(2,2))
+plot(pars_5g)
+```

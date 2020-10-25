@@ -20,7 +20,7 @@ av_ggplot <- function(model){
 }
 
 pr_ggplot <- function(model){
-  mm <- model.matrix(model) %>% as.data.frame() %>% select(-1)
+  mm <- model.matrix(model) %>% as.data.frame() %>% dplyr::select(-1)
   e <- residuals(model)
   coefs <- coef(model)[-1]
   
