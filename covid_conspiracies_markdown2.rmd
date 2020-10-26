@@ -767,6 +767,41 @@ par(mfrow = c(2,2))
 plot(multi_lab_2)
 ```
 
+## DV Chinese lab belief - interaction RWA * INFO_9, minus soc_con and IOU and conspiracy controls
+
+```{r}
+int_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  #soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9:RWA +
+                  SDO +
+                  #RWA +
+                  W2_DAI_Total +
+                  #W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5,
+                 data = conspiracies)
+
+#summary(int_lab)
+summ(int_lab, vifs = TRUE)
+plot_coefs(int_lab)
+par(mfrow = c(2,2))
+plot(int_lab)
+```
+
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
 
 ```{r}
@@ -782,9 +817,9 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                   W2_Newspaper_prefer6 +
                   W2_Newspaper_prefer9 +
                   W2_INFO_5 +
-                  W2_INFO_9 +
+                  W2_INFO_9:RWA +
                   SDO +
-                  RWA +
+                  #RWA +
                   W2_DAI_Total +
                   #W2_IOU_Total +
                   threat +
@@ -806,6 +841,7 @@ plot_coefs(full_lab)
 par(mfrow = c(2,2))
 plot(full_lab)
 ```
+
 
 # Modelling for belief in 5G origin conspiracy
 
@@ -1083,6 +1119,7 @@ plot(multi_5g_2)
 ```
 
 
+
 ## DV 5G conspiracy - multivariate and interaction model (not incl. conspiracy controls)
 
 ```{r}
@@ -1171,9 +1208,8 @@ pars_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                  W2_Newspaper_prefer1 +
                  W2_Newspaper_prefer9 +
                  W2_INFO_5 +
-                 W2_INFO_9 +
+                 W2_INFO_9:RWA +
                  SDO +
-                 RWA +
                  W2_DAI_Total +
                  threat +
                  CRT3 +
@@ -1183,7 +1219,7 @@ pars_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                  conspiracy4_sc,
               data = conspiracies)
 
-summ(pars_lab)
+summ(pars_lab, vifs = TRUE)
 plot_coefs(pars_lab)
 par(mfrow = c(2,2))
 plot(pars_lab)

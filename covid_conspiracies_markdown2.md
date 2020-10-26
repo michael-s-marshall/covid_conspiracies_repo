@@ -1480,6 +1480,96 @@ plot(multi_lab_2)
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
 
+## DV Chinese lab belief - interaction RWA \* INFO\_9, minus soc\_con and IOU and conspiracy controls
+
+``` r
+int_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  #right +
+                  #soc_con +
+                  #fis_con +
+                  nat +
+                  W2_Newspaper_prefer1 +
+                  W2_Newspaper_prefer5 +
+                  W2_Newspaper_prefer6 +
+                  W2_Newspaper_prefer9 +
+                  W2_INFO_5 +
+                  W2_INFO_9:RWA +
+                  SDO +
+                  #RWA +
+                  W2_DAI_Total +
+                  #W2_IOU_Total +
+                  threat +
+                  CRT1 +
+                  CRT2 +
+                  CRT3 +
+                  CRT4 +
+                  CRT5,
+                 data = conspiracies)
+
+#summary(int_lab)
+summ(int_lab, vifs = TRUE)
+```
+
+    ## MODEL INFO:
+    ## Observations: 1406
+    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(26,1379) = 16.95, p = 0.00
+    ## R² = 0.24
+    ## Adj. R² = 0.23 
+    ## 
+    ## Standard errors: OLS
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.82   4.69    -0.17   0.86       
+    ## W1_Education_binary1         -3.35   1.69    -1.98   0.05   1.13
+    ## W1_Income_20192              -0.69   2.59    -0.27   0.79   1.22
+    ## W1_Income_20193              -6.55   2.57    -2.55   0.01   1.22
+    ## W1_Income_20194              -1.90   2.48    -0.77   0.44   1.22
+    ## W1_Income_20195              -6.70   2.54    -2.64   0.01   1.22
+    ## age_sc                       -0.61   4.31    -0.14   0.89   1.40
+    ## nat                           9.51   3.50     2.72   0.01   1.25
+    ## W2_Newspaper_prefer1         10.30   1.79     5.75   0.00   1.12
+    ## W2_Newspaper_prefer5         -1.62   2.27    -0.71   0.48   1.40
+    ## W2_Newspaper_prefer6         -3.56   2.77    -1.29   0.20   1.23
+    ## W2_Newspaper_prefer9          8.60   2.52     3.41   0.00   1.13
+    ## W2_INFO_52                    3.16   1.99     1.59   0.11   1.52
+    ## W2_INFO_53                    7.95   2.33     3.41   0.00   1.52
+    ## W2_INFO_54                    0.15   3.53     0.04   0.97   1.52
+    ## SDO                          17.89   5.06     3.53   0.00   1.36
+    ## W2_DAI_Total                 15.09   4.01     3.76   0.00   1.29
+    ## threat                        6.96   3.29     2.11   0.03   1.19
+    ## CRT1                          0.47   2.23     0.21   0.83   1.38
+    ## CRT2                          3.21   1.92     1.67   0.09   1.45
+    ## CRT3                          5.07   2.06     2.46   0.01   1.58
+    ## CRT4                         -0.86   1.80    -0.48   0.63   1.29
+    ## CRT5                          5.47   1.84     2.98   0.00   1.36
+    ## W2_INFO_91:RWA               10.75   6.00     1.79   0.07   1.85
+    ## W2_INFO_92:RWA               18.70   5.65     3.31   0.00   1.85
+    ## W2_INFO_93:RWA               20.51   5.96     3.44   0.00   1.85
+    ## W2_INFO_94:RWA               39.76   8.44     4.71   0.00   1.85
+    ## ----------------------------------------------------------------
+
+``` r
+plot_coefs(int_lab)
+```
+
+    ## Loading required namespace: broom.mixed
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+``` r
+par(mfrow = c(2,2))
+plot(int_lab)
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
+
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
 
 ``` r
@@ -1495,9 +1585,9 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                   W2_Newspaper_prefer6 +
                   W2_Newspaper_prefer9 +
                   W2_INFO_5 +
-                  W2_INFO_9 +
+                  W2_INFO_9:RWA +
                   SDO +
-                  RWA +
+                  #RWA +
                   W2_DAI_Total +
                   #W2_IOU_Total +
                   threat +
@@ -1523,7 +1613,7 @@ summ(full_lab, vifs = TRUE)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(31,1374) = 20.78, p = 0.00
+    ## F(31,1374) = 20.76, p = 0.00
     ## R² = 0.32
     ## Adj. R² = 0.30 
     ## 
@@ -1531,38 +1621,38 @@ summ(full_lab, vifs = TRUE)
     ## -----------------------------------------------------------------
     ##                                Est.   S.E.   t val.      p    VIF
     ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                  -13.67   5.22    -2.62   0.01       
-    ## W1_Education_binary1          -3.49   1.61    -2.17   0.03   1.13
-    ## W1_Income_20192                0.88   2.47     0.36   0.72   1.25
-    ## W1_Income_20193               -6.23   2.45    -2.54   0.01   1.25
-    ## W1_Income_20194               -0.04   2.36    -0.02   0.99   1.25
-    ## W1_Income_20195               -4.16   2.42    -1.72   0.09   1.25
-    ## age_sc                         4.56   4.12     1.11   0.27   1.42
-    ## nat                           10.86   3.36     3.24   0.00   1.28
-    ## W2_Newspaper_prefer1           9.28   1.71     5.42   0.00   1.13
-    ## W2_Newspaper_prefer5          -0.37   2.16    -0.17   0.86   1.40
-    ## W2_Newspaper_prefer6          -4.88   2.64    -1.85   0.06   1.24
-    ## W2_Newspaper_prefer9           7.25   2.40     3.02   0.00   1.14
-    ## W2_INFO_52                     3.07   1.90     1.62   0.11   1.58
-    ## W2_INFO_53                     5.34   2.24     2.38   0.02   1.58
-    ## W2_INFO_54                    -1.96   3.36    -0.58   0.56   1.58
-    ## W2_INFO_92                     4.59   1.95     2.36   0.02   1.39
-    ## W2_INFO_93                     4.59   2.23     2.06   0.04   1.39
-    ## W2_INFO_94                    13.52   3.81     3.55   0.00   1.39
-    ## SDO                           11.58   4.95     2.34   0.02   1.44
-    ## RWA                           18.04   5.19     3.48   0.00   1.42
-    ## W2_DAI_Total                   8.56   3.90     2.20   0.03   1.36
-    ## threat                        10.28   3.17     3.25   0.00   1.22
-    ## CRT1                          -0.60   2.13    -0.28   0.78   1.39
-    ## CRT2                           2.35   1.82     1.29   0.20   1.45
-    ## CRT3                           4.07   1.96     2.08   0.04   1.59
-    ## CRT4                          -0.91   1.71    -0.53   0.59   1.30
-    ## CRT5                           2.39   1.77     1.35   0.18   1.40
-    ## W1_Conspiracy_Total           26.04   3.89     6.69   0.00   1.08
-    ## conspiracy2_sc               -13.45   2.66    -5.07   0.00   1.06
-    ## conspiracy3_sc                18.76   4.88     3.85   0.00   2.09
-    ## conspiracy4_sc                10.33   2.77     3.73   0.00   1.34
+    ## (Intercept)                  -10.04   5.10    -1.97   0.05       
+    ## W1_Education_binary1          -3.50   1.61    -2.18   0.03   1.13
+    ## W1_Income_20192                0.87   2.47     0.35   0.73   1.25
+    ## W1_Income_20193               -6.19   2.45    -2.53   0.01   1.25
+    ## W1_Income_20194                0.00   2.36     0.00   1.00   1.25
+    ## W1_Income_20195               -4.30   2.42    -1.78   0.08   1.25
+    ## age_sc                         4.29   4.12     1.04   0.30   1.42
+    ## nat                           11.07   3.36     3.29   0.00   1.28
+    ## W2_Newspaper_prefer1           9.29   1.71     5.43   0.00   1.13
+    ## W2_Newspaper_prefer5          -0.31   2.16    -0.15   0.88   1.40
+    ## W2_Newspaper_prefer6          -4.84   2.64    -1.84   0.07   1.24
+    ## W2_Newspaper_prefer9           7.31   2.40     3.04   0.00   1.14
+    ## W2_INFO_52                     3.09   1.90     1.63   0.10   1.56
+    ## W2_INFO_53                     5.39   2.23     2.42   0.02   1.56
+    ## W2_INFO_54                    -1.78   3.36    -0.53   0.60   1.56
+    ## SDO                           11.55   4.96     2.33   0.02   1.44
+    ## W2_DAI_Total                   8.60   3.90     2.21   0.03   1.36
+    ## threat                        10.16   3.17     3.20   0.00   1.22
+    ## CRT1                          -0.78   2.13    -0.37   0.71   1.39
+    ## CRT2                           2.39   1.82     1.31   0.19   1.45
+    ## CRT3                           4.12   1.96     2.10   0.04   1.59
+    ## CRT4                          -0.75   1.71    -0.44   0.66   1.30
+    ## CRT5                           2.47   1.77     1.40   0.16   1.40
+    ## W1_Conspiracy_Total           26.35   3.90     6.76   0.00   1.09
+    ## conspiracy2_sc               -13.40   2.66    -5.04   0.00   1.06
+    ## conspiracy3_sc                18.59   4.88     3.81   0.00   2.09
+    ## conspiracy4_sc                10.40   2.77     3.75   0.00   1.34
     ## conspiracy5_sc                 6.12   4.51     1.36   0.18   2.07
+    ## W2_INFO_91:RWA                10.51   5.77     1.82   0.07   1.94
+    ## W2_INFO_92:RWA                20.04   5.41     3.70   0.00   1.94
+    ## W2_INFO_93:RWA                19.33   5.71     3.39   0.00   1.94
+    ## W2_INFO_94:RWA                33.74   8.05     4.19   0.00   1.94
     ## -----------------------------------------------------------------
 
 ``` r
@@ -1571,14 +1661,14 @@ plot_coefs(full_lab)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-38-2.png)<!-- -->
 
 # Modelling for belief in 5G origin conspiracy
 
@@ -1592,7 +1682,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 ``` r
 conspiracies %>% 
@@ -1602,7 +1692,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-38-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-39-2.png)<!-- -->
 
 ## DV 5G conspiracy - singular IV models
 
@@ -1640,14 +1730,14 @@ ggplot(conspiracies,aes(x = SDO,
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(sdo_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-39-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-40-2.png)<!-- -->
 
 ``` r
 rwa_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ RWA,
@@ -1682,14 +1772,14 @@ ggplot(conspiracies,aes(x = RWA, y = log(W2_Conspiracy_Theory3 + 1))) +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(rwa_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-40-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->
 
 ``` r
 daily_m_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ 
@@ -1724,14 +1814,14 @@ ggplot(conspiracies,aes(x = as.factor(W2_Newspaper_prefer1),
   labs(x = "Daily Mail Reader")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(daily_m_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-42-2.png)<!-- -->
 
 ``` r
 social_m_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~ W2_INFO_5,
@@ -1767,14 +1857,14 @@ ggplot(conspiracies,aes(x = W2_INFO_5,
   labs(x = "COVID-19 info from social media")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(social_m_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-42-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
 
 ``` r
 # plotting RWA and SDO by conspiracy, facetted by social media
@@ -1793,7 +1883,7 @@ conspiracies %>%
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 ``` r
 conspiracies %>% 
@@ -1810,7 +1900,7 @@ conspiracies %>%
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
 
 ## DV 5G conspiracy - socio-economic variables
 
@@ -1856,14 +1946,14 @@ plot_coefs(se_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(se_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-45-2.png)<!-- -->
 
 ## DV 5G conspiracy - socio-economic variables + political/media
 
@@ -1930,14 +2020,14 @@ plot_coefs(se_pol_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(se_pol_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-45-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
 
@@ -2013,14 +2103,14 @@ plot_coefs(se_polpsych_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(se_polpsych_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-47-2.png)<!-- -->
 
 ``` r
 #av_ggplot(se_polpsych_5g)
@@ -2109,14 +2199,14 @@ plot_coefs(multi_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(multi_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-48-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-2.png)<!-- -->
 
 ## DV 5G belief, socio-economic + pol-psych, dropping soc\_con and IOU
 
@@ -2188,14 +2278,14 @@ plot_coefs(se_polpsych_5g_2)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(se_polpsych_5g_2)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-50-2.png)<!-- -->
 
 ## DV 5G belief, multivariate model, dropping soc\_con and IOU
 
@@ -2279,14 +2369,14 @@ plot_coefs(multi_5g_2)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(multi_5g_2)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-50-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-51-2.png)<!-- -->
 
 ## DV 5G conspiracy - multivariate and interaction model (not incl. conspiracy controls)
 
@@ -2370,14 +2460,14 @@ plot_coefs(int_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(int_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-51-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-52-2.png)<!-- -->
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
 
@@ -2471,14 +2561,14 @@ plot_coefs(full_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-52-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
 
 # Parsimonious models
 
@@ -2491,9 +2581,8 @@ pars_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                  W2_Newspaper_prefer1 +
                  W2_Newspaper_prefer9 +
                  W2_INFO_5 +
-                 W2_INFO_9 +
+                 W2_INFO_9:RWA +
                  SDO +
-                 RWA +
                  W2_DAI_Total +
                  threat +
                  CRT3 +
@@ -2503,7 +2592,7 @@ pars_lab <- lm(W2_Conspiracy_Theory1 ~ W1_Education_binary +
                  conspiracy4_sc,
               data = conspiracies)
 
-summ(pars_lab)
+summ(pars_lab, vifs = TRUE)
 ```
 
     ## MODEL INFO:
@@ -2512,39 +2601,39 @@ summ(pars_lab)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(23,1382) = 27.47, p = 0.00
+    ## F(23,1382) = 27.45, p = 0.00
     ## R² = 0.31
     ## Adj. R² = 0.30 
     ## 
     ## Standard errors: OLS
-    ## ----------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p
-    ## -------------------------- -------- ------ -------- ------
-    ## (Intercept)                  -12.85   4.59    -2.80   0.01
-    ## W1_Education_binary1          -3.83   1.59    -2.40   0.02
-    ## W1_Income_20192                0.42   2.46     0.17   0.86
-    ## W1_Income_20193               -6.71   2.44    -2.75   0.01
-    ## W1_Income_20194               -0.39   2.35    -0.17   0.87
-    ## W1_Income_20195               -4.68   2.41    -1.94   0.05
-    ## nat                           11.91   3.30     3.61   0.00
-    ## W2_Newspaper_prefer1           9.20   1.69     5.43   0.00
-    ## W2_Newspaper_prefer9           6.53   2.37     2.76   0.01
-    ## W2_INFO_52                     2.76   1.85     1.49   0.14
-    ## W2_INFO_53                     4.99   2.16     2.30   0.02
-    ## W2_INFO_54                    -2.53   3.25    -0.78   0.44
-    ## W2_INFO_92                     4.31   1.94     2.22   0.03
-    ## W2_INFO_93                     4.37   2.22     1.97   0.05
-    ## W2_INFO_94                    13.11   3.79     3.46   0.00
-    ## SDO                           12.62   4.86     2.60   0.01
-    ## RWA                           20.13   5.06     3.98   0.00
-    ## W2_DAI_Total                   8.92   3.82     2.34   0.02
-    ## threat                        10.38   3.13     3.32   0.00
-    ## CRT3                           5.61   1.68     3.34   0.00
-    ## W1_Conspiracy_Total           26.37   3.89     6.79   0.00
-    ## conspiracy2_sc               -13.60   2.65    -5.13   0.00
-    ## conspiracy3_sc                22.45   4.03     5.57   0.00
-    ## conspiracy4_sc                11.44   2.70     4.23   0.00
-    ## ----------------------------------------------------------
+    ## -----------------------------------------------------------------
+    ##                                Est.   S.E.   t val.      p    VIF
+    ## -------------------------- -------- ------ -------- ------ ------
+    ## (Intercept)                   -9.50   4.48    -2.12   0.03       
+    ## W1_Education_binary1          -3.82   1.59    -2.40   0.02   1.11
+    ## W1_Income_20192                0.40   2.46     0.16   0.87   1.20
+    ## W1_Income_20193               -6.67   2.44    -2.73   0.01   1.20
+    ## W1_Income_20194               -0.36   2.35    -0.15   0.88   1.20
+    ## W1_Income_20195               -4.82   2.41    -2.00   0.05   1.20
+    ## nat                           12.05   3.31     3.64   0.00   1.24
+    ## W2_Newspaper_prefer1           9.21   1.69     5.44   0.00   1.11
+    ## W2_Newspaper_prefer9           6.61   2.37     2.79   0.01   1.10
+    ## W2_INFO_52                     2.80   1.84     1.52   0.13   1.37
+    ## W2_INFO_53                     5.06   2.15     2.36   0.02   1.37
+    ## W2_INFO_54                    -2.34   3.25    -0.72   0.47   1.37
+    ## SDO                           12.63   4.87     2.60   0.01   1.39
+    ## W2_DAI_Total                   9.01   3.82     2.36   0.02   1.30
+    ## threat                        10.26   3.13     3.27   0.00   1.19
+    ## CRT3                           5.68   1.68     3.39   0.00   1.16
+    ## W1_Conspiracy_Total           26.65   3.89     6.85   0.00   1.08
+    ## conspiracy2_sc               -13.55   2.65    -5.10   0.00   1.06
+    ## conspiracy3_sc                22.32   4.04     5.53   0.00   1.43
+    ## conspiracy4_sc                11.52   2.70     4.26   0.00   1.27
+    ## W2_INFO_91:RWA                12.88   5.62     2.29   0.02   1.80
+    ## W2_INFO_92:RWA                21.82   5.29     4.12   0.00   1.80
+    ## W2_INFO_93:RWA                21.42   5.60     3.83   0.00   1.80
+    ## W2_INFO_94:RWA                35.60   7.99     4.45   0.00   1.80
+    ## -----------------------------------------------------------------
 
 ``` r
 plot_coefs(pars_lab)
@@ -2552,14 +2641,14 @@ plot_coefs(pars_lab)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(pars_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-54-2.png)<!-- -->
 
 ## 5G origin belief
 
@@ -2616,11 +2705,11 @@ plot_coefs(pars_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(pars_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-54-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-55-2.png)<!-- -->
