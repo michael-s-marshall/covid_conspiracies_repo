@@ -107,7 +107,7 @@ conspiracies <- conspiracies %>%
       as.character(W1_Voted_GenElection_Name)))
     )
 
-# making preferred newspaper a dummy variable (i.e. replacing NA with 0)
+# making preferred newspaper dummy variable (i.e. replacing NA with 0)
 na_to_zero <- function(x){
   x[is.na(x)] <- 0
   x <- as.numeric(x)
@@ -123,7 +123,7 @@ conspiracies[paper_vars] <- conspiracies[paper_vars] %>%
 ```
 
 ```{r}
-# Creating IVs
+# Creating DVs
 # [nat] nationalism
 nat_keys <- list(nationalism = cs(W2_Nationalism1,W2_Nationalism2))
 nat_test <- scoreItems(nat_keys, conspiracies, min = 1, max = 5)
@@ -1197,6 +1197,7 @@ par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
+
 # Parsimonious models
 
 ## Chinese lab belief
@@ -1225,18 +1226,22 @@ par(mfrow = c(2,2))
 plot(pars_lab)
 ```
 
+Other variables that were tested but did not improve the model and were non-significant included: paranoia and locus of control (both chance and internal).  There is maybe a case to include trust in scientists, which is measured on a 1-5 likert-scale.  But only the middle category 'Trust moderately' had a statistically significant (positive) association with the DV.  Trust in scientists increased the adjusted R squared from 0.30 to 0.31.   
+
 ## 5G origin belief
 
 ```{r}
 pars_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
-               W1_Income_2019 +
-               W2_INFO_5:SDO +
-               W2_DAI_Total +
-               CRT1 +
-               CRT5 +
-               conspiracy1_sc +
-               conspiracy4_sc +
-               conspiracy5_sc,
+                W1_Income_2019 +
+                W2_INFO_5:SDO +
+                W2_DAI_Total +
+                CRT1 +
+                CRT5 +
+                W2_Internal_Total +
+                W2_Trust_Body6 +
+                conspiracy1_sc +
+                conspiracy4_sc +
+                conspiracy5_sc,
              data = conspiracies)
 
 #summary(pars_5g)
@@ -1245,3 +1250,5 @@ plot_coefs(pars_5g)
 par(mfrow = c(2,2))
 plot(pars_5g)
 ```
+
+Other variables that were tested but did not improve the model and were non-significant included: paranoia and locus of control (chance).  

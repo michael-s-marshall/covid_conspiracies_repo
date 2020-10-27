@@ -126,7 +126,7 @@ conspiracies <- conspiracies %>%
       as.character(W1_Voted_GenElection_Name)))
     )
 
-# making preferred newspaper a dummy variable (i.e. replacing NA with 0)
+# making preferred newspaper dummy variable (i.e. replacing NA with 0)
 na_to_zero <- function(x){
   x[is.na(x)] <- 0
   x <- as.numeric(x)
@@ -142,7 +142,7 @@ conspiracies[paper_vars] <- conspiracies[paper_vars] %>%
 ```
 
 ``` r
-# Creating IVs
+# Creating DVs
 # [nat] nationalism
 nat_keys <- list(nationalism = cs(W2_Nationalism1,W2_Nationalism2))
 nat_test <- scoreItems(nat_keys, conspiracies, min = 1, max = 5)
@@ -2650,18 +2650,28 @@ plot(pars_lab)
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-54-2.png)<!-- -->
 
+Other variables that were tested but did not improve the model and were
+non-significant included: paranoia and locus of control (both chance and
+internal). There is maybe a case to include trust in scientists, which
+is measured on a 1-5 likert-scale. But only the middle category ‘Trust
+moderately’ had a statistically significant (positive) association with
+the DV. Trust in scientists increased the adjusted R squared from 0.30
+to 0.31.
+
 ## 5G origin belief
 
 ``` r
 pars_5g <- lm(log(W2_Conspiracy_Theory3 + 1) ~
-               W1_Income_2019 +
-               W2_INFO_5:SDO +
-               W2_DAI_Total +
-               CRT1 +
-               CRT5 +
-               conspiracy1_sc +
-               conspiracy4_sc +
-               conspiracy5_sc,
+                W1_Income_2019 +
+                W2_INFO_5:SDO +
+                W2_DAI_Total +
+                CRT1 +
+                CRT5 +
+                W2_Internal_Total +
+                W2_Trust_Body6 +
+                conspiracy1_sc +
+                conspiracy4_sc +
+                conspiracy5_sc,
              data = conspiracies)
 
 #summary(pars_5g)
@@ -2669,35 +2679,40 @@ summ(pars_5g, vifs = TRUE)
 ```
 
     ## MODEL INFO:
-    ## Observations: 1406
+    ## Observations: 1402 (4 missing obs. deleted)
     ## Dependent Variable: log(W2_Conspiracy_Theory3 + 1)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(14,1391) = 105.84, p = 0.00
-    ## R² = 0.52
-    ## Adj. R² = 0.51 
+    ## F(19,1382) = 82.82, p = 0.00
+    ## R² = 0.53
+    ## Adj. R² = 0.53 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------
-    ##                          Est.   S.E.   t val.      p    VIF
-    ## --------------------- ------- ------ -------- ------ ------
-    ## (Intercept)             -0.20   0.11    -1.93   0.05       
-    ## W1_Income_20192         -0.15   0.09    -1.60   0.11   1.13
-    ## W1_Income_20193         -0.09   0.09    -0.97   0.33   1.13
-    ## W1_Income_20194         -0.23   0.09    -2.66   0.01   1.13
-    ## W1_Income_20195         -0.19   0.09    -2.15   0.03   1.13
-    ## W2_DAI_Total             0.74   0.14     5.48   0.00   1.20
-    ## CRT1                     0.18   0.07     2.55   0.01   1.14
-    ## CRT5                     0.35   0.06     5.69   0.00   1.20
-    ## conspiracy1_sc           0.55   0.09     6.04   0.00   1.24
-    ## conspiracy4_sc           0.39   0.10     3.82   0.00   1.29
-    ## conspiracy5_sc           2.95   0.14    21.08   0.00   1.44
-    ## W2_INFO_51:SDO           0.51   0.18     2.88   0.00   1.34
-    ## W2_INFO_52:SDO           0.84   0.20     4.29   0.00   1.34
-    ## W2_INFO_53:SDO           0.98   0.22     4.53   0.00   1.34
-    ## W2_INFO_54:SDO           0.81   0.31     2.62   0.01   1.34
-    ## -----------------------------------------------------------
+    ## -------------------------------------------------------------
+    ##                            Est.   S.E.   t val.      p    VIF
+    ## ----------------------- ------- ------ -------- ------ ------
+    ## (Intercept)               -0.13   0.16    -0.85   0.40       
+    ## W1_Income_20192           -0.15   0.09    -1.67   0.09   1.20
+    ## W1_Income_20193           -0.05   0.09    -0.58   0.56   1.20
+    ## W1_Income_20194           -0.19   0.09    -2.19   0.03   1.20
+    ## W1_Income_20195           -0.14   0.09    -1.55   0.12   1.20
+    ## W2_DAI_Total               0.69   0.13     5.15   0.00   1.20
+    ## CRT1                       0.18   0.07     2.61   0.01   1.14
+    ## CRT5                       0.32   0.06     5.41   0.00   1.21
+    ## W2_Internal_Total         -0.32   0.16    -1.93   0.05   1.10
+    ## W2_Trust_Body62            0.14   0.08     1.87   0.06   1.24
+    ## W2_Trust_Body63            0.39   0.09     4.41   0.00   1.24
+    ## W2_Trust_Body64            0.55   0.11     5.24   0.00   1.24
+    ## W2_Trust_Body65            0.61   0.18     3.45   0.00   1.24
+    ## conspiracy1_sc             0.49   0.09     5.32   0.00   1.26
+    ## conspiracy4_sc             0.35   0.10     3.53   0.00   1.30
+    ## conspiracy5_sc             2.80   0.14    20.04   0.00   1.49
+    ## W2_INFO_51:SDO             0.38   0.18     2.17   0.03   1.39
+    ## W2_INFO_52:SDO             0.74   0.19     3.79   0.00   1.39
+    ## W2_INFO_53:SDO             0.86   0.21     4.04   0.00   1.39
+    ## W2_INFO_54:SDO             0.76   0.31     2.45   0.01   1.39
+    ## -------------------------------------------------------------
 
 ``` r
 plot_coefs(pars_5g)
@@ -2713,3 +2728,6 @@ plot(pars_5g)
 ```
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-55-2.png)<!-- -->
+
+Other variables that were tested but did not improve the model and were
+non-significant included: paranoia and locus of control (chance).
