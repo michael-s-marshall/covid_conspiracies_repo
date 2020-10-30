@@ -1264,13 +1264,12 @@ plot(pars_5g)
 Inclusion of the Vitamin C treatment belief makes SDO:INFO_54 non-signficant.  But there may be an issue of multi-collinearity, as SDO:INFO_54 is a strong predictor of belief in Vitamin C treatment, as indicated by model below.  
 
 ```{r}
-conspiracies <- conspiracies %>% 
-  mutate(w2_conspiracy5_ihs = log(W2_Conspiracy_Theory5 + 
-                                    ((W2_Conspiracy_Theory5^2 + 1)
-                                     ^ 0.5)
-                                  )
-         )
+ihs <- function(x){
+  log(x + ((x^2 + 1)^0.5))
+}
 
+conspiracies <- conspiracies %>% 
+  mutate(w2_conspiracy5_ihs = ihs(W2_Conspiracy_Theory5))
 
 vitamin_mod <- lm(w2_conspiracy5_ihs ~
                 soc_con +
@@ -1290,3 +1289,140 @@ par(mfrow = c(2,2))
 plot(vitamin_mod)
 ```
 
+
+# Principal Components Analysis - PCA
+
+```{r}
+# pca on conspiracy theory variables
+pca_df <- conspiracies %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5)
+
+pca_fit <- prcomp(pca_df,scale = TRUE)
+```
+
+```{r}
+# looking at biplots for components 1:4
+biplot(pca_fit,
+       col = c("lightgrey","red"))
+
+biplot(pca_fit, choices = 3:4,
+       col = c("lightgrey","red"))
+
+pca_fit$rotation[,1:4]
+
+components <- pca_fit$x[,1:4] %>% as_tibble()
+```
+
+First four principal components are as follows:  
+1. general conspiracy ideation, with belief in 5G, 'it's no worse than flu' and vitamin C treatment highly loaded to this component, and belief in Chinese lab less so  
+2. disbelief in Chinese meat market origin, with mild positive loading for Chinese lab origin  
+3. strong conspiracy ideation (non-nationalistic), strong loading for belig 5g, 'it's no worse than flu' and vitamin C treatment, with negative loading for both Chinese lab origin and Chinese meat market  
+4. strong loading for belief in 5G conspiracy and vitamin C treatment, but strong negative loading for belief 'it's no worse than flu'  
+
+
+```{r}
+pc <- cbind(conspiracies,components)
+
+pc <- pc %>% 
+  mutate(
+    pc1_ihs = ihs(PC1)
+  )
+
+pc %>% 
+  ggplot(aes(x = pc1_ihs)) +
+  geom_density() +
+  labs(x = "Principal Component 1 (IHS)")
+
+pc %>% 
+  ggplot(aes(x = PC2)) +
+  geom_density() +
+  labs(x = "Principal Component 2")
+
+pc %>% 
+  ggplot(aes(x = PC3)) +
+  geom_density() +
+  labs(x = "Principal Component 3")
+
+pc %>% 
+  ggplot(aes(x = PC4)) +
+  geom_density()  +
+  labs(x = "Principal Component 4")
+```
+
+Principal components 1 to 3 explain most of the variation in the data.  
+
+```{r}
+# modelling principal components against general conspiracy ideation
+conspiracy_mod <- lm(W1_Conspiracy_Total ~ pc1_ihs + PC2 + PC3 + PC4,
+                     data = pc)
+
+par(mfrow = c(2,2))
+plot(conspiracy_mod)
+
+summ(conspiracy_mod, vifs = TRUE)
+
+source("diagnostic_plots.R")
+av_ggplot(conspiracy_mod)
+```
+
+Only principal components 1 and 3 associated with general conspiracy ideation.  
+
+# Ranking of conspiracies
+
+```{r}
+## [maxn] Function to find nth highest column position for each row (to use among a subset of data)
+maxn <- function(n) function(x) order(x, decreasing = TRUE)[n]  
+```
+
+```{r}
+## Create differenced DV: item - highest or next highest probability X item probability/100
+subs <- names(pca_df)
+
+conspiracies$c_first <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(1)(x)])  # Highest probability
+table(conspiracies$c_first)
+```
+
+```{r}
+conspiracies$c_second <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(2)(x)])  # 2nd highest probability
+table(conspiracies$c_second)
+```
+
+```{r}
+conspiracies$c_third <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(3)(x)])  # 3rd highest probability
+table(conspiracies$c_third)
+```
+
+```{r}
+conspiracies$c_fourth <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(4)(x)])  # 4th highest probability
+table(conspiracies$c_fourth)
+```
+
+```{r}
+conspiracies$c_fifth <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(5)(x)])  # 5th highest probability
+table(conspiracies$c_fifth)
+```
+
+```{r}
+## A start to creating a differenced DV using the name of the top conspiracy and their ratings...
+#conspiracies$c1_diff <- ifelse(
+#  conspiracies$c.name == "c1", 
+#  df$c1 - df$c.second,
+#  df$c1 - df$c.first)
+
+#summary(df$c1.diff)
+#head(df$c1.diff)
+#df$c1.diff.norm <- df$c1.diff*df$c.first/100
+#head(df$c1.diff.norm)
+
+
+```

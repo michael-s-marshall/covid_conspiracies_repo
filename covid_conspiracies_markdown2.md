@@ -2688,13 +2688,12 @@ SDO:INFO\_54 is a strong predictor of belief in Vitamin C treatment, as
 indicated by model below.
 
 ``` r
-conspiracies <- conspiracies %>% 
-  mutate(w2_conspiracy5_ihs = log(W2_Conspiracy_Theory5 + 
-                                    ((W2_Conspiracy_Theory5^2 + 1)
-                                     ^ 0.5)
-                                  )
-         )
+ihs <- function(x){
+  log(x + ((x^2 + 1)^0.5))
+}
 
+conspiracies <- conspiracies %>% 
+  mutate(w2_conspiracy5_ihs = ihs(W2_Conspiracy_Theory5))
 
 vitamin_mod <- lm(w2_conspiracy5_ihs ~
                 soc_con +
@@ -2756,3 +2755,276 @@ plot(vitamin_mod)
 ```
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-57-2.png)<!-- -->
+
+# Principal Components Analysis - PCA
+
+``` r
+# pca on conspiracy theory variables
+pca_df <- conspiracies %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5)
+
+pca_fit <- prcomp(pca_df,scale = TRUE)
+```
+
+``` r
+# looking at biplots for components 1:4
+biplot(pca_fit,
+       col = c("lightgrey","red"))
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
+
+``` r
+biplot(pca_fit, choices = 3:4,
+       col = c("lightgrey","red"))
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-59-2.png)<!-- -->
+
+``` r
+pca_fit$rotation[,1:4]
+```
+
+    ##                               PC1         PC2        PC3          PC4
+    ## W2_Conspiracy_Theory1  0.38903347  0.24539595 -0.8871956  0.005348538
+    ## W2_Conspiracy_Theory2 -0.06373755 -0.95279476 -0.2915166  0.055301539
+    ## W2_Conspiracy_Theory3  0.56176975 -0.06995748  0.2010846  0.389643958
+    ## W2_Conspiracy_Theory4  0.46001469 -0.12890497  0.1587345 -0.862444840
+    ## W2_Conspiracy_Theory5  0.56337529 -0.10223712  0.2495403  0.318244587
+
+``` r
+components <- pca_fit$x[,1:4] %>% as_tibble()
+```
+
+First four principal components are as follows:  
+1\. general conspiracy ideation, with belief in 5G, ‘it’s no worse than
+flu’ and vitamin C treatment highly loaded to this component, and belief
+in Chinese lab less so  
+2\. disbelief in Chinese meat market origin, with mild positive loading
+for Chinese lab origin  
+3\. strong conspiracy ideation (non-nationalistic), strong loading for
+belig 5g, ‘it’s no worse than flu’ and vitamin C treatment, with
+negative loading for both Chinese lab origin and Chinese meat market  
+4\. strong loading for belief in 5G conspiracy and vitamin C treatment,
+but strong negative loading for belief ‘it’s no worse than flu’
+
+``` r
+pc <- cbind(conspiracies,components)
+
+pc <- pc %>% 
+  mutate(
+    pc1_ihs = ihs(PC1)
+  )
+
+pc %>% 
+  ggplot(aes(x = pc1_ihs)) +
+  geom_density() +
+  labs(x = "Principal Component 1 (IHS)")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-60-1.png)<!-- -->
+
+``` r
+pc %>% 
+  ggplot(aes(x = PC2)) +
+  geom_density() +
+  labs(x = "Principal Component 2")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-60-2.png)<!-- -->
+
+``` r
+pc %>% 
+  ggplot(aes(x = PC3)) +
+  geom_density() +
+  labs(x = "Principal Component 3")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-60-3.png)<!-- -->
+
+``` r
+pc %>% 
+  ggplot(aes(x = PC4)) +
+  geom_density()  +
+  labs(x = "Principal Component 4")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-60-4.png)<!-- -->
+
+Principal components 1 to 3 explain most of the variation in the data.
+
+``` r
+# modelling principal components against general conspiracy ideation
+conspiracy_mod <- lm(W1_Conspiracy_Total ~ pc1_ihs + PC2 + PC3 + PC4,
+                     data = pc)
+
+par(mfrow = c(2,2))
+plot(conspiracy_mod)
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
+
+``` r
+summ(conspiracy_mod, vifs = TRUE)
+```
+
+    ## MODEL INFO:
+    ## Observations: 1406
+    ## Dependent Variable: W1_Conspiracy_Total
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(4,1401) = 20.56, p = 0.00
+    ## R² = 0.06
+    ## Adj. R² = 0.05 
+    ## 
+    ## Standard errors: OLS
+    ## -------------------------------------------------------
+    ##                      Est.   S.E.   t val.      p    VIF
+    ## ----------------- ------- ------ -------- ------ ------
+    ## (Intercept)          0.58   0.01   111.45   0.00       
+    ## pc1_ihs              0.03   0.01     6.56   0.00   1.01
+    ## PC2                  0.01   0.01     1.23   0.22   1.00
+    ## PC3                 -0.03   0.01    -5.78   0.00   1.00
+    ## PC4                  0.00   0.01     0.05   0.96   1.00
+    ## -------------------------------------------------------
+
+``` r
+source("diagnostic_plots.R")
+av_ggplot(conspiracy_mod)
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-61-2.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-61-3.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-61-4.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-61-5.png)<!-- -->
+
+Only principal components 1 and 3 associated with general conspiracy
+ideation.
+
+# Ranking of conspiracies
+
+``` r
+## [maxn] Function to find nth highest column position for each row (to use among a subset of data)
+maxn <- function(n) function(x) order(x, decreasing = TRUE)[n]  
+```
+
+``` r
+## Create differenced DV: item - highest or next highest probability X item probability/100
+subs <- names(pca_df)
+
+conspiracies$c_first <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(1)(x)])  # Highest probability
+table(conspiracies$c_first)
+```
+
+    ## 
+    ##   0   1   2   3   4   5   6   7   8   9  10  11  12  14  15  16  18  19  20  21 
+    ##  16   6   1   4   3   4   1   3   5   2   7   1   1   2   5   1   1   3   5   3 
+    ##  22  24  25  26  27  28  29  30  31  32  35  36  38  39  40  41  42  43  45  46 
+    ##   3   1   1   2   3   3   2   4   2   2   2   1   1   1   3   4   1   3   4   2 
+    ##  47  48  49  50  51  52  53  54  55  56  57  58  59  60  61  62  63  64  65  66 
+    ##   2   7   9  54  42  34  16  15   7   5   6  14  13  27  20  12   6  10  13   7 
+    ##  67  68  69  70  71  72  73  74  75  76  77  78  79  80  81  82  83  84  85  86 
+    ##  12   9  14  37  30  28  17  14  21  11  15  17  15  46  31  46  27  22  26  13 
+    ##  87  88  89  90  91  92  93  94  95  96  97  98  99 100 
+    ##  17  18  16  47  28  40  14  18  24  20  13  17  29 216
+
+``` r
+conspiracies$c_second <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(2)(x)])  # 2nd highest probability
+table(conspiracies$c_second)
+```
+
+    ## 
+    ##   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+    ## 141  58  21  23  18  31  13  14   8  20  37  19   7   2   6   8  10   8   7  12 
+    ##  20  21  22  23  24  25  27  28  29  30  31  32  33  34  35  36  37  38  39  40 
+    ##  18   4   5   5   7   7   4   9  10  22   7   5   7   3   5   3   3   9   5  20 
+    ##  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59  60 
+    ##   7   8   6   5   6   6  11  11  23 116  72  33  38  16  10   9  14   9  17  17 
+    ##  61  62  63  64  65  66  67  68  69  70  71  72  73  74  75  76  77  78  79  80 
+    ##   7   8  11   9  10  12   8   4   3  22  17  11  12   6  15   8   5   9   6  13 
+    ##  81  82  83  84  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99 100 
+    ##  18   9   9   6   7   5   5   3   2   9   4   4   3   2   4   4   3   7   7  44
+
+``` r
+conspiracies$c_third <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(3)(x)])  # 3rd highest probability
+table(conspiracies$c_third)
+```
+
+    ## 
+    ##   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+    ## 354 142  64  45  37  40  22  18  21  22  41  16  16  11   8  16   8   5  14  14 
+    ##  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39 
+    ##  18   6  10   9   6  10   2   8  12   6  10  10   6   5   5   5   9   7   3   3 
+    ##  40  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59 
+    ##   2   3   2   6   5   4   6   9   7  11  48  29  27  22  13   5   6  10   5   6 
+    ##  60  61  62  63  64  65  66  67  68  69  70  71  72  73  74  75  77  78  79  80 
+    ##   8   3   9   3   6   6   5   2   3   2   4   9   3   3   5   3   4   2   4   3 
+    ##  81  82  83  84  85  86  87  88  92  94  95  96  97  98 100 
+    ##   1   4   1   1   1   1   2   1   3   1   1   1   1   1   9
+
+``` r
+conspiracies$c_fourth <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(4)(x)])  # 4th highest probability
+table(conspiracies$c_fourth)
+```
+
+    ## 
+    ##   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+    ## 501 219  81  65  43  30  26  20  28  14  23  15  12   9  14   4   9   7   4   7 
+    ##  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39 
+    ##   7   1   5  12   6   7   2   8   7   6   4   1   4   4   6   2   4   1   3   2 
+    ##  40  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59 
+    ##   4   2   3   4   2   5   7   9   7   7  19  16  16  12   4   6   6   3   6   4 
+    ##  60  61  62  63  64  65  66  67  68  69  70  73  74  75  76  78  79  80  89  90 
+    ##   1   2   2   5   2   2   1   1   3   1   2   2   1   2   1   1   2   1   1   1 
+    ##  91  98  99 100 
+    ##   1   1   1   4
+
+``` r
+conspiracies$c_fifth <- apply(conspiracies[subs],
+                              1, 
+                              function(x)x[maxn(5)(x)])  # 5th highest probability
+table(conspiracies$c_fifth)
+```
+
+    ## 
+    ##   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
+    ## 648 251  93  60  27  32  13  15  19   8  16  10   5  10   9   3   3   2   6   5 
+    ##  20  21  22  23  24  25  26  27  28  29  30  31  32  34  35  36  37  38  39  40 
+    ##   4   8   4   2   3   1   1   1   2   2   1   4   3   4   2   3   1   2   2   4 
+    ##  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  60  61 
+    ##   6   3   5   4   8   4   2   5   9  11  10   6   6   3   4   3   4   1   3   2 
+    ##  62  63  64  65  66  67  68  72  73  74  77  79  86  90  97  99 100 
+    ##   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   2
+
+``` r
+## A start to creating a differenced DV using the name of the top conspiracy and their ratings...
+#conspiracies$c1_diff <- ifelse(
+#  conspiracies$c.name == "c1", 
+#  df$c1 - df$c.second,
+#  df$c1 - df$c.first)
+
+#summary(df$c1.diff)
+#head(df$c1.diff)
+#df$c1.diff.norm <- df$c1.diff*df$c.first/100
+#head(df$c1.diff.norm)
+```
