@@ -430,13 +430,9 @@ First four principal components are as follows:
 ```{r}
 pc <- cbind(conspiracies,components)
 
-ihs <- function(x){
-  log(x + ((x^2 + 1)^0.5))
-}
-
 pc <- pc %>% 
   mutate(
-    pc1_ihs = ihs(PC1)
+    pc1_ihs = asinh(PC1)
   )
 
 pc %>% 
@@ -835,17 +831,53 @@ plot(full_lab)
 ## Plots of DV, incl. inverse hyperbolic sine transformation
 
 ```{r}
+ihs <- function(x, theta){  # IHS transformation
+  asinh(theta * x)/theta
+}
+
+ihs_loglik <- function(theta,x){
+  
+  ihs <- function(x, theta){  # function to IHS transform
+    asinh(theta * x)/theta
+  }
+  
+  n <- length(x)
+  xt <- ihs(x, theta)
+  
+  log_lik <- -n*log(sum((xt - mean(xt))^2))- sum(log(1+theta^2*x^2))
+  return(log_lik)
+}     
+
+
+# alternative using shapiro-wik test
+shapiro_test_pvalue <- function(theta, x){ 
+  x <- ihs(x, theta) 
+  shapiro.test(x)$p.value 
+}
+```
+
+```{r}
+best_theta <- optimize(shapiro_test_pvalue, 
+                       lower = 0.00001, upper = 50,
+                       x = conspiracies$W2_Conspiracy_Theory3, 
+                       maximum = TRUE)$maximum
+best_theta
+```
+
+
+```{r}
 conspiracies %>% 
   ggplot(aes(x = W2_Conspiracy_Theory3)) +
   geom_histogram(colour = "darkgrey", fill = "lightblue")
 
 conspiracies <- conspiracies %>% 
-  mutate(w2_conspiracy3_ihs = ihs(W2_Conspiracy_Theory3))
+  mutate(w2_conspiracy3_ihs = ihs(W2_Conspiracy_Theory3, best_theta))
 
 conspiracies %>% 
   ggplot(aes(x = w2_conspiracy3_ihs)) +
   geom_histogram(colour = "darkgrey", fill = "lightblue")
 ```
+
 
 ## DV 5G conspiracy - singular IV models
 
@@ -1298,7 +1330,6 @@ multi_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   W2_IOU_Total +
                   W2_Paranoia_Total +
                   W2_Internal_Total +
-                  W2_Chance_Total +
                   
                   #covid-anxety
                   threat +
@@ -1342,7 +1373,8 @@ int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
-                  
+                  W2_Internal_Total +
+                   
                   #covid-anxety
                   threat +
                
@@ -1363,7 +1395,7 @@ plot(int_5g_ihs)
 
 ```{r}
 AIC(multi_5g_ihs)
-AIC(int_5g_ihs) # moderate support for interaction term at this point
+AIC(int_5g_ihs) # no strong support for interaction term at this point
 ```
 
 
@@ -1393,6 +1425,7 @@ full_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_Internal_Total +
                 
                 #covid-anxety
                 threat +
@@ -1438,6 +1471,7 @@ full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_Internal_Total +
                 
                 #covid-anxety
                 threat +
@@ -1465,7 +1499,123 @@ plot(full_int_5g_ihs)
 ```{r}
 # comparing AIC with and without interaction
 AIC(full_5g_ihs)
-AIC(full_int_5g_ihs) # moderate support for interaction effect
+AIC(full_int_5g_ihs) # no strong support for interaction effect
+```
+
+
+## DV 5G conspiracy poisson - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+```{r}
+full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
+                #socio-economic variables
+                W2_Gender_binary +
+                W1_Education_binary +
+                W1_Income_2019 +
+                age_sc +
+                  
+                #political and media variables
+                fis_con +
+                nat +
+                W2_Trust_Body6 + #distrust of scientists
+                W2_Newspaper_prefer1 + #daily_mail
+                W2_Newspaper_prefer5 + #guardian
+                W2_Newspaper_prefer9 + #sun
+                W2_INFO_5 + #social media
+                W2_INFO_9 + #family and friends
+                  
+                #political-psychology variables
+                SDO +
+                RWA +
+                W2_DAI_Total +
+                W2_IOU_Total +
+                W2_Paranoia_Total +
+                
+                #covid-anxety
+                threat +
+                
+                #crt
+                crt +
+                CRT_test +
+                  
+                #conspiracies
+                W1_Conspiracy_Total +
+                conspiracy1_sc +
+                conspiracy2_sc,
+              family = "poisson", data = conspiracies)
+
+summary(full_5g_poiss)
+plot_coefs(full_5g_poiss)
+```
+
+
+```{r}
+full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
+                #socio-economic variables
+                W2_Gender_binary +
+                W1_Education_binary +
+                W1_Income_2019 +
+                age_sc +
+                  
+                #political and media variables
+                fis_con +
+                nat +
+                W2_Trust_Body6 + #distrust of scientists
+                W2_Newspaper_prefer1 + #daily_mail
+                W2_Newspaper_prefer5 + #guardian
+                W2_Newspaper_prefer9 + #sun
+                #W2_INFO_5 + #social media
+                W2_INFO_9 + #family and friends
+                  
+                #political-psychology variables
+                #SDO +
+                RWA +
+                W2_DAI_Total +
+                W2_IOU_Total +
+                W2_Paranoia_Total +
+                
+                #covid-anxety
+                threat +
+                
+                #crt
+                crt +
+                CRT_test +
+                    
+                #conspiracies
+                W1_Conspiracy_Total +
+                conspiracy1_sc +
+                conspiracy2_sc +
+                
+                # interactions
+                (W2_INFO_5*SDO),
+              family = "poisson", data = conspiracies)
+
+summary(full_int_5g_poiss)
+plot_coefs(full_int_5g_poiss)
+```
+
+
+```{r}
+# comparing AIC with and without interaction
+AIC(full_5g_poiss)
+AIC(full_int_5g_poiss) # no support for interaction effect
+```
+
+## Brief foray into random forest for 5G belief
+
+```{r}
+pacman::p_load(randomForest)
+
+conspiracies2 <- model.matrix(full_5g_ihs)[,-1] %>% as.data.frame()
+y <- model.matrix(full_lab) %>% as.data.frame %>%
+  dplyr::select(conspiracy3_sc) %>% as_vector() %>% 
+  ihs(theta = best_theta)
+
+set.seed(123)
+rf_mod_5g <- randomForest(y ~ .,
+                          data = conspiracies2, ntree = 750,
+                          mtry = 8, importance = TRUE)
+
+varImpPlot(rf_mod_5g)
 ```
 
 
@@ -1708,3 +1858,5 @@ plot_coefs(full_int_5g_ihs)
 summ(full_meat)
 plot_coefs(full_meat)
 ```
+
+
