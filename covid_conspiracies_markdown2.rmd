@@ -273,12 +273,13 @@ conspiracies$CRT_test <- ifelse(
 ```
 
 ```{r}
-# Right wing authoritarianism
+# CRT
 crt_keys <- list(crt = cs(CRT1,
                           CRT2,
-                          CRT3,
-                          CRT4, 
-                          CRT5))
+                          CRT3#,
+                          #CRT4, 
+                          #CRT5
+                          ))
 
 crt_test <- scoreItems(crt_keys, conspiracies, min = 0, max = 1)
 head(crt_test$scores)
@@ -582,7 +583,8 @@ se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~
                         W2_IOU_Total +
                         W2_Paranoia_Total +
                         W2_Internal_Total +
-                        W2_Chance_Total,
+                        W2_Chance_Total +
+                        W2_PO_Total,
                       data = conspiracies)
 
 summ(se_polpsych_lab, vifs = TRUE)
@@ -591,7 +593,8 @@ par(mfrow = c(2,2))
 plot(se_polpsych_lab)
 ```
 
-Looking at mulitcollinearity below for the following variables:  
+Looking at mulitcollinearity below for the following variables: 
+
 * right  
 * soc_con  
 * fis_con  
@@ -806,7 +809,7 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~
                   W2_IOU_Total +
                   W2_Paranoia_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                  
                   #CRT
@@ -982,7 +985,8 @@ se_polpsych_5g <- lm(W2_Conspiracy_Theory3 ~
                         W2_IOU_Total +
                         W2_Paranoia_Total +
                         W2_Internal_Total +
-                        W2_Chance_Total,
+                        W2_Chance_Total +
+                        W2_PO_Total,
                      data = conspiracies)
 
 summ(se_polpsych_5g, vifs = TRUE)
@@ -994,7 +998,7 @@ plot(se_polpsych_5g)
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
 
-Dropping locus of control variables.  
+Dropping locus of control variables, internal and chance.  
 
 ```{r}
 multi_5g <- lm(W2_Conspiracy_Theory3 ~ 
@@ -1020,8 +1024,9 @@ multi_5g <- lm(W2_Conspiracy_Theory3 ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
+                  W2_PO_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                  
                   # crt
@@ -1063,8 +1068,9 @@ int_5g <- lm(W2_Conspiracy_Theory3 ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
+                  W2_PO_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                
                   #crt
@@ -1114,8 +1120,9 @@ full_5g <- lm(W2_Conspiracy_Theory3 ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_PO_Total +
                 
-                #covid-anxety
+                #covid-anxiety
                 threat +
                 
                 #crt
@@ -1159,6 +1166,7 @@ full_int_5g <- lm(W2_Conspiracy_Theory3 ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_PO_Total +
                 
                 #covid-anxety
                 threat +
@@ -1293,7 +1301,8 @@ se_polpsych_5g_ihs <- lm(w2_conspiracy3_ihs ~
                         W2_IOU_Total +
                         W2_Paranoia_Total +
                         W2_Internal_Total +
-                        W2_Chance_Total,
+                        W2_Chance_Total +
+                        W2_PO_Total,
                      data = conspiracies)
 
 summ(se_polpsych_5g_ihs, vifs = TRUE)
@@ -1329,9 +1338,9 @@ multi_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
-                  W2_Internal_Total +
+                  W2_PO_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                  
                   # crt
@@ -1373,9 +1382,9 @@ int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
-                  W2_Internal_Total +
+                  W2_PO_Total +
                    
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                
                   #crt
@@ -1425,9 +1434,9 @@ full_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
-                W2_Internal_Total +
+                W2_PO_Total +
                 
-                #covid-anxety
+                #covid-anxiety
                 threat +
                 
                 #crt
@@ -1471,7 +1480,7 @@ full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
-                W2_Internal_Total +
+                W2_PO_Total +
                 
                 #covid-anxety
                 threat +
@@ -1529,6 +1538,7 @@ full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_PO_Total +
                 
                 #covid-anxety
                 threat +
@@ -1572,8 +1582,9 @@ full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 W2_DAI_Total +
                 W2_IOU_Total +
                 W2_Paranoia_Total +
+                W2_PO_Total +
                 
-                #covid-anxety
+                #covid-anxiety
                 threat +
                 
                 #crt
@@ -1724,7 +1735,8 @@ se_polpsych_meat <- lm(W2_Conspiracy_Theory2 ~
                         W2_IOU_Total +
                         W2_Paranoia_Total +
                         W2_Internal_Total +
-                        W2_Chance_Total,
+                        W2_Chance_Total +
+                        W2_PO_Total,
                       data = conspiracies)
 
 summ(se_polpsych_meat, vifs = TRUE)
@@ -1766,8 +1778,9 @@ multi_meat <- lm(W2_Conspiracy_Theory2 ~
                   W2_Paranoia_Total +
                   W2_Internal_Total +
                   W2_Chance_Total +
+                  W2_PO_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                   
                   #CRT
@@ -1811,6 +1824,7 @@ full_meat <- lm(W2_Conspiracy_Theory2 ~
                   W2_Paranoia_Total +
                   W2_Internal_Total +
                   W2_Chance_Total +
+                  W2_PO_Total +
                   
                   #covid-anxety
                   threat +
@@ -1859,4 +1873,104 @@ summ(full_meat)
 plot_coefs(full_meat)
 ```
 
+
+## Conspiracies and social distancing
+
+```{r}
+# loading paackage for multi nom
+pacman::p_load(nnet)
+```
+
+```{r}
+## making a dataset of variables included in the models above
+## plus DV's for social distancing and vaccination
+
+vars <- model.matrix(full_lab)[,-1] %>% as.data.frame() %>% names()
+vars <- c(vars,"w2_conspiracy3_ihs","W2_Internal_Total",
+          "W2_Chance_Total","W2_Conspiracy_Theory1",
+          "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
+          "W2_Conspiracy_Theory4","W2_Conspiracy_Theory5",
+          "conspiracy4_sc","conspiracy5_sc","conspiracy1_sc",
+          "W2_PO_Total","pid")
+vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
+vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
+
+conspiracies2 <- conspiracies %>% 
+  dplyr::select(one_of(vars)) %>% 
+  na.omit()
+
+conspiracies2 <- merge(
+  conspiracies2,
+  conspiracies %>% dplyr::select(pid,W2_SocialDistance11,W2_C19_Vax_Self,
+                                 W2_C19_Vax_Child),
+  by = "pid", all.x = TRUE
+)
+```
+
+
+```{r}
+# functions to inspact multinomial logit model
+z_score <- function(model){
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  return(z)
+}
+
+p_value <- function(model){
+  z <- z_score(model)
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+}
+```
+
+
+```{r}
+dist_mod <- multinom(W2_SocialDistance11 ~ conspiracy1_sc +
+                       conspiracy2_sc + conspiracy3_sc, 
+                     data = conspiracies2)
+
+summary(dist_mod)
+```
+
+```{r}
+p_value(dist_mod) # pvalues
+```
+
+```{r}
+exp(coef(dist_mod)) # odds ratios
+```
+
+## Multinomial model for vaccine acceptance
+
+```{r}
+vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
+                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
+                      W2_Gender_binary + W1_Education_binary +
+                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
+                      SDO + RWA + W2_DAI_Total + crt +
+                      W1_Conspiracy_Total,
+                    data = conspiracies2)
+```
+
+
+```{r, echo = FALSE, results = 'asis'}
+results <- left_join(
+  exp(coef(vax_full)) %>% as_tibble() %>% 
+    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("No","Maybe"),16)),
+  p_value(vax_full) %>% as_tibble() %>% 
+    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("No","Maybe"),16)),
+  by = c("variable","response")
+) %>%
+  mutate(
+    ` ` = ifelse(p_value < 0.001, "***",
+                 ifelse(p_value < 0.01, "**",
+                        ifelse(p_value < 0.05, "*",
+                               ifelse(p_value < 0.1, ".", " "))))
+  ) %>% 
+  dplyr::select(variable,response,everything())
+
+library(knitr)
+kable(results, caption = "Multinomial Regression Results for Vaccine Acceptance")
+```
 
