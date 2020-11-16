@@ -1881,6 +1881,7 @@ plot_coefs(full_meat)
 pacman::p_load(nnet)
 ```
 
+
 ```{r}
 ## making a dataset of variables included in the models above
 ## plus DV's for social distancing and vaccination
@@ -1901,12 +1902,16 @@ conspiracies2 <- conspiracies %>%
 
 conspiracies2 <- merge(
   conspiracies2,
-  conspiracies %>% dplyr::select(pid,W2_SocialDistance11,
+  conspiracies %>% dplyr::select(pid,W2_SocialDistance10,
+                                 W2_SocialDistance11,
                                  W2_SocialDistance12,
+                                 W2_SocialDistance14,
                                  W2_C19_Vax_Self,
-                                 W2_C19_Vax_Child),
+                                 W2_C19_Vax_Child, W2_Trust_Body1,
+                                 W2_Trust_Body2,W2_Trust_Body5),
   by = "pid", all.x = TRUE
 )
+
 ```
 
 
@@ -1926,94 +1931,37 @@ p_value <- function(model){
 
 
 ```{r}
-conspiracies2 <- conspiracies2 %>% 
-  mutate(
-    social_distance11 = fct_collapse(as.factor(W2_SocialDistance11),
-                                     "Agree" = c("5","4"),
-                                     "Neither" = "3",
-                                     "Disagree" = c("2","1")),
-    social_distance12 = fct_collapse(as.factor(W2_SocialDistance12),
-                                     "Agree" = c("5","4"),
-                                     "Neither" = "3",
-                                     "Disagree" = c("2","1")),
-    W2_SocialDistance11 = fct_relevel(as.factor(W2_SocialDistance11),
-                                      c("5","4","3","2","1")),
-    W2_SocialDistance12 = fct_relevel(as.factor(W2_SocialDistance12),
-                                      c("5","4","3","2","1"))
-    )
+# social distance scale
+sd_keys <- list(sd = cs(W2_SocialDistance10,
+                        W2_SocialDistance11,
+                        W2_SocialDistance12,
+                        W2_SocialDistance14))
+
+sd_test <- scoreItems(sd_keys, conspiracies2, min = 1, max = 5)
+head(sd_test$scores)
+summary(sd_test$alpha)  # Scale alpha
+conspiracies2$social_distance <- rescale01(sd_test$scores, na.rm = TRUE)
+conspiracies2$social_distance <- c(conspiracies2$social_distance)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies2$social_distance)
+ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
+  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
 
 ```{r}
-count(conspiracies2,W2_SocialDistance11) %>%  mutate(`%` = n / sum(n))
-
-dist_full <- multinom(W2_SocialDistance11 ~ conspiracy1_sc +
+dist_full <- lm(social_distance ~ conspiracy1_sc +
                       conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
                       W2_Gender_binary + W1_Education_binary +
                       W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
                       SDO + RWA + W2_DAI_Total + crt +
                       W1_Conspiracy_Total,
                     data = conspiracies2)
-```
 
-
-```{r, echo = FALSE, results = 'asis'}
-results <- left_join(
-  exp(coef(dist_full)) %>% as_tibble() %>% 
-    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("Agree","Neither","Disagree",
-                            "Strongly disagree"),16)),
-  p_value(dist_full) %>% as_tibble() %>% 
-    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("Agree","Neither","Disagree",
-                            "Strongly disagree"),16)),
-  by = c("variable","response")
-) %>%
-  mutate(
-    ` ` = ifelse(p_value < 0.001, "***",
-                 ifelse(p_value < 0.01, "**",
-                        ifelse(p_value < 0.05, "*",
-                               ifelse(p_value < 0.1, ".", " "))))
-  ) %>% 
-  dplyr::select(variable,response,everything())
-
-library(knitr)
-kable(results, caption = "Multinomial Regression Results for Social Distancing: 'wanted to do it'")
-```
-
-
-```{r}
-count(conspiracies2,W2_SocialDistance12) %>%  mutate(`%` = n / sum(n))
-dist12_full <- multinom(W2_SocialDistance12 ~ conspiracy1_sc +
-                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
-                      W2_Gender_binary + W1_Education_binary +
-                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
-                      SDO + RWA + W2_DAI_Total + crt +
-                      W1_Conspiracy_Total,
-                    data = conspiracies2)
-```
-
-```{r, echo = FALSE, results = 'asis'}
-results <- left_join(
-  exp(coef(dist12_full)) %>% as_tibble() %>% 
-    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("Agree","Neither","Disagree",
-                            "Strongly disagree"),16)),
-  p_value(dist12_full) %>% as_tibble() %>% 
-    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("Agree","Neither","Disagree",
-                            "Strongly disagree"),16)),
-  by = c("variable","response")
-) %>%
-  mutate(
-    ` ` = ifelse(p_value < 0.001, "***",
-                 ifelse(p_value < 0.01, "**",
-                        ifelse(p_value < 0.05, "*",
-                               ifelse(p_value < 0.1, ".", " "))))
-  ) %>% 
-  dplyr::select(variable,response,everything())
-
-kable(results, caption = "Multinomial Regression Results for Social Distancing: 'good thing to do'")
+summ(dist_full, vifs = TRUE)
+plot_coefs(dist_full)
+par(mfrow = c(2,2))
+plot(dist_full)
 ```
 
 
@@ -2033,23 +1981,69 @@ vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
 
 
 ```{r, echo = FALSE, results = 'asis'}
+sum_table <- summary(vax_full)
+
 results <- left_join(
-  exp(coef(vax_full)) %>% as_tibble() %>% 
-    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
+  coef(vax_full) %>% as_tibble() %>% 
+    gather(variable,coefficient,`(Intercept)`:W1_Conspiracy_Total) %>% 
     mutate(response = rep(c("No","Maybe"),16)),
-  p_value(vax_full) %>% as_tibble() %>% 
-    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
+  sum_table$standard.errors %>% as_tibble() %>% 
+    gather(variable, std_error,`(Intercept)`:W1_Conspiracy_Total) %>% 
     mutate(response = rep(c("No","Maybe"),16)),
   by = c("variable","response")
-) %>%
+) %>% 
+  dplyr::select(variable,response,everything()) %>% 
   mutate(
-    ` ` = ifelse(p_value < 0.001, "***",
-                 ifelse(p_value < 0.01, "**",
-                        ifelse(p_value < 0.05, "*",
-                               ifelse(p_value < 0.1, ".", " "))))
-  ) %>% 
-  dplyr::select(variable,response,everything())
+    upper_ci = coefficient + std_error * qnorm(0.975),
+    lower_ci = coefficient - std_error * qnorm(0.975)
+  )
 
-kable(results, caption = "Multinomial Regression Results for Vaccine Acceptance")
+results %>% 
+  filter(variable != "(Intercept)") %>% 
+  ggplot(aes(x = variable, y = coefficient)) +
+  geom_hline(yintercept = 0, colour = "grey", linetype = "dashed") +
+  geom_point(size = 2) +
+  geom_line(data = results %>% filter(variable != "(Intercept)") %>% 
+              gather(interval,estimate,upper_ci:lower_ci),
+            aes(x = variable, y = estimate)) + 
+  facet_wrap(~response) +
+  coord_flip() +
+  theme_bw() +
+  labs(title = "Vaccine acceptance (baseline = Yes)")
 ```
 
+## Conspiracy belief and trust in government institutions
+
+```{r}
+# governmental trust scale
+trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2
+                           #,W2_Trust_Body5
+                           ))
+
+trust_test <- scoreItems(trust_keys, conspiracies2, min = 1, max = 5)
+head(trust_test$scores)
+trust_test$alpha  # Scale alpha
+conspiracies2$govt_trust <- rescale01(trust_test$scores, na.rm = TRUE)
+conspiracies2$govt_trust <- c(conspiracies2$govt_trust)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies2$govt_trust)
+ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
+  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
+```
+
+Note: trust in science (W2_Trust_Body6) removed, as may be tapping into a latent 'distrustful' disposition invaldating the exogeneity assumption.  
+
+```{r}
+trust_full <- lm(govt_trust ~ conspiracy1_sc +
+                      conspiracy2_sc + conspiracy3_sc +
+                      W2_Gender_binary + W1_Education_binary +
+                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
+                      SDO + RWA + W2_DAI_Total + 
+                      W1_Conspiracy_Total + crt,
+                 data = conspiracies2)
+
+summ(trust_full, vifs = TRUE)
+plot_coefs(trust_full)
+par(mfrow = c(2,2))
+plot(trust_full)
+```

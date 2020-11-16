@@ -4165,10 +4165,13 @@ conspiracies2 <- conspiracies %>%
 
 conspiracies2 <- merge(
   conspiracies2,
-  conspiracies %>% dplyr::select(pid,W2_SocialDistance11,
+  conspiracies %>% dplyr::select(pid,W2_SocialDistance10,
+                                 W2_SocialDistance11,
                                  W2_SocialDistance12,
+                                 W2_SocialDistance14,
                                  W2_C19_Vax_Self,
-                                 W2_C19_Vax_Child),
+                                 W2_C19_Vax_Child, W2_Trust_Body1,
+                                 W2_Trust_Body2,W2_Trust_Body5),
   by = "pid", all.x = TRUE
 )
 ```
@@ -4188,221 +4191,111 @@ p_value <- function(model){
 ```
 
 ``` r
-conspiracies2 <- conspiracies2 %>% 
-  mutate(
-    social_distance11 = fct_collapse(as.factor(W2_SocialDistance11),
-                                     "Agree" = c("5","4"),
-                                     "Neither" = "3",
-                                     "Disagree" = c("2","1")),
-    social_distance12 = fct_collapse(as.factor(W2_SocialDistance12),
-                                     "Agree" = c("5","4"),
-                                     "Neither" = "3",
-                                     "Disagree" = c("2","1")),
-    W2_SocialDistance11 = fct_relevel(as.factor(W2_SocialDistance11),
-                                      c("5","4","3","2","1")),
-    W2_SocialDistance12 = fct_relevel(as.factor(W2_SocialDistance12),
-                                      c("5","4","3","2","1"))
-    )
+# social distance scale
+sd_keys <- list(sd = cs(W2_SocialDistance10,
+                        W2_SocialDistance11,
+                        W2_SocialDistance12,
+                        W2_SocialDistance14))
+
+sd_test <- scoreItems(sd_keys, conspiracies2, min = 1, max = 5)
+head(sd_test$scores)
 ```
 
+    ##        sd
+    ## [1,] 5.00
+    ## [2,] 3.25
+    ## [3,] 4.00
+    ## [4,] 4.75
+    ## [5,] 3.00
+    ## [6,] 3.75
+
 ``` r
-count(conspiracies2,W2_SocialDistance11) %>%  mutate(`%` = n / sum(n))
+summary(sd_test$alpha)  # Scale alpha
 ```
 
-    ##   W2_SocialDistance11   n          %
-    ## 1                   5 714 0.51036455
-    ## 2                   4 435 0.31093638
-    ## 3                   3 184 0.13152252
-    ## 4                   2  45 0.03216583
-    ## 5                   1  21 0.01501072
+    ##        sd        
+    ##  Min.   :0.8735  
+    ##  1st Qu.:0.8735  
+    ##  Median :0.8735  
+    ##  Mean   :0.8735  
+    ##  3rd Qu.:0.8735  
+    ##  Max.   :0.8735
 
 ``` r
-dist_full <- multinom(W2_SocialDistance11 ~ conspiracy1_sc +
+conspiracies2$social_distance <- rescale01(sd_test$scores, na.rm = TRUE)
+conspiracies2$social_distance <- c(conspiracies2$social_distance)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies2$social_distance)
+```
+
+    ##    vars    n mean   sd median trimmed  mad min max range  skew kurtosis se
+    ## X1    1 1399 0.82 0.19   0.88    0.85 0.19   0   1     1 -1.05     1.17  0
+
+``` r
+ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
+  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-93-1.png)<!-- -->
+
+``` r
+dist_full <- lm(social_distance ~ conspiracy1_sc +
                       conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
                       W2_Gender_binary + W1_Education_binary +
                       W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
                       SDO + RWA + W2_DAI_Total + crt +
                       W1_Conspiracy_Total,
                     data = conspiracies2)
+
+summ(dist_full, vifs = TRUE)
 ```
 
-    ## # weights:  85 (64 variable)
-    ## initial  value 2251.603639 
-    ## iter  10 value 1470.307297
-    ## iter  20 value 1429.395599
-    ## iter  30 value 1422.834813
-    ## iter  40 value 1422.455865
-    ## final  value 1422.452948 
-    ## converged
-
-| variable               | response          | odds\_ratio |  p\_value |        |
-| :--------------------- | :---------------- | ----------: | --------: | :----- |
-| (Intercept)            | Agree             |   1.2693594 | 0.5644521 |        |
-| (Intercept)            | Neither           |   2.4225705 | 0.1229356 |        |
-| (Intercept)            | Disagree          |   0.1478413 | 0.0605122 | .      |
-| (Intercept)            | Strongly disagree |   0.0220737 | 0.0066874 | \*\*   |
-| conspiracy1\_sc        | Agree             |   0.8679837 | 0.5285327 |        |
-| conspiracy1\_sc        | Neither           |   1.1576796 | 0.6516428 |        |
-| conspiracy1\_sc        | Disagree          |   0.2729181 | 0.0345715 | \*     |
-| conspiracy1\_sc        | Strongly disagree |   0.6408338 | 0.5729202 |        |
-| conspiracy2\_sc        | Agree             |   0.6718544 | 0.0846893 | .      |
-| conspiracy2\_sc        | Neither           |   0.2494167 | 0.0000144 | \*\*\* |
-| conspiracy2\_sc        | Disagree          |   0.7194809 | 0.5617657 |        |
-| conspiracy2\_sc        | Strongly disagree |   0.1773878 | 0.0221452 | \*     |
-| conspiracy3\_sc        | Agree             |   2.1286942 | 0.0415465 | \*     |
-| conspiracy3\_sc        | Neither           |   7.3364588 | 0.0000057 | \*\*\* |
-| conspiracy3\_sc        | Disagree          |   3.8941918 | 0.0697229 | .      |
-| conspiracy3\_sc        | Strongly disagree |   1.5168959 | 0.6977096 |        |
-| W2\_Trust\_Body6       | Agree             |   4.3226785 | 0.0000003 | \*\*\* |
-| W2\_Trust\_Body6       | Neither           |   5.8237632 | 0.0000050 | \*\*\* |
-| W2\_Trust\_Body6       | Disagree          |  17.1375915 | 0.0000219 | \*\*\* |
-| W2\_Trust\_Body6       | Strongly disagree |  12.6064216 | 0.0046743 | \*\*   |
-| W2\_Gender\_binary2    | Agree             |   0.6495004 | 0.0014021 | \*\*   |
-| W2\_Gender\_binary2    | Neither           |   0.5354844 | 0.0011261 | \*\*   |
-| W2\_Gender\_binary2    | Disagree          |   1.1086786 | 0.7601600 |        |
-| W2\_Gender\_binary2    | Strongly disagree |   0.9454714 | 0.9108299 |        |
-| W1\_Education\_binary1 | Agree             |   0.9491967 | 0.7049038 |        |
-| W1\_Education\_binary1 | Neither           |   0.8119841 | 0.2782698 |        |
-| W1\_Education\_binary1 | Disagree          |   0.9995677 | 0.9990046 |        |
-| W1\_Education\_binary1 | Strongly disagree |   0.3001858 | 0.0174995 | \*     |
-| W1\_Income\_2019       | Agree             |   0.9550646 | 0.8075193 |        |
-| W1\_Income\_2019       | Neither           |   1.0235662 | 0.9317188 |        |
-| W1\_Income\_2019       | Disagree          |   0.8018637 | 0.6512936 |        |
-| W1\_Income\_2019       | Strongly disagree |   0.7156006 | 0.6353303 |        |
-| age\_sc                | Agree             |   0.2796030 | 0.0002098 | \*\*\* |
-| age\_sc                | Neither           |   0.0930298 | 0.0000016 | \*\*\* |
-| age\_sc                | Disagree          |   0.0468823 | 0.0005290 | \*\*\* |
-| age\_sc                | Strongly disagree |   0.1046295 | 0.0765760 | .      |
-| W2\_INFO\_5            | Agree             |   1.0655939 | 0.7894557 |        |
-| W2\_INFO\_5            | Neither           |   0.7849742 | 0.4871877 |        |
-| W2\_INFO\_5            | Disagree          |   2.9799177 | 0.0554007 | .      |
-| W2\_INFO\_5            | Strongly disagree |   0.5732116 | 0.5475848 |        |
-| W2\_INFO\_9            | Agree             |   0.7082466 | 0.1721285 |        |
-| W2\_INFO\_9            | Neither           |   0.3334057 | 0.0030336 | \*\*   |
-| W2\_INFO\_9            | Disagree          |   0.6301423 | 0.4678443 |        |
-| W2\_INFO\_9            | Strongly disagree |   0.5566807 | 0.5381443 |        |
-| SDO                    | Agree             |   4.5375455 | 0.0002631 | \*\*\* |
-| SDO                    | Neither           |   9.3622252 | 0.0002339 | \*\*\* |
-| SDO                    | Disagree          |  14.3037879 | 0.0122124 | \*     |
-| SDO                    | Strongly disagree |  59.1529912 | 0.0036626 | \*\*   |
-| RWA                    | Agree             |   0.2126227 | 0.0003930 | \*\*\* |
-| RWA                    | Neither           |   0.1290994 | 0.0015792 | \*\*   |
-| RWA                    | Disagree          |   0.0573293 | 0.0120371 | \*     |
-| RWA                    | Strongly disagree |   0.0549487 | 0.0539663 | .      |
-| W2\_DAI\_Total         | Agree             |   2.5239151 | 0.0041973 | \*\*   |
-| W2\_DAI\_Total         | Neither           |   4.4952971 | 0.0012005 | \*\*   |
-| W2\_DAI\_Total         | Disagree          |   1.2267316 | 0.7980082 |        |
-| W2\_DAI\_Total         | Strongly disagree |   2.1531704 | 0.4742109 |        |
-| crt                    | Agree             |   1.6554205 | 0.0100173 | \*     |
-| crt                    | Neither           |   1.0977376 | 0.7316194 |        |
-| crt                    | Disagree          |   1.3419953 | 0.5621575 |        |
-| crt                    | Strongly disagree |   0.6226965 | 0.4852975 |        |
-| W1\_Conspiracy\_Total  | Agree             |   0.4788002 | 0.0333928 | \*     |
-| W1\_Conspiracy\_Total  | Neither           |   0.2306282 | 0.0026926 | \*\*   |
-| W1\_Conspiracy\_Total  | Disagree          |   0.8010804 | 0.7998339 |        |
-| W1\_Conspiracy\_Total  | Strongly disagree |  49.7806833 | 0.0027353 | \*\*   |
-
-Multinomial Regression Results for Social Distancing: ‘wanted to do it’
+    ## MODEL INFO:
+    ## Observations: 1399
+    ## Dependent Variable: social_distance
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(15,1383) = 34.03, p = 0.00
+    ## R² = 0.27
+    ## Adj. R² = 0.26 
+    ## 
+    ## Standard errors: OLS
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.70   0.03    25.54   0.00       
+    ## conspiracy1_sc                0.02   0.01     1.37   0.17   1.35
+    ## conspiracy2_sc                0.08   0.02     5.28   0.00   1.05
+    ## conspiracy3_sc               -0.12   0.02    -5.39   0.00   1.39
+    ## W2_Trust_Body6               -0.15   0.02    -8.25   0.00   1.18
+    ## W2_Gender_binary2             0.04   0.01     4.45   0.00   1.10
+    ## W1_Education_binary1          0.01   0.01     1.53   0.13   1.10
+    ## W1_Income_2019                0.02   0.01     1.66   0.10   1.12
+    ## age_sc                        0.17   0.02     7.48   0.00   1.30
+    ## W2_INFO_5                    -0.01   0.02    -0.35   0.73   1.41
+    ## W2_INFO_9                     0.07   0.02     3.98   0.00   1.23
+    ## SDO                          -0.20   0.03    -7.22   0.00   1.34
+    ## RWA                           0.14   0.03     4.96   0.00   1.31
+    ## W2_DAI_Total                 -0.06   0.02    -3.01   0.00   1.25
+    ## crt                          -0.02   0.01    -1.57   0.12   1.21
+    ## W1_Conspiracy_Total           0.05   0.02     2.13   0.03   1.11
+    ## ----------------------------------------------------------------
 
 ``` r
-count(conspiracies2,W2_SocialDistance12) %>%  mutate(`%` = n / sum(n))
+plot_coefs(dist_full)
 ```
 
-    ##   W2_SocialDistance12   n           %
-    ## 1                   5 794 0.567548249
-    ## 2                   4 419 0.299499643
-    ## 3                   3 155 0.110793424
-    ## 4                   2  22 0.015725518
-    ## 5                   1   9 0.006433167
+    ## Loading required namespace: broom.mixed
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
 
 ``` r
-dist12_full <- multinom(W2_SocialDistance12 ~ conspiracy1_sc +
-                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
-                      W2_Gender_binary + W1_Education_binary +
-                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
-                      SDO + RWA + W2_DAI_Total + crt +
-                      W1_Conspiracy_Total,
-                    data = conspiracies2)
+par(mfrow = c(2,2))
+plot(dist_full)
 ```
 
-    ## # weights:  85 (64 variable)
-    ## initial  value 2251.603639 
-    ## iter  10 value 1251.537432
-    ## iter  20 value 1206.060319
-    ## iter  30 value 1193.408062
-    ## iter  40 value 1190.597745
-    ## iter  50 value 1190.331084
-    ## final  value 1190.322929 
-    ## converged
-
-| variable               | response          | odds\_ratio |  p\_value |        |
-| :--------------------- | :---------------- | ----------: | --------: | :----- |
-| (Intercept)            | Agree             |   1.0535408 | 0.8999046 |        |
-| (Intercept)            | Neither           |   1.1452455 | 0.8343549 |        |
-| (Intercept)            | Disagree          |   0.0510618 | 0.0606686 | .      |
-| (Intercept)            | Strongly disagree |   0.0173530 | 0.0621908 | .      |
-| conspiracy1\_sc        | Agree             |   1.1461746 | 0.5450124 |        |
-| conspiracy1\_sc        | Neither           |   0.8931324 | 0.7576747 |        |
-| conspiracy1\_sc        | Disagree          |   0.3257177 | 0.2229575 |        |
-| conspiracy1\_sc        | Strongly disagree |   0.3275309 | 0.3868982 |        |
-| conspiracy2\_sc        | Agree             |   0.6127705 | 0.0345201 | \*     |
-| conspiracy2\_sc        | Neither           |   0.2406427 | 0.0000775 | \*\*\* |
-| conspiracy2\_sc        | Disagree          |   0.1467752 | 0.0252267 | \*     |
-| conspiracy2\_sc        | Strongly disagree |   0.0885881 | 0.0369663 | \*     |
-| conspiracy3\_sc        | Agree             |   1.4945229 | 0.2818547 |        |
-| conspiracy3\_sc        | Neither           |  12.1691848 | 0.0000001 | \*\*\* |
-| conspiracy3\_sc        | Disagree          |  26.1258184 | 0.0005519 | \*\*\* |
-| conspiracy3\_sc        | Strongly disagree |   0.8148151 | 0.9093331 |        |
-| W2\_Trust\_Body6       | Agree             |   5.0252674 | 0.0000000 | \*\*\* |
-| W2\_Trust\_Body6       | Neither           |   8.2642506 | 0.0000005 | \*\*\* |
-| W2\_Trust\_Body6       | Disagree          |  95.5781554 | 0.0000055 | \*\*\* |
-| W2\_Trust\_Body6       | Strongly disagree |  93.9410478 | 0.0020020 | \*\*   |
-| W2\_Gender\_binary2    | Agree             |   0.7604778 | 0.0450042 | \*     |
-| W2\_Gender\_binary2    | Neither           |   0.3616269 | 0.0000030 | \*\*\* |
-| W2\_Gender\_binary2    | Disagree          |   0.5436870 | 0.2174042 |        |
-| W2\_Gender\_binary2    | Strongly disagree |   0.8455128 | 0.8477824 |        |
-| W1\_Education\_binary1 | Agree             |   0.9235067 | 0.5658749 |        |
-| W1\_Education\_binary1 | Neither           |   0.8358494 | 0.3992884 |        |
-| W1\_Education\_binary1 | Disagree          |   2.2367711 | 0.1564754 |        |
-| W1\_Education\_binary1 | Strongly disagree |   0.3242037 | 0.1740768 |        |
-| W1\_Income\_2019       | Agree             |   1.0179751 | 0.9258001 |        |
-| W1\_Income\_2019       | Neither           |   0.9173195 | 0.7777670 |        |
-| W1\_Income\_2019       | Disagree          |   0.6495047 | 0.5704562 |        |
-| W1\_Income\_2019       | Strongly disagree |   0.0614235 | 0.0718734 | .      |
-| age\_sc                | Agree             |   0.2101497 | 0.0000070 | \*\*\* |
-| age\_sc                | Neither           |   0.0696466 | 0.0000014 | \*\*\* |
-| age\_sc                | Disagree          |   0.0134929 | 0.0029298 | \*\*   |
-| age\_sc                | Strongly disagree |   0.0007207 | 0.0050895 | \*\*   |
-| W2\_INFO\_5            | Agree             |   1.1993543 | 0.4484501 |        |
-| W2\_INFO\_5            | Neither           |   1.2314802 | 0.5891209 |        |
-| W2\_INFO\_5            | Disagree          |   4.5712162 | 0.0850685 | .      |
-| W2\_INFO\_5            | Strongly disagree |   0.5722401 | 0.7206243 |        |
-| W2\_INFO\_9            | Agree             |   0.7235577 | 0.2068969 |        |
-| W2\_INFO\_9            | Neither           |   0.1800483 | 0.0000541 | \*\*\* |
-| W2\_INFO\_9            | Disagree          |   0.3698449 | 0.3108044 |        |
-| W2\_INFO\_9            | Strongly disagree |   0.0906646 | 0.1672067 |        |
-| SDO                    | Agree             |  11.6133483 | 0.0000000 | \*\*\* |
-| SDO                    | Neither           |  40.2090057 | 0.0000001 | \*\*\* |
-| SDO                    | Disagree          | 120.0479818 | 0.0041771 | \*\*   |
-| SDO                    | Strongly disagree | 636.0214285 | 0.0052811 | \*\*   |
-| RWA                    | Agree             |   0.1167295 | 0.0000017 | \*\*\* |
-| RWA                    | Neither           |   0.0919171 | 0.0013028 | \*\*   |
-| RWA                    | Disagree          |   0.1528343 | 0.2711577 |        |
-| RWA                    | Strongly disagree |   0.0564741 | 0.2185709 |        |
-| W2\_DAI\_Total         | Agree             |   2.3953469 | 0.0071578 | \*\*   |
-| W2\_DAI\_Total         | Neither           |   4.1083100 | 0.0064262 | \*\*   |
-| W2\_DAI\_Total         | Disagree          |   0.3758357 | 0.4145978 |        |
-| W2\_DAI\_Total         | Strongly disagree |   0.4971818 | 0.6912845 |        |
-| crt                    | Agree             |   1.5072407 | 0.0359585 | \*     |
-| crt                    | Neither           |   2.1080697 | 0.0190389 | \*     |
-| crt                    | Disagree          |   0.7350924 | 0.6817695 |        |
-| crt                    | Strongly disagree |   0.5257159 | 0.5802479 |        |
-| W1\_Conspiracy\_Total  | Agree             |   0.4813288 | 0.0369808 | \*     |
-| W1\_Conspiracy\_Total  | Neither           |   0.1701580 | 0.0010857 | \*\*   |
-| W1\_Conspiracy\_Total  | Disagree          |   0.3321477 | 0.3667594 |        |
-| W1\_Conspiracy\_Total  | Strongly disagree | 317.0135136 | 0.0143124 | \*     |
-
-Multinomial Regression Results for Social Distancing: ‘good thing to do’
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -4434,39 +4327,110 @@ vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
     ## final  value 1006.095974 
     ## converged
 
-| variable               | response | odds\_ratio |  p\_value |        |
-| :--------------------- | :------- | ----------: | --------: | :----- |
-| (Intercept)            | No       |   0.1195335 | 0.0036458 | \*\*   |
-| (Intercept)            | Maybe    |   0.5330255 | 0.1389440 |        |
-| conspiracy1\_sc        | No       |   2.2132923 | 0.0410937 | \*     |
-| conspiracy1\_sc        | Maybe    |   0.9542526 | 0.8399116 |        |
-| conspiracy2\_sc        | No       |   0.2850847 | 0.0009875 | \*\*\* |
-| conspiracy2\_sc        | Maybe    |   0.5224210 | 0.0050461 | \*\*   |
-| conspiracy3\_sc        | No       |   8.1480569 | 0.0000015 | \*\*\* |
-| conspiracy3\_sc        | Maybe    |   0.9239459 | 0.8336542 |        |
-| W2\_Trust\_Body6       | No       |  14.1973166 | 0.0000000 | \*\*\* |
-| W2\_Trust\_Body6       | Maybe    |   2.7791102 | 0.0003734 | \*\*\* |
-| W2\_Gender\_binary2    | No       |   1.2462675 | 0.3207793 |        |
-| W2\_Gender\_binary2    | Maybe    |   1.3590864 | 0.0278282 | \*     |
-| W1\_Education\_binary1 | No       |   1.1425252 | 0.5562986 |        |
-| W1\_Education\_binary1 | Maybe    |   1.0988924 | 0.5075933 |        |
-| W1\_Income\_2019       | No       |   0.7286568 | 0.3327100 |        |
-| W1\_Income\_2019       | Maybe    |   0.4393181 | 0.0000279 | \*\*\* |
-| age\_sc                | No       |   0.0398408 | 0.0000001 | \*\*\* |
-| age\_sc                | Maybe    |   0.2315590 | 0.0000372 | \*\*\* |
-| W2\_INFO\_5            | No       |   1.2212044 | 0.6117151 |        |
-| W2\_INFO\_5            | Maybe    |   1.1719772 | 0.5160622 |        |
-| W2\_INFO\_9            | No       |   0.5968970 | 0.2273772 |        |
-| W2\_INFO\_9            | Maybe    |   0.8319015 | 0.4819490 |        |
-| SDO                    | No       |   2.1073303 | 0.3024157 |        |
-| SDO                    | Maybe    |   1.5230526 | 0.3273076 |        |
-| RWA                    | No       |   1.6582732 | 0.5007991 |        |
-| RWA                    | Maybe    |   1.3905525 | 0.4631349 |        |
-| W2\_DAI\_Total         | No       |   0.4061793 | 0.0973401 | .      |
-| W2\_DAI\_Total         | Maybe    |   0.8764441 | 0.6944873 |        |
-| crt                    | No       |   1.2859932 | 0.4803296 |        |
-| crt                    | Maybe    |   0.7947599 | 0.2526006 |        |
-| W1\_Conspiracy\_Total  | No       |   1.0471541 | 0.9373028 |        |
-| W1\_Conspiracy\_Total  | Maybe    |   2.0604475 | 0.0463090 | \*     |
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
 
-Multinomial Regression Results for Vaccine Acceptance
+## Conspiracy belief and trust in government institutions
+
+``` r
+# governmental trust scale
+trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2
+                           #,W2_Trust_Body5
+                           ))
+
+trust_test <- scoreItems(trust_keys, conspiracies2, min = 1, max = 5)
+head(trust_test$scores)
+```
+
+    ##       sd
+    ## [1,] 2.5
+    ## [2,] 5.0
+    ## [3,] 3.5
+    ## [4,] 5.0
+    ## [5,] 3.0
+    ## [6,] 2.0
+
+``` r
+trust_test$alpha  # Scale alpha
+```
+
+    ##              sd
+    ## alpha 0.8856421
+
+``` r
+conspiracies2$govt_trust <- rescale01(trust_test$scores, na.rm = TRUE)
+conspiracies2$govt_trust <- c(conspiracies2$govt_trust)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies2$govt_trust)
+```
+
+    ##    vars    n mean   sd median trimmed  mad min max range  skew kurtosis   se
+    ## X1    1 1399  0.6 0.26   0.62     0.6 0.19   0   1     1 -0.09    -0.93 0.01
+
+``` r
+ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
+  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-97-1.png)<!-- -->
+
+Note: trust in science (W2\_Trust\_Body6) removed, as may be tapping
+into a latent ‘distrustful’ disposition invaldating the exogeneity
+assumption.
+
+``` r
+trust_full <- lm(govt_trust ~ conspiracy1_sc +
+                      conspiracy2_sc + conspiracy3_sc +
+                      W2_Gender_binary + W1_Education_binary +
+                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
+                      SDO + RWA + W2_DAI_Total + 
+                      W1_Conspiracy_Total + crt,
+                 data = conspiracies2)
+
+summ(trust_full, vifs = TRUE)
+```
+
+    ## MODEL INFO:
+    ## Observations: 1399
+    ## Dependent Variable: govt_trust
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(14,1384) = 17.17, p = 0.00
+    ## R² = 0.15
+    ## Adj. R² = 0.14 
+    ## 
+    ## Standard errors: OLS
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.74   0.04    17.82   0.00       
+    ## conspiracy1_sc               -0.02   0.02    -0.69   0.49   1.34
+    ## conspiracy2_sc               -0.06   0.02    -2.69   0.01   1.03
+    ## conspiracy3_sc                0.01   0.03     0.29   0.77   1.33
+    ## W2_Gender_binary2            -0.00   0.01    -0.28   0.78   1.10
+    ## W1_Education_binary1          0.01   0.01     0.75   0.46   1.10
+    ## W1_Income_2019               -0.04   0.02    -2.00   0.05   1.12
+    ## age_sc                       -0.11   0.03    -3.22   0.00   1.30
+    ## W2_INFO_5                    -0.00   0.02    -0.19   0.85   1.41
+    ## W2_INFO_9                    -0.09   0.03    -3.44   0.00   1.23
+    ## SDO                          -0.13   0.04    -3.11   0.00   1.32
+    ## RWA                          -0.31   0.04    -6.98   0.00   1.31
+    ## W2_DAI_Total                  0.03   0.03     0.89   0.37   1.25
+    ## W1_Conspiracy_Total           0.34   0.03     9.82   0.00   1.10
+    ## crt                           0.01   0.02     0.36   0.72   1.21
+    ## ----------------------------------------------------------------
+
+``` r
+plot_coefs(trust_full)
+```
+
+    ## Loading required namespace: broom.mixed
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-98-1.png)<!-- -->
+
+``` r
+par(mfrow = c(2,2))
+plot(trust_full)
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-98-2.png)<!-- -->
