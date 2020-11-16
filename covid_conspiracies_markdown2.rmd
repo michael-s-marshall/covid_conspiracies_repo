@@ -2001,11 +2001,12 @@ results <- left_join(
 results %>% 
   filter(variable != "(Intercept)") %>% 
   ggplot(aes(x = variable, y = coefficient)) +
-  geom_hline(yintercept = 0, colour = "grey", linetype = "dashed") +
-  geom_point(size = 2) +
+  geom_hline(yintercept = 0, colour = "black", linetype = "dashed") +
   geom_line(data = results %>% filter(variable != "(Intercept)") %>% 
               gather(interval,estimate,upper_ci:lower_ci),
-            aes(x = variable, y = estimate)) + 
+            aes(x = variable, y = estimate), colour = "black") + 
+  geom_point(size = 2, colour = "black") +
+  geom_point(size = 1.5, colour = "white") +
   facet_wrap(~response) +
   coord_flip() +
   theme_bw() +
@@ -2016,15 +2017,16 @@ results %>%
 
 ```{r}
 # governmental trust scale
-trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2
-                           #,W2_Trust_Body5
+trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2,
+                           W2_Trust_Body5
                            ))
 
 trust_test <- scoreItems(trust_keys, conspiracies2, min = 1, max = 5)
 head(trust_test$scores)
 trust_test$alpha  # Scale alpha
-conspiracies2$govt_trust <- rescale01(trust_test$scores, na.rm = TRUE)
-conspiracies2$govt_trust <- c(conspiracies2$govt_trust)  # Ensure variable is numeric and not matrix class
+conspiracies2$govt_distrust <- rescale01(trust_test$scores, na.rm = TRUE)
+conspiracies2$govt_distrust <- c(conspiracies2$govt_distrust)  # Ensure variable is numeric and not matrix class
+conspiracies2$govt_trust <- 0 - conspiracies2$govt_distrust
 
 describe(conspiracies2$govt_trust)
 ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +

@@ -4333,38 +4333,39 @@ vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
 
 ``` r
 # governmental trust scale
-trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2
-                           #,W2_Trust_Body5
+trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2,
+                           W2_Trust_Body5
                            ))
 
 trust_test <- scoreItems(trust_keys, conspiracies2, min = 1, max = 5)
 head(trust_test$scores)
 ```
 
-    ##       sd
-    ## [1,] 2.5
-    ## [2,] 5.0
-    ## [3,] 3.5
-    ## [4,] 5.0
-    ## [5,] 3.0
-    ## [6,] 2.0
+    ##            sd
+    ## [1,] 3.000000
+    ## [2,] 4.666667
+    ## [3,] 4.000000
+    ## [4,] 5.000000
+    ## [5,] 3.000000
+    ## [6,] 2.000000
 
 ``` r
 trust_test$alpha  # Scale alpha
 ```
 
     ##              sd
-    ## alpha 0.8856421
+    ## alpha 0.8742177
 
 ``` r
-conspiracies2$govt_trust <- rescale01(trust_test$scores, na.rm = TRUE)
-conspiracies2$govt_trust <- c(conspiracies2$govt_trust)  # Ensure variable is numeric and not matrix class
+conspiracies2$govt_distrust <- rescale01(trust_test$scores, na.rm = TRUE)
+conspiracies2$govt_distrust <- c(conspiracies2$govt_distrust)  # Ensure variable is numeric and not matrix class
+conspiracies2$govt_trust <- 0 - conspiracies2$govt_distrust
 
 describe(conspiracies2$govt_trust)
 ```
 
-    ##    vars    n mean   sd median trimmed  mad min max range  skew kurtosis   se
-    ## X1    1 1399  0.6 0.26   0.62     0.6 0.19   0   1     1 -0.09    -0.93 0.01
+    ##    vars    n  mean   sd median trimmed  mad min max range skew kurtosis   se
+    ## X1    1 1399 -0.63 0.24  -0.67   -0.63 0.25  -1   0     1 0.11    -0.81 0.01
 
 ``` r
 ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
@@ -4395,29 +4396,29 @@ summ(trust_full, vifs = TRUE)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(14,1384) = 17.17, p = 0.00
-    ## R² = 0.15
-    ## Adj. R² = 0.14 
+    ## F(14,1384) = 15.40, p = 0.00
+    ## R² = 0.13
+    ## Adj. R² = 0.13 
     ## 
     ## Standard errors: OLS
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                   0.74   0.04    17.82   0.00       
-    ## conspiracy1_sc               -0.02   0.02    -0.69   0.49   1.34
-    ## conspiracy2_sc               -0.06   0.02    -2.69   0.01   1.03
-    ## conspiracy3_sc                0.01   0.03     0.29   0.77   1.33
-    ## W2_Gender_binary2            -0.00   0.01    -0.28   0.78   1.10
-    ## W1_Education_binary1          0.01   0.01     0.75   0.46   1.10
-    ## W1_Income_2019               -0.04   0.02    -2.00   0.05   1.12
-    ## age_sc                       -0.11   0.03    -3.22   0.00   1.30
-    ## W2_INFO_5                    -0.00   0.02    -0.19   0.85   1.41
-    ## W2_INFO_9                    -0.09   0.03    -3.44   0.00   1.23
-    ## SDO                          -0.13   0.04    -3.11   0.00   1.32
-    ## RWA                          -0.31   0.04    -6.98   0.00   1.31
-    ## W2_DAI_Total                  0.03   0.03     0.89   0.37   1.25
-    ## W1_Conspiracy_Total           0.34   0.03     9.82   0.00   1.10
-    ## crt                           0.01   0.02     0.36   0.72   1.21
+    ## (Intercept)                  -0.75   0.04   -19.87   0.00       
+    ## conspiracy1_sc                0.01   0.02     0.61   0.54   1.34
+    ## conspiracy2_sc                0.06   0.02     2.86   0.00   1.03
+    ## conspiracy3_sc                0.01   0.03     0.31   0.76   1.33
+    ## W2_Gender_binary2             0.01   0.01     0.42   0.67   1.10
+    ## W1_Education_binary1         -0.01   0.01    -0.80   0.42   1.10
+    ## W1_Income_2019                0.04   0.02     2.23   0.03   1.12
+    ## age_sc                        0.09   0.03     2.94   0.00   1.30
+    ## W2_INFO_5                     0.02   0.02     0.87   0.38   1.41
+    ## W2_INFO_9                     0.09   0.02     3.68   0.00   1.23
+    ## SDO                           0.09   0.04     2.33   0.02   1.32
+    ## RWA                           0.25   0.04     6.16   0.00   1.31
+    ## W2_DAI_Total                 -0.00   0.03    -0.08   0.93   1.25
+    ## W1_Conspiracy_Total          -0.31   0.03    -9.92   0.00   1.10
+    ## crt                           0.00   0.02     0.27   0.79   1.21
     ## ----------------------------------------------------------------
 
 ``` r
