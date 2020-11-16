@@ -1901,7 +1901,9 @@ conspiracies2 <- conspiracies %>%
 
 conspiracies2 <- merge(
   conspiracies2,
-  conspiracies %>% dplyr::select(pid,W2_SocialDistance11,W2_C19_Vax_Self,
+  conspiracies %>% dplyr::select(pid,W2_SocialDistance11,
+                                 W2_SocialDistance12,
+                                 W2_C19_Vax_Self,
                                  W2_C19_Vax_Child),
   by = "pid", all.x = TRUE
 )
@@ -1924,24 +1926,102 @@ p_value <- function(model){
 
 
 ```{r}
-dist_mod <- multinom(W2_SocialDistance11 ~ conspiracy1_sc +
-                       conspiracy2_sc + conspiracy3_sc, 
-                     data = conspiracies2)
-
-summary(dist_mod)
+conspiracies2 <- conspiracies2 %>% 
+  mutate(
+    social_distance11 = fct_collapse(as.factor(W2_SocialDistance11),
+                                     "Agree" = c("5","4"),
+                                     "Neither" = "3",
+                                     "Disagree" = c("2","1")),
+    social_distance12 = fct_collapse(as.factor(W2_SocialDistance12),
+                                     "Agree" = c("5","4"),
+                                     "Neither" = "3",
+                                     "Disagree" = c("2","1")),
+    W2_SocialDistance11 = fct_relevel(as.factor(W2_SocialDistance11),
+                                      c("5","4","3","2","1")),
+    W2_SocialDistance12 = fct_relevel(as.factor(W2_SocialDistance12),
+                                      c("5","4","3","2","1"))
+    )
 ```
+
 
 ```{r}
-p_value(dist_mod) # pvalues
+count(conspiracies2,W2_SocialDistance11) %>%  mutate(`%` = n / sum(n))
+
+dist_full <- multinom(W2_SocialDistance11 ~ conspiracy1_sc +
+                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
+                      W2_Gender_binary + W1_Education_binary +
+                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
+                      SDO + RWA + W2_DAI_Total + crt +
+                      W1_Conspiracy_Total,
+                    data = conspiracies2)
 ```
 
-```{r}
-exp(coef(dist_mod)) # odds ratios
+
+```{r, echo = FALSE, results = 'asis'}
+results <- left_join(
+  exp(coef(dist_full)) %>% as_tibble() %>% 
+    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("Agree","Neither","Disagree",
+                            "Strongly disagree"),16)),
+  p_value(dist_full) %>% as_tibble() %>% 
+    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("Agree","Neither","Disagree",
+                            "Strongly disagree"),16)),
+  by = c("variable","response")
+) %>%
+  mutate(
+    ` ` = ifelse(p_value < 0.001, "***",
+                 ifelse(p_value < 0.01, "**",
+                        ifelse(p_value < 0.05, "*",
+                               ifelse(p_value < 0.1, ".", " "))))
+  ) %>% 
+  dplyr::select(variable,response,everything())
+
+library(knitr)
+kable(results, caption = "Multinomial Regression Results for Social Distancing: 'wanted to do it'")
 ```
+
+
+```{r}
+count(conspiracies2,W2_SocialDistance12) %>%  mutate(`%` = n / sum(n))
+dist12_full <- multinom(W2_SocialDistance12 ~ conspiracy1_sc +
+                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
+                      W2_Gender_binary + W1_Education_binary +
+                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
+                      SDO + RWA + W2_DAI_Total + crt +
+                      W1_Conspiracy_Total,
+                    data = conspiracies2)
+```
+
+```{r, echo = FALSE, results = 'asis'}
+results <- left_join(
+  exp(coef(dist12_full)) %>% as_tibble() %>% 
+    gather(variable,odds_ratio,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("Agree","Neither","Disagree",
+                            "Strongly disagree"),16)),
+  p_value(dist12_full) %>% as_tibble() %>% 
+    gather(variable,p_value,`(Intercept)`:W1_Conspiracy_Total) %>% 
+    mutate(response = rep(c("Agree","Neither","Disagree",
+                            "Strongly disagree"),16)),
+  by = c("variable","response")
+) %>%
+  mutate(
+    ` ` = ifelse(p_value < 0.001, "***",
+                 ifelse(p_value < 0.01, "**",
+                        ifelse(p_value < 0.05, "*",
+                               ifelse(p_value < 0.1, ".", " "))))
+  ) %>% 
+  dplyr::select(variable,response,everything())
+
+kable(results, caption = "Multinomial Regression Results for Social Distancing: 'good thing to do'")
+```
+
 
 ## Multinomial model for vaccine acceptance
 
 ```{r}
+count(conspiracies2,W2_C19_Vax_Self) %>%  mutate(`%` = n / sum(n))
+
 vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
                       conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
                       W2_Gender_binary + W1_Education_binary +
@@ -1970,7 +2050,6 @@ results <- left_join(
   ) %>% 
   dplyr::select(variable,response,everything())
 
-library(knitr)
 kable(results, caption = "Multinomial Regression Results for Vaccine Acceptance")
 ```
 
