@@ -103,6 +103,23 @@ paper_vars <- rep(str_c("W2_Newspaper_prefer",seq(1,11,1)))
 
 conspiracies[paper_vars] <- conspiracies[paper_vars] %>% 
   map_df(na_to_zero)
+
+conspiracies <- conspiracies %>% 
+  mutate(
+    red_top_tabloid = ifelse(
+      W2_Newspaper_prefer3 == 1 | W2_Newspaper_prefer2 == 1 |
+        W2_Newspaper_prefer7 == 1 | W2_Newspaper_prefer8 == 1 |
+        W2_Newspaper_prefer9 == 1, 1, 0),
+    mid_level_news = ifelse(
+      W2_Newspaper_prefer1 == 1 | W2_Newspaper_prefer4 == 1, 1, 0),
+    elite_news = ifelse(
+      W2_Newspaper_prefer5 == 1 | W2_Newspaper_prefer6 == 1 |
+        W2_Newspaper_prefer10 == 1 | 
+        W2_Newspaper_prefer11 == 1, 1, 0)
+  )
+
+conspiracies %>% 
+  count(red_top_tabloid, mid_level_news, elite_news)
 ```
 
 ```{r}
@@ -246,25 +263,25 @@ conspiracies[factors] <- conspiracies[factors] %>%
 ```
 
 ```{r}
-# Making a binary for each CRT scale, baseline = correct answer
+# Making a binary for each CRT scale, baseline = incorrect answer
 conspiracies$CRT1 <- ifelse(
-  to_factor(conspiracies$W1_CRT1) != "5 pence", 1, 0
+  to_factor(conspiracies$W1_CRT1) == "5 pence", 1, 0
 )
 
 conspiracies$CRT2 <- ifelse(
-  to_factor(conspiracies$W1_CRT2) != "5 minutes", 1, 0
+  to_factor(conspiracies$W1_CRT2) == "5 minutes", 1, 0
 )
 
 conspiracies$CRT3 <- ifelse(
-  to_factor(conspiracies$W1_CRT3) != "47 days", 1, 0
+  to_factor(conspiracies$W1_CRT3) == "47 days", 1, 0
 )
 
 conspiracies$CRT4 <- ifelse(
-  to_factor(conspiracies$W1_CRT4) != "2nd", 1, 0
+  to_factor(conspiracies$W1_CRT4) == "2nd", 1, 0
 )
 
 conspiracies$CRT5 <- ifelse(
-  to_factor(conspiracies$W1_CRT5) != "8", 1, 0
+  to_factor(conspiracies$W1_CRT5) == "8", 1, 0
 )
 
 conspiracies$CRT_test <- ifelse(
@@ -276,9 +293,9 @@ conspiracies$CRT_test <- ifelse(
 # CRT
 crt_keys <- list(crt = cs(CRT1,
                           CRT2,
-                          CRT3#,
-                          #CRT4, 
-                          #CRT5
+                          CRT3,
+                          CRT4, 
+                          CRT5
                           ))
 
 crt_test <- scoreItems(crt_keys, conspiracies, min = 0, max = 1)
@@ -306,28 +323,10 @@ conspiracies %>%
 kruskal.test(crt ~ CRT_test, data = conspiracies)
 ```
 
-
 ```{r}
-# Making a binary for each CRT scale, 1 = most common wrong answer
-conspiracies$CRT1_wrong <- ifelse(
-  to_factor(conspiracies$W1_CRT1) == "10 pence", 1, 0
-)
-
-conspiracies$CRT2_wrong <- ifelse(
-  to_factor(conspiracies$W1_CRT2) == "100 minutes", 1, 0
-)
-
-conspiracies$CRT3_wrong <- ifelse(
-  to_factor(conspiracies$W1_CRT3) == "24 days", 1, 0
-)
-
-conspiracies$CRT4_wrong <- ifelse(
-  to_factor(conspiracies$W1_CRT4) == "1st", 1, 0
-)
-
-conspiracies$CRT5_wrong <- ifelse(
-  to_factor(conspiracies$W1_CRT5) == "7", 1, 0
-)
+# renaming trust in science
+conspiracies <- conspiracies %>% 
+  rename(distrust_science = W2_Trust_Body6)
 ```
 
 
@@ -336,7 +335,7 @@ conspiracies$CRT5_wrong <- ifelse(
 numerics <- c("W1_Conspiracy_Total","W2_Paranoia_Total",
               "W2_Internal_Total","W2_Chance_Total","W2_PO_Total",
               "W2_DAI_Total","W2_IOU_Total", "W2_INFO_5",
-              "W2_INFO_9","W2_Trust_Body6","W1_Income_2019")
+              "W2_INFO_9","distrust_science","W1_Income_2019")
 
 conspiracies[numerics] <- conspiracies[numerics] %>% 
   map_df(rescale01, na.rm = TRUE)
@@ -365,6 +364,7 @@ conspiracies$conspiracy5_sc <- rescale01(
   conspiracies$W2_Conspiracy_Theory5, na.rm = TRUE
 )
 ```
+
 
 ## Distribution of variables
 
@@ -470,7 +470,6 @@ plot(conspiracy_mod)
 summ(conspiracy_mod, vifs = TRUE)
 
 source("diagnostic_plots.R")
-av_ggplot(conspiracy_mod)
 ```
 
 Only principal components 1 and 3 associated with general conspiracy ideation.  
@@ -495,10 +494,10 @@ summ(rwa_lab)
 ```
 
 ```{r}
-daily_m_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Newspaper_prefer1,
+mid_news_lab <- lm(W2_Conspiracy_Theory1 ~ mid_level_news,
               data = conspiracies)
 
-summ(daily_m_lab)
+summ(mid_news_lab)
 ```
 
 ```{r}
@@ -518,9 +517,6 @@ se_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Gender_binary +
               data = conspiracies)
 
 summ(se_lab, vifs = TRUE)
-plot_coefs(se_lab)
-par(mfrow = c(2,2))
-plot(se_lab)
 ```
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media
@@ -539,18 +535,15 @@ se_pol_lab <- lm(W2_Conspiracy_Theory1 ~
                    soc_con +
                    fis_con +
                    nat +
-                   W2_Trust_Body6 + #distrust of scientists
-                   W2_Newspaper_prefer1 + #daily_mail
-                   W2_Newspaper_prefer5 + #guardian
-                   W2_Newspaper_prefer9 + #sun
+                   distrust_science + #distrust of scientists
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
                    W2_INFO_5 + #social media
                    W2_INFO_9, #family and friends
                  data = conspiracies)
 
 summ(se_pol_lab, vifs = TRUE)
-plot_coefs(se_pol_lab)
-par(mfrow = c(2,2))
-plot(se_pol_lab)
 ```
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
@@ -569,10 +562,10 @@ se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~
                         soc_con +
                         fis_con +
                         nat +
-                        W2_Trust_Body6 + #distrust of scientists
-                        W2_Newspaper_prefer1 + #daily_mail
-                        W2_Newspaper_prefer5 + #guardian
-                        W2_Newspaper_prefer9 + #sun
+                        distrust_science + #distrust of scientists
+                        red_top_tabloid + 
+                        mid_level_news + 
+                        elite_news + 
                         W2_INFO_5 + #social media
                         W2_INFO_9 + #family and friends
                      
@@ -588,9 +581,6 @@ se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~
                       data = conspiracies)
 
 summ(se_polpsych_lab, vifs = TRUE)
-plot_coefs(se_polpsych_lab)
-par(mfrow = c(2,2))
-plot(se_polpsych_lab)
 ```
 
 Looking at mulitcollinearity below for the following variables: 
@@ -672,10 +662,10 @@ se_polpsych_lab_2 <- lm(W2_Conspiracy_Theory1 ~
                         #political and media variables
                         fis_con +
                         nat +
-                        W2_Trust_Body6 + #distrust of scientists
-                        W2_Newspaper_prefer1 + #daily_mail
-                        W2_Newspaper_prefer5 + #guardian
-                        W2_Newspaper_prefer9 + #sun
+                        distrust_science + #distrust of scientists
+                        red_top_tabloid + 
+                        mid_level_news + 
+                        elite_news + 
                         W2_INFO_5 + #social media
                         W2_INFO_9 + #family and friends
                      
@@ -688,9 +678,6 @@ se_polpsych_lab_2 <- lm(W2_Conspiracy_Theory1 ~
                       data = conspiracies)
 
 summ(se_polpsych_lab_2, vifs = TRUE)
-plot_coefs(se_polpsych_lab_2)
-par(mfrow = c(2,2))
-plot(se_polpsych_lab_2)
 ```
 
 
@@ -708,10 +695,10 @@ multi_lab <- lm(W2_Conspiracy_Theory1 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   
@@ -731,9 +718,6 @@ multi_lab <- lm(W2_Conspiracy_Theory1 ~
                 data = conspiracies)
 
 summ(multi_lab, vifs = TRUE)
-plot_coefs(multi_lab)
-par(mfrow = c(2,2))
-plot(multi_lab)
 ```
 
 
@@ -752,36 +736,38 @@ int_lab <- lm(W2_Conspiracy_Theory1 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
+                  W2_INFO_5 +
+                  W2_INFO_9 +
                   
                   #political-psychology variables
-                  SDO +
+                  #SDO +
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
                   
-                  #covid-anxety
+                  #covid-anxiety
                   threat +
                   
                   #CRT
-                  crt +
+                  #crt +
+                  CRT_test +
                 
                   #interactions
-                  (W2_INFO_5*RWA) +
-                  (W2_INFO_9*RWA),
+                  (crt*RWA) +
+                  (crt*SDO),
                 data = conspiracies)
 
 summ(int_lab, vifs = TRUE)
-plot_coefs(int_lab)
-par(mfrow = c(2,2))
-plot(int_lab)
 ```
 
 
 ## DV Chinese lab conspiracy - full model incl. conspiracy ideation
+
+Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
 full_lab <- lm(W2_Conspiracy_Theory1 ~
@@ -795,10 +781,10 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   
@@ -808,6 +794,9 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  W2_Internal_Total +
                   
                   #covid-anxiety
                   threat +
@@ -823,9 +812,66 @@ full_lab <- lm(W2_Conspiracy_Theory1 ~
                 data = conspiracies)
 
 summ(full_lab, vifs = TRUE)
-plot_coefs(full_lab)
 par(mfrow = c(2,2))
 plot(full_lab)
+```
+
+# Interaction model
+
+```{r}
+full_int_lab <- lm(W2_Conspiracy_Theory1 ~
+                  
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  fis_con +
+                  nat +
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  #RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  W2_Paranoia_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  W2_Internal_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #CRT
+                  #crt +
+                  CRT_test +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy2_sc +
+                  conspiracy3_sc +
+                    
+                  # interaction
+                  (SDO*crt),
+                data = conspiracies)
+
+summ(full_int_lab, vifs = TRUE)
+par(mfrow = c(2,2))
+plot(full_int_lab)
+```
+
+
+```{r}
+AIC(full_lab)
+AIC(full_int_lab) # no support for interaction effect
 ```
 
 
@@ -900,11 +946,10 @@ summ(rwa_5g)
 ```
 
 ```{r}
-daily_m_5g <- lm(W2_Conspiracy_Theory3 ~ 
-                   W2_Newspaper_prefer1,
+mid_news_5g <- lm(W2_Conspiracy_Theory3 ~ mid_level_news,
               data = conspiracies)
 
-summ(daily_m_5g)
+summ(mid_news_5g)
 ```
 
 ```{r}
@@ -924,9 +969,6 @@ se_5g <- lm(W2_Conspiracy_Theory3 ~ W2_Gender_binary +
               data = conspiracies)
 
 summ(se_5g, vifs = TRUE)
-plot_coefs(se_5g)
-par(mfrow = c(2,2))
-plot(se_5g)
 ```
 
 ## DV 5G conspiracy - socio-economic variables + political/media
@@ -944,18 +986,15 @@ se_pol_5g <- lm(W2_Conspiracy_Theory3 ~
                    #political and media variables
                    fis_con +
                    nat +
-                   W2_Trust_Body6 + #distrust of scientists
-                   W2_Newspaper_prefer1 + #daily_mail
-                   W2_Newspaper_prefer5 + #guardian
-                   W2_Newspaper_prefer9 + #sun
+                   distrust_science + #distrust of scientists
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
                    W2_INFO_5 + #social media
                    W2_INFO_9,
                  data = conspiracies)
 
 summ(se_pol_5g, vifs = TRUE)
-plot_coefs(se_pol_5g)
-par(mfrow = c(2,2))
-plot(se_pol_5g)
 ```
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
@@ -971,10 +1010,10 @@ se_polpsych_5g <- lm(W2_Conspiracy_Theory3 ~
                         #political and media variables
                         fis_con +
                         nat +
-                        W2_Trust_Body6 + #distrust of scientists
-                        W2_Newspaper_prefer1 + #daily_mail
-                        W2_Newspaper_prefer5 + #guardian
-                        W2_Newspaper_prefer9 + #sun
+                        distrust_science + #distrust of scientists
+                        red_top_tabloid + 
+                        mid_level_news + 
+                        elite_news + 
                         W2_INFO_5 + #social media
                         W2_INFO_9 + #family and friends
                      
@@ -990,9 +1029,6 @@ se_polpsych_5g <- lm(W2_Conspiracy_Theory3 ~
                      data = conspiracies)
 
 summ(se_polpsych_5g, vifs = TRUE)
-plot_coefs(se_polpsych_5g)
-par(mfrow = c(2,2))
-plot(se_polpsych_5g)
 ```
 
 
@@ -1011,10 +1047,10 @@ multi_5g <- lm(W2_Conspiracy_Theory3 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   
@@ -1035,16 +1071,12 @@ multi_5g <- lm(W2_Conspiracy_Theory3 ~
                  data = conspiracies)
 
 summ(multi_5g, vifs = TRUE)
-plot_coefs(multi_5g)
-par(mfrow = c(2,2))
-plot(multi_5g)
 ```
 
 As with the Chinese lab belief, the locus of control variables (W2_Internal_Total and W2_Chance_Total) appear unrelated to the DV, and are omitted in subsequent models.  
 
 
 ## DV 5G conspiracy - multivariate and interaction model
-
 
 ```{r}
 int_5g <- lm(W2_Conspiracy_Theory3 ~
@@ -1057,10 +1089,11 @@ int_5g <- lm(W2_Conspiracy_Theory3 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
+                  W2_INFO_5 +
                   W2_INFO_9 +
                   
                   #political-psychology variables
@@ -1074,27 +1107,26 @@ int_5g <- lm(W2_Conspiracy_Theory3 ~
                   threat +
                
                   #crt
-                  crt +
+                  #crt +
                   CRT_test +
                   
                   #interactions
-                  (W2_INFO_5 * SDO),
+                  (crt * SDO),
              data = conspiracies)
 
 summ(int_5g, vifs = TRUE)
-plot_coefs(int_5g)
-par(mfrow = c(2,2))
-plot(int_5g)
 ```
 
 
 ```{r}
 AIC(multi_5g)
-AIC(int_5g) # support for interaction term at this point
+AIC(int_5g) # very weak support for interaction term at this point
 ```
 
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
 full_5g <- lm(W2_Conspiracy_Theory3 ~
@@ -1107,10 +1139,10 @@ full_5g <- lm(W2_Conspiracy_Theory3 ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
                 W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
@@ -1121,6 +1153,8 @@ full_5g <- lm(W2_Conspiracy_Theory3 ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
+                W2_Chance_Total +
+                W2_Internal_Total +
                 
                 #covid-anxiety
                 threat +
@@ -1136,7 +1170,6 @@ full_5g <- lm(W2_Conspiracy_Theory3 ~
               data = conspiracies)
 
 summ(full_5g, vifs = TRUE)
-plot_coefs(full_5g)
 par(mfrow = c(2,2))
 plot(full_5g)
 ```
@@ -1153,11 +1186,11 @@ full_int_5g <- lm(W2_Conspiracy_Theory3 ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
-                #W2_INFO_5 + #social media
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
+                W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
                 #political-psychology variables
@@ -1167,12 +1200,14 @@ full_int_5g <- lm(W2_Conspiracy_Theory3 ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
-                
+                W2_Internal_Total +
+                W2_Chance_Total +
+                  
                 #covid-anxety
                 threat +
                 
                 #crt
-                crt +
+                #crt +
                 CRT_test +
                     
                 #conspiracies
@@ -1181,11 +1216,10 @@ full_int_5g <- lm(W2_Conspiracy_Theory3 ~
                 conspiracy2_sc +
                 
                 # interactions
-                (W2_INFO_5*SDO),
+                (crt*SDO),
               data = conspiracies)
 
 summ(full_int_5g, vifs = TRUE)
-plot_coefs(full_int_5g)
 par(mfrow = c(2,2))
 plot(full_int_5g)
 ```
@@ -1194,7 +1228,7 @@ plot(full_int_5g)
 ```{r}
 # comparing AIC with and without interaction
 AIC(full_5g)
-AIC(full_int_5g) # support for interaction effect
+AIC(full_int_5g) # very weak support for interaction effect
 ```
 
 
@@ -1216,11 +1250,10 @@ summ(rwa_5g_ihs)
 ```
 
 ```{r}
-daily_m_5g_ihs <- lm(w2_conspiracy3_ihs ~ 
-                   W2_Newspaper_prefer1,
+mid_news_5g_ihs <- lm(w2_conspiracy3_ihs ~ mid_level_news,
               data = conspiracies)
 
-summ(daily_m_5g_ihs)
+summ(mid_news_5g_ihs)
 ```
 
 ```{r}
@@ -1240,9 +1273,6 @@ se_5g_ihs <- lm(w2_conspiracy3_ihs ~ W2_Gender_binary +
               data = conspiracies)
 
 summ(se_5g_ihs, vifs = TRUE)
-plot_coefs(se_5g_ihs)
-par(mfrow = c(2,2))
-plot(se_5g_ihs)
 ```
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media
@@ -1260,18 +1290,15 @@ se_pol_5g_ihs <- lm(w2_conspiracy3_ihs ~
                    #political and media variables
                    fis_con +
                    nat +
-                   W2_Trust_Body6 + #distrust of scientists
-                   W2_Newspaper_prefer1 + #daily_mail
-                   W2_Newspaper_prefer5 + #guardian
-                   W2_Newspaper_prefer9 + #sun
+                   distrust_science + #distrust of scientists
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
                    W2_INFO_5 + #social media
                    W2_INFO_9,
                  data = conspiracies)
 
 summ(se_pol_5g_ihs, vifs = TRUE)
-plot_coefs(se_pol_5g_ihs)
-par(mfrow = c(2,2))
-plot(se_pol_5g_ihs)
 ```
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych
@@ -1287,10 +1314,10 @@ se_polpsych_5g_ihs <- lm(w2_conspiracy3_ihs ~
                         #political and media variables
                         fis_con +
                         nat +
-                        W2_Trust_Body6 + #distrust of scientists
-                        W2_Newspaper_prefer1 + #daily_mail
-                        W2_Newspaper_prefer5 + #guardian
-                        W2_Newspaper_prefer9 + #sun
+                        distrust_science + #distrust of scientists
+                        red_top_tabloid + 
+                        mid_level_news + 
+                        elite_news + 
                         W2_INFO_5 + #social media
                         W2_INFO_9 + #family and friends
                      
@@ -1306,9 +1333,6 @@ se_polpsych_5g_ihs <- lm(w2_conspiracy3_ihs ~
                      data = conspiracies)
 
 summ(se_polpsych_5g_ihs, vifs = TRUE)
-plot_coefs(se_polpsych_5g_ihs)
-par(mfrow = c(2,2))
-plot(se_polpsych_5g_ihs)
 ```
 
 
@@ -1325,10 +1349,10 @@ multi_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   
@@ -1349,9 +1373,6 @@ multi_5g_ihs <- lm(w2_conspiracy3_ihs ~
                  data = conspiracies)
 
 summ(multi_5g_ihs, vifs = TRUE)
-plot_coefs(multi_5g_ihs)
-par(mfrow = c(2,2))
-plot(multi_5g_ihs)
 ```
 
 As with the Chinese lab belief, the locus of control variables (W2_Internal_Total and W2_Chance_Total) appear unrelated to the DV, and are omitted in subsequent models.  
@@ -1371,10 +1392,10 @@ int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_9 +
                   
                   #political-psychology variables
@@ -1396,19 +1417,18 @@ int_5g_ihs <- lm(w2_conspiracy3_ihs ~
              data = conspiracies)
 
 summ(int_5g_ihs, vifs = TRUE)
-plot_coefs(int_5g_ihs)
-par(mfrow = c(2,2))
-plot(int_5g_ihs)
 ```
 
 
 ```{r}
 AIC(multi_5g_ihs)
-AIC(int_5g_ihs) # no strong support for interaction term at this point
+AIC(int_5g_ihs) # very weak support for interaction term at this point
 ```
 
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
 full_5g_ihs <- lm(w2_conspiracy3_ihs ~
@@ -1421,10 +1441,10 @@ full_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
                 W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
@@ -1435,6 +1455,8 @@ full_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
+                W2_Internal_Total +
+                W2_Chance_Total +
                 
                 #covid-anxiety
                 threat +
@@ -1450,7 +1472,6 @@ full_5g_ihs <- lm(w2_conspiracy3_ihs ~
               data = conspiracies)
 
 summ(full_5g_ihs, vifs = TRUE)
-plot_coefs(full_5g_ihs)
 par(mfrow = c(2,2))
 plot(full_5g_ihs)
 ```
@@ -1467,11 +1488,11 @@ full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
-                #W2_INFO_5 + #social media
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
+                W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
                 #political-psychology variables
@@ -1481,12 +1502,14 @@ full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
+                W2_Chance_Total +
+                W2_Internal_Total +
                 
                 #covid-anxety
                 threat +
                 
                 #crt
-                crt +
+                #crt +
                 CRT_test +
                     
                 #conspiracies
@@ -1495,20 +1518,17 @@ full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
                 conspiracy2_sc +
                 
                 # interactions
-                (W2_INFO_5*SDO),
+                (crt*SDO),
               data = conspiracies)
 
 summ(full_int_5g_ihs, vifs = TRUE)
-plot_coefs(full_int_5g_ihs)
-par(mfrow = c(2,2))
-plot(full_int_5g_ihs)
 ```
 
 
 ```{r}
 # comparing AIC with and without interaction
 AIC(full_5g_ihs)
-AIC(full_int_5g_ihs) # no strong support for interaction effect
+AIC(full_int_5g_ihs) # no support for interaction effect
 ```
 
 
@@ -1525,10 +1545,10 @@ full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
                 W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
@@ -1539,6 +1559,8 @@ full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
+                W2_Internal_Total +
+                W2_Chance_Total +
                 
                 #covid-anxety
                 threat +
@@ -1553,7 +1575,7 @@ full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 conspiracy2_sc,
               family = "poisson", data = conspiracies)
 
-summary(full_5g_poiss)
+summ(full_5g_poiss)
 plot_coefs(full_5g_poiss)
 ```
 
@@ -1569,11 +1591,11 @@ full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 #political and media variables
                 fis_con +
                 nat +
-                W2_Trust_Body6 + #distrust of scientists
-                W2_Newspaper_prefer1 + #daily_mail
-                W2_Newspaper_prefer5 + #guardian
-                W2_Newspaper_prefer9 + #sun
-                #W2_INFO_5 + #social media
+                distrust_science + #distrust of scientists
+                red_top_tabloid + 
+                mid_level_news + 
+                elite_news + 
+                W2_INFO_5 + #social media
                 W2_INFO_9 + #family and friends
                   
                 #political-psychology variables
@@ -1583,12 +1605,14 @@ full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 W2_IOU_Total +
                 W2_Paranoia_Total +
                 W2_PO_Total +
+                W2_Internal_Total +
+                W2_Chance_Total +
                 
                 #covid-anxiety
                 threat +
                 
                 #crt
-                crt +
+                #crt +
                 CRT_test +
                     
                 #conspiracies
@@ -1597,10 +1621,10 @@ full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                 conspiracy2_sc +
                 
                 # interactions
-                (W2_INFO_5*SDO),
+                (crt*SDO),
               family = "poisson", data = conspiracies)
 
-summary(full_int_5g_poiss)
+summ(full_int_5g_poiss)
 plot_coefs(full_int_5g_poiss)
 ```
 
@@ -1608,7 +1632,7 @@ plot_coefs(full_int_5g_poiss)
 ```{r}
 # comparing AIC with and without interaction
 AIC(full_5g_poiss)
-AIC(full_int_5g_poiss) # no support for interaction effect
+AIC(full_int_5g_poiss) # support for interaction effect
 ```
 
 ## Brief foray into random forest for 5G belief
@@ -1649,10 +1673,10 @@ summ(rwa_meat)
 ```
 
 ```{r}
-daily_m_meat <- lm(W2_Conspiracy_Theory2 ~ W2_Newspaper_prefer1,
+mid_news_meat <- lm(W2_Conspiracy_Theory2 ~ mid_level_news,
               data = conspiracies)
 
-summ(daily_m_meat)
+summ(mid_news_meat)
 ```
 
 ```{r}
@@ -1672,9 +1696,6 @@ se_meat <- lm(W2_Conspiracy_Theory2 ~ W2_Gender_binary +
               data = conspiracies)
 
 summ(se_meat, vifs = TRUE)
-plot_coefs(se_meat)
-par(mfrow = c(2,2))
-plot(se_meat)
 ```
 
 ## DV Chinese meat market belief - socio-economic variables + political/media
@@ -1693,18 +1714,15 @@ se_pol_meat <- lm(W2_Conspiracy_Theory2 ~
                    soc_con +
                    fis_con +
                    nat +
-                   W2_Trust_Body6 + #distrust of scientists
-                   W2_Newspaper_prefer1 + #daily_mail
-                   W2_Newspaper_prefer5 + #guardian
-                   W2_Newspaper_prefer9 + #sun
+                   distrust_science + #distrust of scientists
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
                    W2_INFO_5 + #social media
                    W2_INFO_9, #family and friends
                  data = conspiracies)
 
 summ(se_pol_meat, vifs = TRUE)
-plot_coefs(se_pol_meat)
-par(mfrow = c(2,2))
-plot(se_pol_meat)
 ```
 
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych
@@ -1721,10 +1739,10 @@ se_polpsych_meat <- lm(W2_Conspiracy_Theory2 ~
                         #political and media variables
                         fis_con +
                         nat +
-                        W2_Trust_Body6 + #distrust of scientists
-                        W2_Newspaper_prefer1 + #daily_mail
-                        W2_Newspaper_prefer5 + #guardian
-                        W2_Newspaper_prefer9 + #sun
+                        distrust_science + #distrust of scientists
+                        red_top_tabloid + 
+                        mid_level_news + 
+                        elite_news + 
                         W2_INFO_5 + #social media
                         W2_INFO_9 + #family and friends
                      
@@ -1740,9 +1758,6 @@ se_polpsych_meat <- lm(W2_Conspiracy_Theory2 ~
                       data = conspiracies)
 
 summ(se_polpsych_meat, vifs = TRUE)
-plot_coefs(se_polpsych_meat)
-par(mfrow = c(2,2))
-plot(se_polpsych_meat)
 ```
 
 
@@ -1761,10 +1776,10 @@ multi_meat <- lm(W2_Conspiracy_Theory2 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   W2_Internal_Total +
@@ -1789,13 +1804,12 @@ multi_meat <- lm(W2_Conspiracy_Theory2 ~
                 data = conspiracies)
 
 summ(multi_meat, vifs = TRUE)
-plot_coefs(multi_meat)
-par(mfrow = c(2,2))
-plot(multi_meat)
 ```
 
 
 ## DV Chinese meat market belief - full model incl. conspiracy ideation
+
+Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
 full_meat <- lm(W2_Conspiracy_Theory2 ~
@@ -1809,10 +1823,10 @@ full_meat <- lm(W2_Conspiracy_Theory2 ~
                   #political and media variables
                   fis_con +
                   nat +
-                  W2_Trust_Body6 + #distrust of scientists
-                  W2_Newspaper_prefer1 + #daily_mail
-                  W2_Newspaper_prefer5 + #guardian
-                  W2_Newspaper_prefer9 + #sun
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
                   W2_INFO_5 + #social media
                   W2_INFO_9 + #family and friends
                   
@@ -1840,10 +1854,61 @@ full_meat <- lm(W2_Conspiracy_Theory2 ~
                 data = conspiracies)
 
 summ(full_meat, vifs = TRUE)
-plot_coefs(full_meat)
-par(mfrow = c(2,2))
-plot(full_meat)
 ```
+
+```{r}
+full_int_meat <- lm(W2_Conspiracy_Theory2 ~
+                  
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  fis_con +
+                  nat +
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news + 
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  #SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  W2_Paranoia_Total +
+                  W2_Internal_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  
+                  #covid-anxety
+                  threat +
+                 
+                  #CRT
+                  #crt +
+                  CRT_test +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy3_sc +
+                  
+                  #interaction
+                  (SDO*crt),
+                data = conspiracies)
+
+summ(full_int_meat, vifs = TRUE)
+```
+
+```{r}
+AIC(full_meat)
+AIC(full_int_meat) # very weak support for interactions
+```
+
 
 # Summary of final models
 
@@ -1862,15 +1927,49 @@ plot_coefs(full_5g)
 ```{r}
 # 5G belief - full set of variables and interaction term
 # DV is IHS transformed
-# NOTE: interaction is significant in the non-transformed DV model as well
-summ(full_int_5g_ihs)
-plot_coefs(full_int_5g_ihs)
+summ(full_int_5g_poiss)
+plot_coefs(full_int_5g_poiss)
 ```
 
 ```{r}
 # Chinese meat market model - full set of variables
 summ(full_meat)
 plot_coefs(full_meat)
+```
+
+## Combined plot of models
+
+```{r, message = FALSE, warning = FALSE}
+model_vars <- c("W1_Education_binary1","crt",
+                "red_top_tabloid","mid_level_news",
+                "W2_INFO_5","W2_INFO_9",
+                "distrust_science","SDO",
+                "RWA","W1_Conspiracy_Total","conspiracy1_sc",
+                "conspiracy2_sc","conspiracy3_sc")
+names(model_vars) <- c("Post-secondary education","CRT",
+                       "Tabloid news","Mid-level news",
+                       "Social media",
+                       "Family and friends","Distrusts science",
+                       "SDO","RWA","Conspiracy ideation","Wuhan lab",
+                       "Meat market","5G")
+
+plot_coefs(
+  full_lab,full_5g,
+  model.names = c("Wuhan lab","5G"),
+  coefs = model_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Model Coefficients: Multivariate Linear Regression"
+  ) +
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.36),
+        legend.title = element_text(size = 9),
+        legend.position = c(1,1), legend.direction = "vertical",
+        legend.justification = c(1,1),
+        legend.background = element_rect(colour = "darkgrey", fill = NA))
 ```
 
 
@@ -1950,13 +2049,46 @@ ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
 
 
 ```{r}
-dist_full <- lm(social_distance ~ conspiracy1_sc +
-                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
-                      W2_Gender_binary + W1_Education_binary +
-                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
-                      SDO + RWA + W2_DAI_Total + crt +
-                      W1_Conspiracy_Total,
-                    data = conspiracies2)
+dist_full <- lm(social_distance ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  fis_con +
+                  nat +
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  W2_Paranoia_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  W2_Internal_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #CRT
+                  crt +
+                  CRT_test +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy2_sc +
+                  conspiracy3_sc,
+                data = conspiracies2)
 
 summ(dist_full, vifs = TRUE)
 plot_coefs(dist_full)
@@ -1970,26 +2102,59 @@ plot(dist_full)
 ```{r}
 count(conspiracies2,W2_C19_Vax_Self) %>%  mutate(`%` = n / sum(n))
 
-vax_full <- multinom(W2_C19_Vax_Self ~ conspiracy1_sc +
-                      conspiracy2_sc + conspiracy3_sc + W2_Trust_Body6 +
-                      W2_Gender_binary + W1_Education_binary +
-                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
-                      SDO + RWA + W2_DAI_Total + crt +
-                      W1_Conspiracy_Total,
-                    data = conspiracies2)
+vax_full <- multinom(W2_C19_Vax_Self ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  fis_con +
+                  nat +
+                  distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  W2_Paranoia_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  W2_Internal_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #CRT
+                  crt +
+                  CRT_test +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy2_sc +
+                  conspiracy3_sc,
+                data = conspiracies2)
 ```
 
 
-```{r, echo = FALSE, results = 'asis'}
+```{r}
 sum_table <- summary(vax_full)
 
 results <- left_join(
   coef(vax_full) %>% as_tibble() %>% 
-    gather(variable,coefficient,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("No","Maybe"),16)),
+    gather(variable,coefficient,`(Intercept)`:conspiracy3_sc) %>% 
+    mutate(response = rep(c("No","Maybe"),28)),
   sum_table$standard.errors %>% as_tibble() %>% 
-    gather(variable, std_error,`(Intercept)`:W1_Conspiracy_Total) %>% 
-    mutate(response = rep(c("No","Maybe"),16)),
+    gather(variable, std_error,`(Intercept)`:conspiracy3_sc) %>% 
+    mutate(response = rep(c("No","Maybe"),28)),
   by = c("variable","response")
 ) %>% 
   dplyr::select(variable,response,everything()) %>% 
@@ -2033,15 +2198,48 @@ ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-Note: trust in science (W2_Trust_Body6) removed, as may be tapping into a latent 'distrustful' disposition invaldating the exogeneity assumption.  
+Note: trust in science (distrust_science) removed, as may be tapping into a latent 'distrustful' disposition invalidating the exogeneity assumption.  
 
 ```{r}
-trust_full <- lm(govt_trust ~ conspiracy1_sc +
-                      conspiracy2_sc + conspiracy3_sc +
-                      W2_Gender_binary + W1_Education_binary +
-                      W1_Income_2019 + age_sc + W2_INFO_5 + W2_INFO_9 +
-                      SDO + RWA + W2_DAI_Total + 
-                      W1_Conspiracy_Total + crt,
+trust_full <- lm(govt_trust ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  fis_con +
+                  nat +
+                  #distrust_science + #distrust of scientists
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  RWA +
+                  W2_DAI_Total +
+                  W2_IOU_Total +
+                  W2_Paranoia_Total +
+                  W2_Chance_Total +
+                  W2_PO_Total +
+                  W2_Internal_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #CRT
+                  crt +
+                  CRT_test +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy2_sc +
+                  conspiracy3_sc,
                  data = conspiracies2)
 
 summ(trust_full, vifs = TRUE)
