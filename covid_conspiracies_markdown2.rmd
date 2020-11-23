@@ -1532,108 +1532,179 @@ AIC(full_int_5g_ihs) # no support for interaction effect
 ```
 
 
-## DV 5G conspiracy poisson - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+## DV 5G conspiracy poisson regression model
+
+```{r}
+conspiracies %>% 
+  mutate(
+    sdo_deciles = cut_number(SDO,10)
+  ) %>%
+  group_by(sdo_deciles) %>% 
+  summarise(
+    mean_5g = mean(W2_Conspiracy_Theory3),
+    var_5g = sd(W2_Conspiracy_Theory3) ^ 2
+  )
+
+conspiracies %>% 
+  mutate(
+    social_media = cut_interval(W2_INFO_5,5)
+  ) %>%
+  group_by(social_media) %>% 
+  summarise(
+    mean_5g = mean(W2_Conspiracy_Theory3),
+    var_5g = sd(W2_Conspiracy_Theory3) ^ 2
+  )
+```
+
+
+The tables above suggest overdispersion of the data.  As a result, running quasipoisson models, as suggested by [Building Your Statistical Horizons](https://bookdown.org/roback/bookdown-bysh/ch-poissonreg.html).    
 
 ```{r}
 full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
-                #socio-economic variables
-                W2_Gender_binary +
-                W1_Education_binary +
-                W1_Income_2019 +
-                age_sc +
-                  
-                #political and media variables
-                fis_con +
-                nat +
-                distrust_science + #distrust of scientists
-                red_top_tabloid + 
-                mid_level_news + 
-                elite_news + 
-                W2_INFO_5 + #social media
-                W2_INFO_9 + #family and friends
-                  
-                #political-psychology variables
-                SDO +
-                RWA +
-                W2_DAI_Total +
-                W2_IOU_Total +
-                W2_Paranoia_Total +
-                W2_PO_Total +
-                W2_Internal_Total +
-                W2_Chance_Total +
-                
-                #covid-anxety
-                threat +
-                
-                #crt
-                crt +
-                CRT_test +
-                  
-                #conspiracies
-                W1_Conspiracy_Total +
-                conspiracy1_sc +
-                conspiracy2_sc,
-              family = "poisson", data = conspiracies)
+                           #socio-economic variables
+                           W2_Gender_binary +
+                           W1_Education_binary +
+                           W1_Income_2019 +
+                           age_sc +
+                           
+                           #political and media variables
+                           fis_con +
+                           nat +
+                           distrust_science + #distrust of scientists
+                           red_top_tabloid + 
+                           mid_level_news + 
+                           elite_news + 
+                           W2_INFO_5 + #social media
+                           W2_INFO_9 + #family and friends
+                           
+                           #political-psychology variables
+                           SDO +
+                           RWA +
+                           W2_DAI_Total +
+                           W2_IOU_Total +
+                           W2_Paranoia_Total +
+                           W2_PO_Total +
+                           W2_Internal_Total +
+                           W2_Chance_Total +
+                           
+                           #covid-anxiety
+                           threat +
+                           
+                           #crt
+                           crt +
+                           CRT_test +
+                           
+                           #conspiracies
+                           W1_Conspiracy_Total +
+                           conspiracy1_sc +
+                           conspiracy2_sc,
+                         family = "quasipoisson", data = conspiracies)
 
-summ(full_5g_poiss)
-plot_coefs(full_5g_poiss)
+summary(full_5g_poiss)
 ```
 
+```{r}
+# plotting coefficients for poisson model
+cons <- as_tibble(
+  exp(confint(full_5g_poiss))
+)
+
+names(cons) <- c("lower","upper")
+
+cons$estimate <- exp(coef(full_5g_poiss))
+cons$variable <- names(coef(full_5g_poiss))
+
+cons %>% 
+  filter(variable != "(Intercept)") %>%
+  gather(
+    level,ci,lower:upper
+  ) %>% 
+  ggplot(aes(x = fct_reorder(variable,estimate), y = estimate)) +
+  geom_hline(yintercept = 1, linetype = "dashed", size = 1, 
+             colour = "darkgrey") +
+  geom_point() +
+  geom_line(aes(x = fct_reorder(variable,estimate), y = ci)) +
+  coord_flip() +
+  theme_classic()
+```
+
+## DV 5G belief - poisson regression, interaction term
 
 ```{r}
+## interaction term added
 full_int_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
-                #socio-economic variables
-                W2_Gender_binary +
-                W1_Education_binary +
-                W1_Income_2019 +
-                age_sc +
-                  
-                #political and media variables
-                fis_con +
-                nat +
-                distrust_science + #distrust of scientists
-                red_top_tabloid + 
-                mid_level_news + 
-                elite_news + 
-                W2_INFO_5 + #social media
-                W2_INFO_9 + #family and friends
-                  
-                #political-psychology variables
-                #SDO +
-                RWA +
-                W2_DAI_Total +
-                W2_IOU_Total +
-                W2_Paranoia_Total +
-                W2_PO_Total +
-                W2_Internal_Total +
-                W2_Chance_Total +
-                
-                #covid-anxiety
-                threat +
-                
-                #crt
-                #crt +
-                CRT_test +
-                    
-                #conspiracies
-                W1_Conspiracy_Total +
-                conspiracy1_sc +
-                conspiracy2_sc +
-                
-                # interactions
-                (crt*SDO),
-              family = "poisson", data = conspiracies)
+                           #socio-economic variables
+                           W2_Gender_binary +
+                           W1_Education_binary +
+                           W1_Income_2019 +
+                           age_sc +
+                           
+                           #political and media variables
+                           fis_con +
+                           nat +
+                           distrust_science + #distrust of scientists
+                           red_top_tabloid + 
+                           mid_level_news + 
+                           elite_news + 
+                           W2_INFO_5 + #social media
+                           W2_INFO_9 + #family and friends
+                           
+                           #political-psychology variables
+                           #SDO +
+                           RWA +
+                           W2_DAI_Total +
+                           W2_IOU_Total +
+                           W2_Paranoia_Total +
+                           W2_PO_Total +
+                           W2_Internal_Total +
+                           W2_Chance_Total +
+                           
+                           #covid-anxiety
+                           threat +
+                           
+                           #crt
+                           #crt +
+                           CRT_test +
+                           
+                           #conspiracies
+                           W1_Conspiracy_Total +
+                           conspiracy1_sc +
+                           conspiracy2_sc +
+                           
+                           # interactions
+                           (crt*SDO),
+                         family = "quasipoisson", data = conspiracies)
 
-summ(full_int_5g_poiss)
-plot_coefs(full_int_5g_poiss)
+summary(full_int_5g_poiss)
 ```
 
 
 ```{r}
-# comparing AIC with and without interaction
-AIC(full_5g_poiss)
-AIC(full_int_5g_poiss) # support for interaction effect
+# plotting poiss coefficients (not incl. interaction due to scale size)
+cons <- as_tibble(
+  exp(confint(full_int_5g_poiss))
+)
+
+names(cons) <- c("lower","upper")
+
+cons$estimate <- exp(coef(full_int_5g_poiss))
+cons$variable <- names(coef(full_int_5g_poiss))
+
+cons %>% 
+  filter(variable != "(Intercept)" & variable != "crt:SDO") %>%
+  gather(
+    level,ci,lower:upper
+  ) %>% 
+  ggplot(aes(x = fct_reorder(variable,estimate), y = estimate)) +
+  geom_hline(yintercept = 1, linetype = "dashed", size = 1, 
+             colour = "darkgrey") +
+  geom_point() +
+  geom_line(aes(x = fct_reorder(variable,estimate), y = ci)) +
+  coord_flip() +
+  theme_classic()
 ```
+
+
 
 ## Brief foray into random forest for 5G belief
 
