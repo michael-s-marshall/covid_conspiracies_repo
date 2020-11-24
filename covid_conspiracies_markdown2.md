@@ -3329,6 +3329,23 @@ cons %>%
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
 
+``` r
+# drop in deviance test
+phi <- sum(resid(full_int_5g_poiss, type='pearson')^2) / full_int_5g_poiss$df.residual
+drop.in.dev <- full_5g_poiss$deviance - full_int_5g_poiss$deviance
+diff.in.df <- full_5g_poiss$df.residual - full_int_5g_poiss$df.residual
+Fstat <- drop.in.dev / summary(full_int_5g_poiss)$dispersion
+Fstat
+```
+
+    ## [1] 6.247821
+
+``` r
+1-pf(Fstat, diff.in.df, full_int_5g_poiss$df.residual)
+```
+
+    ## [1] 0.01255076
+
 ## Brief foray into random forest for 5G belief
 
 ``` r
@@ -3347,7 +3364,7 @@ rf_mod_5g <- randomForest(y ~ .,
 varImpPlot(rf_mod_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
 
 # Modelling for belief in Chinese meat market origin
 
@@ -3952,7 +3969,7 @@ plot_coefs(full_lab)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-93-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables, raw data is DV
@@ -4008,7 +4025,7 @@ plot_coefs(full_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-93-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables and interaction term
@@ -4074,7 +4091,7 @@ plot_coefs(full_int_5g_poiss)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
@@ -4130,7 +4147,7 @@ plot_coefs(full_meat)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
 
 ## Combined plot of models
 
@@ -4167,7 +4184,7 @@ plot_coefs(
         legend.background = element_rect(colour = "darkgrey", fill = NA))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-97-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -4267,7 +4284,7 @@ ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-100-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-101-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -4364,14 +4381,14 @@ plot_coefs(dist_full)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-101-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-102-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-101-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-102-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -4470,7 +4487,7 @@ results %>%
   labs(title = "Vaccine acceptance (baseline = Yes)")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-103-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-104-1.png)<!-- -->
 
 ## Conspiracy belief and trust in government institutions
 
@@ -4515,7 +4532,7 @@ ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-104-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-105-1.png)<!-- -->
 
 Note: trust in science (distrust\_science) removed, as may be tapping
 into a latent ‘distrustful’ disposition invalidating the exogeneity
@@ -4615,11 +4632,11 @@ plot_coefs(trust_full)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-105-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-106-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(trust_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-105-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-106-2.png)<!-- -->

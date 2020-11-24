@@ -1705,6 +1705,18 @@ cons %>%
 ```
 
 
+```{r}
+# drop in deviance test
+phi <- sum(resid(full_int_5g_poiss, type='pearson')^2) / full_int_5g_poiss$df.residual
+drop.in.dev <- full_5g_poiss$deviance - full_int_5g_poiss$deviance
+diff.in.df <- full_5g_poiss$df.residual - full_int_5g_poiss$df.residual
+Fstat <- drop.in.dev / summary(full_int_5g_poiss)$dispersion
+Fstat
+
+1-pf(Fstat, diff.in.df, full_int_5g_poiss$df.residual)
+```
+
+
 
 ## Brief foray into random forest for 5G belief
 
