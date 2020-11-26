@@ -1003,6 +1003,18 @@ summ(se_pol_lab, vifs = TRUE)
     ## W2_INFO_9                    13.39   3.09     4.33   0.00   1.21
     ## ----------------------------------------------------------------
 
+``` r
+AIC(se_lab)
+```
+
+    ## [1] 13768.48
+
+``` r
+AIC(se_pol_lab)
+```
+
+    ## [1] 13478.77
+
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
 
 ``` r
@@ -1293,6 +1305,18 @@ summ(se_polpsych_lab_2, vifs = TRUE)
     ## W2_Paranoia_Total             14.52   4.10     3.54   0.00   1.64
     ## -----------------------------------------------------------------
 
+``` r
+AIC(se_pol_lab)
+```
+
+    ## [1] 13478.77
+
+``` r
+AIC(se_polpsych_lab_2)
+```
+
+    ## [1] 13422.8
+
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ``` r
@@ -1368,6 +1392,18 @@ summ(multi_lab, vifs = TRUE)
     ## crt                           -9.96   2.67    -3.73   0.00   1.30
     ## CRT_test                       3.12   1.67     1.87   0.06   1.10
     ## -----------------------------------------------------------------
+
+``` r
+AIC(se_polpsych_lab_2)
+```
+
+    ## [1] 13422.8
+
+``` r
+AIC(multi_lab)
+```
+
+    ## [1] 13399.58
 
 ## DV Chinese lab belief - interactions
 
@@ -1449,6 +1485,18 @@ summ(int_lab, vifs = TRUE)
     ## crt:RWA                       -3.09   15.36    -0.20   0.84   12.47
     ## crt:SDO                       -5.28   14.75    -0.36   0.72    7.96
     ## -------------------------------------------------------------------
+
+``` r
+AIC(multi_lab)
+```
+
+    ## [1] 13399.58
+
+``` r
+AIC(int_lab) # no support for interactions
+```
+
+    ## [1] 13403.32
 
 ## DV Chinese lab conspiracy - full model incl. conspiracy ideation
 
@@ -1547,7 +1595,19 @@ par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+
+``` r
+AIC(multi_lab)
+```
+
+    ## [1] 13399.58
+
+``` r
+AIC(full_lab)
+```
+
+    ## [1] 13319.14
 
 # Interaction model
 
@@ -1647,7 +1707,7 @@ par(mfrow = c(2,2))
 plot(full_int_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
 
 ``` r
 AIC(full_lab)
@@ -1709,7 +1769,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 ``` r
 conspiracies <- conspiracies %>% 
@@ -1722,7 +1782,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-48-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
 
 ## DV 5G conspiracy - singular IV models
 
@@ -1915,6 +1975,18 @@ summ(se_pol_5g, vifs = TRUE)
     ## W2_INFO_9                      7.64   2.04     3.75   0.00   1.21
     ## -----------------------------------------------------------------
 
+``` r
+AIC(se_5g)
+```
+
+    ## [1] 12573.69
+
+``` r
+AIC(se_pol_5g)
+```
+
+    ## [1] 12309.17
+
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
 
 ``` r
@@ -1985,6 +2057,18 @@ summ(se_polpsych_5g, vifs = TRUE)
     ## W2_Chance_Total               -2.94   3.40    -0.87   0.39   1.93
     ## W2_PO_Total                    8.63   3.17     2.72   0.01   2.23
     ## -----------------------------------------------------------------
+
+``` r
+AIC(se_pol_5g)
+```
+
+    ## [1] 12309.17
+
+``` r
+AIC(se_polpsych_5g)
+```
+
+    ## [1] 12175.88
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
 
@@ -2064,6 +2148,18 @@ summ(multi_5g, vifs = TRUE)
     ## crt                           -8.73   1.71    -5.11   0.00   1.30
     ## CRT_test                      -0.29   1.07    -0.27   0.78   1.10
     ## -----------------------------------------------------------------
+
+``` r
+AIC(se_polpsych_5g)
+```
+
+    ## [1] 12175.88
+
+``` r
+AIC(multi_5g)
+```
+
+    ## [1] 12151.07
 
 As with the Chinese lab belief, the locus of control variables
 (W2\_Internal\_Total and W2\_Chance\_Total) appear unrelated to the DV,
@@ -2257,7 +2353,19 @@ par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
+
+``` r
+AIC(multi_5g)
+```
+
+    ## [1] 12151.07
+
+``` r
+AIC(full_5g)
+```
+
+    ## [1] 12128.51
 
 ``` r
 full_int_5g <- lm(W2_Conspiracy_Theory3 ~
@@ -2355,7 +2463,7 @@ par(mfrow = c(2,2))
 plot(full_int_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-60-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 ``` r
 # comparing AIC with and without interaction
@@ -2561,6 +2669,18 @@ summ(se_pol_5g_ihs, vifs = TRUE)
     ## W2_INFO_9                     0.13   0.04     3.15   0.00   1.21
     ## ----------------------------------------------------------------
 
+``` r
+AIC(se_5g_ihs)
+```
+
+    ## [1] 1646.507
+
+``` r
+AIC(se_pol_5g_ihs)
+```
+
+    ## [1] 1371.774
+
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych
 
 ``` r
@@ -2631,6 +2751,18 @@ summ(se_polpsych_5g_ihs, vifs = TRUE)
     ## W2_Chance_Total              -0.09   0.07    -1.39   0.16   1.93
     ## W2_PO_Total                   0.17   0.06     2.74   0.01   2.23
     ## ----------------------------------------------------------------
+
+``` r
+AIC(se_pol_5g_ihs)
+```
+
+    ## [1] 1371.774
+
+``` r
+AIC(se_polpsych_5g_ihs)
+```
+
+    ## [1] 1236.01
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
 
@@ -2708,6 +2840,18 @@ summ(multi_5g_ihs, vifs = TRUE)
     ## crt                          -0.24   0.03    -7.04   0.00   1.30
     ## CRT_test                      0.03   0.02     1.53   0.13   1.10
     ## ----------------------------------------------------------------
+
+``` r
+AIC(se_polpsych_5g_ihs)
+```
+
+    ## [1] 1236.01
+
+``` r
+AIC(multi_5g_ihs)
+```
+
+    ## [1] 1182.477
 
 As with the Chinese lab belief, the locus of control variables
 (W2\_Internal\_Total and W2\_Chance\_Total) appear unrelated to the DV,
@@ -2900,7 +3044,19 @@ par(mfrow = c(2,2))
 plot(full_5g_ihs)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
+
+``` r
+AIC(multi_5g_ihs)
+```
+
+    ## [1] 1182.477
+
+``` r
+AIC(full_5g_ihs)
+```
+
+    ## [1] 1142.894
 
 ``` r
 full_int_5g_ihs <- lm(w2_conspiracy3_ihs ~
@@ -3190,7 +3346,7 @@ cons %>%
   theme_classic()
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-77-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
 
 ## DV 5G belief - poisson regression, interaction term
 
@@ -3327,26 +3483,26 @@ cons %>%
   theme_classic()
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
 
 ``` r
 # drop in deviance test
 phi <- sum(resid(full_int_5g_poiss, type='pearson')^2) / full_int_5g_poiss$df.residual
-drop.in.dev <- full_5g_poiss$deviance - full_int_5g_poiss$deviance
-diff.in.df <- full_5g_poiss$df.residual - full_int_5g_poiss$df.residual
-Fstat <- drop.in.dev / summary(full_int_5g_poiss)$dispersion
-Fstat
+drop_in_dev <- full_5g_poiss$deviance - full_int_5g_poiss$deviance
+diff_in_df <- full_5g_poiss$df.residual - full_int_5g_poiss$df.residual
+f_stat <- drop_in_dev / summary(full_int_5g_poiss)$dispersion
+f_stat
 ```
 
     ## [1] 6.247821
 
 ``` r
-1-pf(Fstat, diff.in.df, full_int_5g_poiss$df.residual)
+1-pf(f_stat, diff_in_df, full_int_5g_poiss$df.residual)
 ```
 
     ## [1] 0.01255076
 
-## Brief foray into random forest for 5G belief
+## Random forest for 5G belief
 
 ``` r
 pacman::p_load(randomForest)
@@ -3364,7 +3520,7 @@ rf_mod_5g <- randomForest(y ~ .,
 varImpPlot(rf_mod_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
 
 # Modelling for belief in Chinese meat market origin
 
@@ -3561,6 +3717,18 @@ summ(se_pol_meat, vifs = TRUE)
     ## W2_INFO_9                      0.02   2.93     0.01   1.00   1.21
     ## -----------------------------------------------------------------
 
+``` r
+AIC(se_meat)
+```
+
+    ## [1] 13392.6
+
+``` r
+AIC(se_pol_meat)
+```
+
+    ## [1] 13327.15
+
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych
 
 ``` r
@@ -3632,6 +3800,18 @@ summ(se_polpsych_meat, vifs = TRUE)
     ## W2_Chance_Total              15.10   5.06     2.98   0.00   1.93
     ## W2_PO_Total                  -7.85   4.72    -1.66   0.10   2.23
     ## ----------------------------------------------------------------
+
+``` r
+AIC(se_pol_meat)
+```
+
+    ## [1] 13327.15
+
+``` r
+AIC(se_polpsych_meat)
+```
+
+    ## [1] 13290.1
 
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
@@ -3716,6 +3896,18 @@ summ(multi_meat, vifs = TRUE)
     ## crt                           2.43   2.55     0.95   0.34   1.30
     ## CRT_test                     -1.18   1.60    -0.73   0.46   1.10
     ## ----------------------------------------------------------------
+
+``` r
+AIC(se_polpsych_meat)
+```
+
+    ## [1] 13290.1
+
+``` r
+AIC(multi_meat)
+```
+
+    ## [1] 13277.23
 
 ## DV Chinese meat market belief - full model incl. conspiracy ideation
 
@@ -3902,6 +4094,12 @@ summ(full_int_meat, vifs = TRUE)
     ## ------------------------------------------------------------------
 
 ``` r
+AIC(multi_meat)
+```
+
+    ## [1] 13277.23
+
+``` r
 AIC(full_meat)
 ```
 
@@ -3969,7 +4167,7 @@ plot_coefs(full_lab)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-93-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-109-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables, raw data is DV
@@ -4025,11 +4223,10 @@ plot_coefs(full_5g)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-110-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables and interaction term
-# DV is IHS transformed
 summ(full_int_5g_poiss)
 ```
 
@@ -4091,7 +4288,7 @@ plot_coefs(full_int_5g_poiss)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-111-1.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
@@ -4147,7 +4344,7 @@ plot_coefs(full_meat)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-112-1.png)<!-- -->
 
 ## Combined plot of models
 
@@ -4184,7 +4381,7 @@ plot_coefs(
         legend.background = element_rect(colour = "darkgrey", fill = NA))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-97-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-113-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -4284,7 +4481,7 @@ ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-101-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-117-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -4381,14 +4578,14 @@ plot_coefs(dist_full)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-102-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-118-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-102-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-118-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -4487,7 +4684,7 @@ results %>%
   labs(title = "Vaccine acceptance (baseline = Yes)")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-104-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-120-1.png)<!-- -->
 
 ## Conspiracy belief and trust in government institutions
 
@@ -4532,7 +4729,7 @@ ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-105-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-121-1.png)<!-- -->
 
 Note: trust in science (distrust\_science) removed, as may be tapping
 into a latent ‘distrustful’ disposition invalidating the exogeneity
@@ -4632,11 +4829,11 @@ plot_coefs(trust_full)
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-106-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-122-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(trust_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-106-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-122-2.png)<!-- -->
