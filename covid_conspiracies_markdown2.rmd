@@ -2091,14 +2091,64 @@ AIC(full_int_meat) # very weak support for interactions
 
 ```{r}
 # Chinese lab belief - full set of variables
-summ(full_lab)
-plot_coefs(full_lab) 
+to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
+             "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
+             "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
+             "distrust_science","fis_con","W2_IOU_Total","W2_Chance_Total",
+             "W2_Internal_Total","W2_PO_Total","nat","W2_Paranoia_Total",
+             "RWA","SDO","crt","CRT_test","W1_Conspiracy_Total")
+names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
+              "Family and friends","Mid-level news","Social media",
+              "Tabloid news","COVID-19 anxiety","Death anxiety",
+              "Distrust scientists","Fiscal conservatism",
+              "Intolerance of uncertainty","LOC: chance","LOC: internal",
+              "LOC: powerful others","Nationalism","Paranoia","RWA",
+              "SDO","CRT","CRT pre-exposure","Conspiracy ideation")
+
+lab_vars <- c(to_plot, "conspiracy3_sc","conspiracy2_sc")
+names(lab_vars) <- c(names(to_plot), "5G belief", "Meat market belief")
+
+plot_coefs(
+  full_lab,
+  coefs = lab_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Figure 1 - Model 1 coefficients: belief in Wuhan laboratory origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.36)
+  )
+
+summary(full_lab)$r.squared
+summary(full_lab)$adj.r.squared
 ```
 
 ```{r}
 # 5G belief - full set of variables, raw data is DV
-summ(full_5g)
-plot_coefs(full_5g)
+fiveg_vars <- c(to_plot, "conspiracy2_sc","conspiracy1_sc")
+names(fiveg_vars) <- c(names(to_plot),"Meat market belief",
+                     "Wuhan lab belief")
+
+plot_coefs(
+  full_5g,
+  coefs = fiveg_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Figure 3 - Model 3 coefficients: belief in 5G origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.44)
+  )
+
+summary(full_5g)$r.squared
+summary(full_5g)$adj.r.squared
+
 ```
 
 ```{r}
@@ -2109,8 +2159,25 @@ plot_coefs(full_int_5g_poiss)
 
 ```{r}
 # Chinese meat market model - full set of variables
-summ(full_meat)
-plot_coefs(full_meat)
+meat_vars <- c(to_plot, "conspiracy3_sc","conspiracy1_sc")
+names(meat_vars) <- c(names(to_plot),"5G belief",
+                     "Wuhan lab belief")
+
+plot_coefs(
+  full_meat,
+  coefs = meat_vars) +
+  labs(
+    caption = "Figure 2 - Model 2 coefficients: belief in meat market origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.36)
+  )
+
+summary(full_meat)$r.squared
+summary(full_meat)$adj.r.squared
 ```
 
 ## Combined plot of models
@@ -2423,3 +2490,51 @@ plot_coefs(trust_full)
 par(mfrow = c(2,2))
 plot(trust_full)
 ```
+
+## Table summarising variables
+
+```{r}
+all_vars <- model.matrix(dist_full)[,-1] %>% as_tibble()
+var_summaries <- tibble(
+  variable = names(all_vars),
+  mean = all_vars %>% map_dbl(mean, na.rm = TRUE),
+  sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
+) %>% 
+  filter(!variable %in% c("conspiracy1_sc","conspiracy2_sc",
+                          "conspiracy3_sc"))
+write.csv(
+  rbind(
+    var_summaries,
+    tibble(
+      variable = c("Wuhan lab belief","Chinese meat market belief",
+                 "5G belief"),
+      mean = c(
+        mean(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        mean(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        mean(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE)
+        ),
+      sd = c(
+        sd(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        sd(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        sd(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE)
+        )
+      )
+    ), 
+  "variable_summaries.csv"
+)
+```
+
+
+```{r}
+conspiracies2 %>% 
+  count(
+    to_factor(W2_C19_Vax_Self)
+  )
+```
+

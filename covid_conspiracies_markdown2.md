@@ -4115,54 +4115,36 @@ AIC(full_int_meat) # very weak support for interactions
 
 ``` r
 # Chinese lab belief - full set of variables
-summ(full_lab)
-```
+to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
+             "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
+             "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
+             "distrust_science","fis_con","W2_IOU_Total","W2_Chance_Total",
+             "W2_Internal_Total","W2_PO_Total","nat","W2_Paranoia_Total",
+             "RWA","SDO","crt","CRT_test","W1_Conspiracy_Total")
+names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
+              "Family and friends","Mid-level news","Social media",
+              "Tabloid news","COVID-19 anxiety","Death anxiety",
+              "Distrust scientists","Fiscal conservatism",
+              "Intolerance of uncertainty","LOC: chance","LOC: internal",
+              "LOC: powerful others","Nationalism","Paranoia","RWA",
+              "SDO","CRT","CRT pre-exposure","Conspiracy ideation")
 
-    ## MODEL INFO:
-    ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
-    ## Type: OLS linear regression 
-    ## 
-    ## MODEL FIT:
-    ## F(26,1372) = 22.94, p = 0.00
-    ## R² = 0.30
-    ## Adj. R² = 0.29 
-    ## 
-    ## Standard errors: OLS
-    ## ----------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p
-    ## -------------------------- -------- ------ -------- ------
-    ## (Intercept)                  -11.10   6.32    -1.76   0.08
-    ## W2_Gender_binary2              1.21   1.59     0.76   0.45
-    ## W1_Education_binary1          -3.82   1.63    -2.34   0.02
-    ## W1_Income_2019                -3.20   2.32    -1.38   0.17
-    ## age_sc                         1.55   4.33     0.36   0.72
-    ## fis_con                        2.16   4.12     0.53   0.60
-    ## nat                           10.63   3.51     3.03   0.00
-    ## distrust_science              10.37   3.34     3.10   0.00
-    ## red_top_tabloid                4.21   1.79     2.35   0.02
-    ## mid_level_news                10.12   1.70     5.95   0.00
-    ## elite_news                    -1.29   1.65    -0.78   0.43
-    ## W2_INFO_5                      3.96   2.81     1.41   0.16
-    ## W2_INFO_9                      9.35   2.99     3.13   0.00
-    ## SDO                           13.32   5.14     2.59   0.01
-    ## RWA                           14.94   5.34     2.80   0.01
-    ## W2_DAI_Total                  11.23   4.37     2.57   0.01
-    ## W2_IOU_Total                 -10.26   4.88    -2.10   0.04
-    ## W2_Paranoia_Total              8.71   4.15     2.10   0.04
-    ## W2_Chance_Total                0.59   5.12     0.12   0.91
-    ## W2_PO_Total                    0.04   4.82     0.01   0.99
-    ## W2_Internal_Total              6.99   4.93     1.42   0.16
-    ## threat                         9.60   3.23     2.97   0.00
-    ## crt                           -6.95   2.62    -2.65   0.01
-    ## CRT_test                       2.31   1.63     1.42   0.16
-    ## W1_Conspiracy_Total           25.02   4.04     6.19   0.00
-    ## conspiracy2_sc               -12.38   2.73    -4.53   0.00
-    ## conspiracy3_sc                21.52   4.09     5.26   0.00
-    ## ----------------------------------------------------------
+lab_vars <- c(to_plot, "conspiracy3_sc","conspiracy2_sc")
+names(lab_vars) <- c(names(to_plot), "5G belief", "Meat market belief")
 
-``` r
-plot_coefs(full_lab) 
+plot_coefs(
+  full_lab,
+  coefs = lab_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Figure 1 - Model 1 coefficients: belief in Wuhan laboratory origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.36)
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4170,60 +4152,53 @@ plot_coefs(full_lab)
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-109-1.png)<!-- -->
 
 ``` r
-# 5G belief - full set of variables, raw data is DV
-summ(full_5g)
+summary(full_lab)$r.squared
 ```
 
-    ## MODEL INFO:
-    ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
-    ## Type: OLS linear regression 
-    ## 
-    ## MODEL FIT:
-    ## F(26,1372) = 23.99, p = 0.00
-    ## R² = 0.31
-    ## Adj. R² = 0.30 
-    ## 
-    ## Standard errors: OLS
-    ## ----------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p
-    ## -------------------------- -------- ------ -------- ------
-    ## (Intercept)                   -4.81   4.13    -1.17   0.24
-    ## W2_Gender_binary2             -0.38   1.04    -0.37   0.71
-    ## W1_Education_binary1           0.13   1.07     0.12   0.91
-    ## W1_Income_2019                -1.28   1.51    -0.84   0.40
-    ## age_sc                        -2.40   2.83    -0.85   0.40
-    ## fis_con                        1.94   2.69     0.72   0.47
-    ## nat                            1.95   2.30     0.85   0.40
-    ## distrust_science              13.65   2.16     6.32   0.00
-    ## red_top_tabloid                4.76   1.17     4.08   0.00
-    ## mid_level_news                -0.60   1.12    -0.54   0.59
-    ## elite_news                     1.04   1.08     0.96   0.33
-    ## W2_INFO_5                      5.35   1.83     2.92   0.00
-    ## W2_INFO_9                      6.25   1.95     3.20   0.00
-    ## SDO                           17.65   3.33     5.29   0.00
-    ## RWA                          -12.46   3.48    -3.58   0.00
-    ## W2_DAI_Total                  16.00   2.83     5.66   0.00
-    ## W2_IOU_Total                 -10.93   3.18    -3.44   0.00
-    ## W2_Paranoia_Total             10.22   2.71     3.78   0.00
-    ## W2_PO_Total                    7.97   3.14     2.54   0.01
-    ## W2_Chance_Total               -3.29   3.35    -0.98   0.33
-    ## W2_Internal_Total             -0.00   3.22    -0.00   1.00
-    ## threat                        -3.41   2.12    -1.61   0.11
-    ## crt                           -7.77   1.70    -4.56   0.00
-    ## CRT_test                      -0.65   1.06    -0.61   0.54
-    ## W1_Conspiracy_Total            2.60   2.68     0.97   0.33
-    ## conspiracy1_sc                 9.19   1.75     5.26   0.00
-    ## conspiracy2_sc                 1.04   1.80     0.58   0.56
-    ## ----------------------------------------------------------
+    ## [1] 0.3030154
 
 ``` r
-plot_coefs(full_5g)
+summary(full_lab)$adj.r.squared
+```
+
+    ## [1] 0.2898072
+
+``` r
+# 5G belief - full set of variables, raw data is DV
+fiveg_vars <- c(to_plot, "conspiracy2_sc","conspiracy1_sc")
+names(fiveg_vars) <- c(names(to_plot),"Meat market belief",
+                     "Wuhan lab belief")
+
+plot_coefs(
+  full_5g,
+  coefs = fiveg_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Figure 3 - Model 3 coefficients: belief in 5G origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.44)
+  )
 ```
 
     ## Loading required namespace: broom.mixed
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-110-1.png)<!-- -->
+
+``` r
+summary(full_5g)$r.squared
+```
+
+    ## [1] 0.3125074
+
+``` r
+summary(full_5g)$adj.r.squared
+```
+
+    ## [1] 0.2994791
 
 ``` r
 # 5G belief - full set of variables and interaction term
@@ -4292,59 +4267,39 @@ plot_coefs(full_int_5g_poiss)
 
 ``` r
 # Chinese meat market model - full set of variables
-summ(full_meat)
-```
+meat_vars <- c(to_plot, "conspiracy3_sc","conspiracy1_sc")
+names(meat_vars) <- c(names(to_plot),"5G belief",
+                     "Wuhan lab belief")
 
-    ## MODEL INFO:
-    ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
-    ## Type: OLS linear regression 
-    ## 
-    ## MODEL FIT:
-    ## F(26,1372) = 6.07, p = 0.00
-    ## R² = 0.10
-    ## Adj. R² = 0.09 
-    ## 
-    ## Standard errors: OLS
-    ## ----------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p
-    ## -------------------------- -------- ------ -------- ------
-    ## (Intercept)                   26.61   6.15     4.32   0.00
-    ## W2_Gender_binary2             -0.43   1.56    -0.27   0.79
-    ## W1_Education_binary1          -1.79   1.60    -1.12   0.26
-    ## W1_Income_2019                 3.58   2.27     1.58   0.12
-    ## age_sc                         2.42   4.25     0.57   0.57
-    ## fis_con                        1.72   4.04     0.43   0.67
-    ## nat                           14.13   3.43     4.12   0.00
-    ## distrust_science              -7.08   3.28    -2.16   0.03
-    ## red_top_tabloid                0.69   1.76     0.39   0.69
-    ## mid_level_news                 1.95   1.69     1.15   0.25
-    ## elite_news                     1.25   1.61     0.78   0.44
-    ## W2_INFO_5                     -1.40   2.75    -0.51   0.61
-    ## W2_INFO_9                     -2.16   2.94    -0.74   0.46
-    ## SDO                            1.83   5.05     0.36   0.72
-    ## RWA                           -2.18   5.24    -0.41   0.68
-    ## W2_DAI_Total                   3.78   4.29     0.88   0.38
-    ## W2_IOU_Total                  12.45   4.78     2.61   0.01
-    ## W2_Paranoia_Total             -5.51   4.08    -1.35   0.18
-    ## W2_Internal_Total             21.17   4.80     4.41   0.00
-    ## W2_Chance_Total               15.11   5.00     3.02   0.00
-    ## W2_PO_Total                   -7.46   4.72    -1.58   0.11
-    ## threat                        14.30   3.15     4.53   0.00
-    ## crt                            1.53   2.57     0.59   0.55
-    ## CRT_test                      -0.87   1.60    -0.55   0.59
-    ## W1_Conspiracy_Total            2.45   4.01     0.61   0.54
-    ## conspiracy1_sc               -11.89   2.63    -4.53   0.00
-    ## conspiracy3_sc                 2.35   4.05     0.58   0.56
-    ## ----------------------------------------------------------
-
-``` r
-plot_coefs(full_meat)
+plot_coefs(
+  full_meat,
+  coefs = meat_vars) +
+  labs(
+    caption = "Figure 2 - Model 2 coefficients: belief in meat market origin"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.36)
+  )
 ```
 
     ## Loading required namespace: broom.mixed
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-112-1.png)<!-- -->
+
+``` r
+summary(full_meat)$r.squared
+```
+
+    ## [1] 0.1031069
+
+``` r
+summary(full_meat)$adj.r.squared
+```
+
+    ## [1] 0.08611041
 
 ## Combined plot of models
 
@@ -4837,3 +4792,55 @@ plot(trust_full)
 ```
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-122-2.png)<!-- -->
+
+## Table summarising variables
+
+``` r
+all_vars <- model.matrix(dist_full)[,-1] %>% as_tibble()
+var_summaries <- tibble(
+  variable = names(all_vars),
+  mean = all_vars %>% map_dbl(mean, na.rm = TRUE),
+  sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
+) %>% 
+  filter(!variable %in% c("conspiracy1_sc","conspiracy2_sc",
+                          "conspiracy3_sc"))
+write.csv(
+  rbind(
+    var_summaries,
+    tibble(
+      variable = c("Wuhan lab belief","Chinese meat market belief",
+                 "5G belief"),
+      mean = c(
+        mean(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        mean(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        mean(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE)
+        ),
+      sd = c(
+        sd(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        sd(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE),
+        sd(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
+                                         conspiracies2$pid], na.rm = TRUE)
+        )
+      )
+    ), 
+  "variable_summaries.csv"
+)
+```
+
+``` r
+conspiracies2 %>% 
+  count(
+    to_factor(W2_C19_Vax_Self)
+  )
+```
+
+    ##   to_factor(W2_C19_Vax_Self)   n
+    ## 1                        Yes 939
+    ## 2                         No 126
+    ## 3                      Maybe 325
+    ## 4                       <NA>   9
