@@ -480,28 +480,28 @@ Only principal components 1 and 3 associated with general conspiracy ideation.
 ## DV Chinese lab conspiracy - singular IV models
 
 ```{r}
-sdo_lab <- lm(W2_Conspiracy_Theory1 ~ SDO,
+sdo_lab <- lm(conspiracy1_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_lab)
 ```
 
 ```{r}
-rwa_lab <- lm(W2_Conspiracy_Theory1 ~ RWA,
+rwa_lab <- lm(conspiracy1_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_lab)
 ```
 
 ```{r}
-mid_news_lab <- lm(W2_Conspiracy_Theory1 ~ mid_level_news,
+mid_news_lab <- lm(conspiracy1_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_lab)
 ```
 
 ```{r}
-social_m_lab <- lm(W2_Conspiracy_Theory1 ~ W2_INFO_5,
+social_m_lab <- lm(conspiracy1_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_lab)
@@ -510,7 +510,7 @@ summ(social_m_lab)
 ## DV Chinese lab conspiracy - socio-economic variables
 
 ```{r}
-se_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Gender_binary +
+se_lab <- lm(conspiracy1_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -522,7 +522,7 @@ summ(se_lab, vifs = TRUE)
 ## DV Chinese lab conspiracy - socio-economic variables + political/media
 
 ```{r}
-se_pol_lab <- lm(W2_Conspiracy_Theory1 ~ 
+se_pol_lab <- lm(conspiracy1_sc ~ 
                    
                    #socio-economic variables
                    W2_Gender_binary +
@@ -555,7 +555,7 @@ AIC(se_pol_lab)
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
 
 ```{r}
-se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~
+se_polpsych_lab <- lm(conspiracy1_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -657,7 +657,7 @@ Potential multicollinearity between right, soc_con and fis_con. From hereon, fis
 ## DV Chinese lab belief - model above minus the aforementioned variables
 
 ```{r}
-se_polpsych_lab_2 <- lm(W2_Conspiracy_Theory1 ~
+se_polpsych_lab_2 <- lm(conspiracy1_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -695,7 +695,7 @@ AIC(se_polpsych_lab_2)
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ```{r}
-multi_lab <- lm(W2_Conspiracy_Theory1 ~
+multi_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -740,7 +740,7 @@ AIC(multi_lab)
 ## DV Chinese lab belief - interactions
 
 ```{r}
-int_lab <- lm(W2_Conspiracy_Theory1 ~
+int_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -791,7 +791,7 @@ AIC(int_lab) # no support for interactions
 Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
-full_lab <- lm(W2_Conspiracy_Theory1 ~
+full_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -847,7 +847,7 @@ AIC(full_lab)
 # Interaction model
 
 ```{r}
-full_int_lab <- lm(W2_Conspiracy_Theory1 ~
+full_int_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -959,7 +959,7 @@ conspiracies %>%
 ## DV 5G conspiracy - singular IV models
 
 ```{r}
-sdo_5g <- lm(W2_Conspiracy_Theory3 ~ SDO,
+sdo_5g <- lm(conspiracy3_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_5g)
@@ -967,21 +967,21 @@ summ(sdo_5g)
 
 
 ```{r}
-rwa_5g <- lm(W2_Conspiracy_Theory3 ~ RWA,
+rwa_5g <- lm(conspiracy3_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_5g)
 ```
 
 ```{r}
-mid_news_5g <- lm(W2_Conspiracy_Theory3 ~ mid_level_news,
+mid_news_5g <- lm(conspiracy3_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_5g)
 ```
 
 ```{r}
-social_m_5g <- lm(W2_Conspiracy_Theory3 ~ W2_INFO_5,
+social_m_5g <- lm(conspiracy3_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_5g)
@@ -990,7 +990,7 @@ summ(social_m_5g)
 ## DV 5G conspiracy - socio-economic variables
 
 ```{r}
-se_5g <- lm(W2_Conspiracy_Theory3 ~ W2_Gender_binary +
+se_5g <- lm(conspiracy3_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -1004,7 +1004,7 @@ summ(se_5g, vifs = TRUE)
 As with modelling above, fis_con is included instead of soc_con and right to avoid multicollinearity problem.  
 
 ```{r}
-se_pol_5g <- lm(W2_Conspiracy_Theory3 ~ 
+se_pol_5g <- lm(conspiracy3_sc ~ 
                    #socio-economic variables
                    W2_Gender_binary +
                    W1_Education_binary +
@@ -1035,7 +1035,7 @@ AIC(se_pol_5g)
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
 
 ```{r}
-se_polpsych_5g <- lm(W2_Conspiracy_Theory3 ~
+se_polpsych_5g <- lm(conspiracy3_sc ~
                         #socio-economic variables
                         W2_Gender_binary +
                         W1_Education_binary +
@@ -1077,7 +1077,7 @@ AIC(se_polpsych_5g)
 Dropping locus of control variables, internal and chance.  
 
 ```{r}
-multi_5g <- lm(W2_Conspiracy_Theory3 ~ 
+multi_5g <- lm(conspiracy3_sc ~ 
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -1126,7 +1126,7 @@ As with the Chinese lab belief, the locus of control variables (W2_Internal_Tota
 ## DV 5G conspiracy - multivariate and interaction model
 
 ```{r}
-int_5g <- lm(W2_Conspiracy_Theory3 ~
+int_5g <- lm(conspiracy3_sc ~
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -1176,7 +1176,7 @@ AIC(int_5g) # very weak support for interaction term at this point
 Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
-full_5g <- lm(W2_Conspiracy_Theory3 ~
+full_5g <- lm(conspiracy3_sc ~
                 #socio-economic variables
                 W2_Gender_binary +
                 W1_Education_binary +
@@ -1229,7 +1229,7 @@ AIC(full_5g)
 
 
 ```{r}
-full_int_5g <- lm(W2_Conspiracy_Theory3 ~
+full_int_5g <- lm(conspiracy3_sc ~
                 #socio-economic variables
                 W2_Gender_binary +
                 W1_Education_binary +
@@ -1818,28 +1818,28 @@ varImpPlot(rf_mod_5g)
 ## DV Chinese meat market - singular IV models
 
 ```{r}
-sdo_meat <- lm(W2_Conspiracy_Theory2 ~ SDO,
+sdo_meat <- lm(conspiracy2_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_meat)
 ```
 
 ```{r}
-rwa_meat <- lm(W2_Conspiracy_Theory2 ~ RWA,
+rwa_meat <- lm(conspiracy2_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_meat)
 ```
 
 ```{r}
-mid_news_meat <- lm(W2_Conspiracy_Theory2 ~ mid_level_news,
+mid_news_meat <- lm(conspiracy2_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_meat)
 ```
 
 ```{r}
-social_m_meat <- lm(W2_Conspiracy_Theory2 ~ W2_INFO_5,
+social_m_meat <- lm(conspiracy2_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_meat)
@@ -1848,7 +1848,7 @@ summ(social_m_meat)
 ## DV Chinese meat market belief - socio-economic variables
 
 ```{r}
-se_meat <- lm(W2_Conspiracy_Theory2 ~ W2_Gender_binary +
+se_meat <- lm(conspiracy2_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -1860,7 +1860,7 @@ summ(se_meat, vifs = TRUE)
 ## DV Chinese meat market belief - socio-economic variables + political/media
 
 ```{r}
-se_pol_meat <- lm(W2_Conspiracy_Theory2 ~ 
+se_pol_meat <- lm(conspiracy2_sc ~ 
                    
                    #socio-economic variables
                    W2_Gender_binary +
@@ -1893,7 +1893,7 @@ AIC(se_pol_meat)
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych
 
 ```{r}
-se_polpsych_meat <- lm(W2_Conspiracy_Theory2 ~
+se_polpsych_meat <- lm(conspiracy2_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -1935,7 +1935,7 @@ AIC(se_polpsych_meat)
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ```{r}
-multi_meat <- lm(W2_Conspiracy_Theory2 ~
+multi_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -1988,7 +1988,7 @@ AIC(multi_meat)
 Re-adding in LOC variables for comprehensiveness and transparency.  
 
 ```{r}
-full_meat <- lm(W2_Conspiracy_Theory2 ~
+full_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -2033,7 +2033,7 @@ summ(full_meat, vifs = TRUE)
 ```
 
 ```{r}
-full_int_meat <- lm(W2_Conspiracy_Theory2 ~
+full_int_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -2185,30 +2185,27 @@ summary(full_meat)$adj.r.squared
 ```{r, message = FALSE, warning = FALSE}
 model_vars <- c("W1_Education_binary1","crt",
                 "red_top_tabloid","mid_level_news",
-                "W2_INFO_5","W2_INFO_9",
-                "distrust_science","SDO",
-                "RWA","W1_Conspiracy_Total","conspiracy1_sc",
-                "conspiracy2_sc","conspiracy3_sc")
+                "W2_INFO_5","W2_INFO_9","SDO",
+                "RWA")
 names(model_vars) <- c("Post-secondary education","CRT",
                        "Tabloid news","Mid-level news",
                        "Social media",
-                       "Family and friends","Distrusts science",
-                       "SDO","RWA","Conspiracy ideation","Wuhan lab",
-                       "Meat market","5G")
+                       "Family and friends",
+                       "SDO","RWA")
 
 plot_coefs(
-  full_lab,full_5g,
-  model.names = c("Wuhan lab","5G"),
+  full_lab,full_5g,full_meat,
+  model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
   theme(legend.position = "top") +
   labs(
     caption = "Model Coefficients: Multivariate Linear Regression"
   ) +
-  theme(plot.caption = element_text(hjust = 0.5,
+  theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
-                                    hjust = 0.36),
+                                    hjust = 0.43),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
@@ -2219,7 +2216,7 @@ plot_coefs(
 ## Conspiracies and social distancing
 
 ```{r}
-# loading paackage for multi nom
+# loading package for multi nom
 pacman::p_load(nnet)
 ```
 
@@ -2499,35 +2496,9 @@ var_summaries <- tibble(
   variable = names(all_vars),
   mean = all_vars %>% map_dbl(mean, na.rm = TRUE),
   sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
-) %>% 
-  filter(!variable %in% c("conspiracy1_sc","conspiracy2_sc",
-                          "conspiracy3_sc"))
-write.csv(
-  rbind(
-    var_summaries,
-    tibble(
-      variable = c("Wuhan lab belief","Chinese meat market belief",
-                 "5G belief"),
-      mean = c(
-        mean(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        mean(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        mean(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE)
-        ),
-      sd = c(
-        sd(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        sd(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        sd(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE)
-        )
-      )
-    ), 
-  "variable_summaries.csv"
 )
+
+write.csv(var_summaries,"variable_summaries.csv")
 ```
 
 

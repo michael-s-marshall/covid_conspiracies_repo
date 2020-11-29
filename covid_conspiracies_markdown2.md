@@ -813,7 +813,7 @@ ideation.
 ## DV Chinese lab conspiracy - singular IV models
 
 ``` r
-sdo_lab <- lm(W2_Conspiracy_Theory1 ~ SDO,
+sdo_lab <- lm(conspiracy1_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_lab)
@@ -821,7 +821,7 @@ summ(sdo_lab)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -830,15 +830,15 @@ summ(sdo_lab)
     ## Adj. R² = 0.04 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         24.11   1.95    12.34   0.00
-    ## SDO                 39.08   4.84     8.08   0.00
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.24   0.02    12.34   0.00
+    ## SDO                 0.39   0.05     8.08   0.00
+    ## -----------------------------------------------
 
 ``` r
-rwa_lab <- lm(W2_Conspiracy_Theory1 ~ RWA,
+rwa_lab <- lm(conspiracy1_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_lab)
@@ -846,7 +846,7 @@ summ(rwa_lab)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -855,15 +855,15 @@ summ(rwa_lab)
     ## Adj. R² = 0.06 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         13.88   2.74     5.07   0.00
-    ## RWA                 47.40   5.06     9.37   0.00
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.14   0.03     5.07   0.00
+    ## RWA                 0.47   0.05     9.37   0.00
+    ## -----------------------------------------------
 
 ``` r
-mid_news_lab <- lm(W2_Conspiracy_Theory1 ~ mid_level_news,
+mid_news_lab <- lm(conspiracy1_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_lab)
@@ -871,7 +871,7 @@ summ(mid_news_lab)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -880,15 +880,15 @@ summ(mid_news_lab)
     ## Adj. R² = 0.06 
     ## 
     ## Standard errors: OLS
-    ## ---------------------------------------------------
-    ##                         Est.   S.E.   t val.      p
-    ## -------------------- ------- ------ -------- ------
-    ## (Intercept)            32.48   1.04    31.29   0.00
-    ## mid_level_news         18.08   1.84     9.84   0.00
-    ## ---------------------------------------------------
+    ## --------------------------------------------------
+    ##                        Est.   S.E.   t val.      p
+    ## -------------------- ------ ------ -------- ------
+    ## (Intercept)            0.32   0.01    31.29   0.00
+    ## mid_level_news         0.18   0.02     9.84   0.00
+    ## --------------------------------------------------
 
 ``` r
-social_m_lab <- lm(W2_Conspiracy_Theory1 ~ W2_INFO_5,
+social_m_lab <- lm(conspiracy1_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_lab)
@@ -896,7 +896,7 @@ summ(social_m_lab)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -905,17 +905,17 @@ summ(social_m_lab)
     ## Adj. R² = 0.03 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         32.81   1.20    27.33   0.00
-    ## W2_INFO_5           18.00   2.72     6.61   0.00
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.33   0.01    27.33   0.00
+    ## W2_INFO_5           0.18   0.03     6.61   0.00
+    ## -----------------------------------------------
 
 ## DV Chinese lab conspiracy - socio-economic variables
 
 ``` r
-se_lab <- lm(W2_Conspiracy_Theory1 ~ W2_Gender_binary +
+se_lab <- lm(conspiracy1_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -926,7 +926,7 @@ summ(se_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1403 (3 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -938,17 +938,17 @@ summ(se_lab, vifs = TRUE)
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  50.87   2.87    17.74   0.00       
-    ## W2_Gender_binary2             2.76   1.77     1.56   0.12   1.03
-    ## W1_Education_binary1         -8.28   1.84    -4.50   0.00   1.06
-    ## W1_Income_2019               -9.34   2.50    -3.73   0.00   1.06
-    ## age_sc                       -8.94   4.14    -2.16   0.03   1.03
+    ## (Intercept)                   0.51   0.03    17.74   0.00       
+    ## W2_Gender_binary2             0.03   0.02     1.56   0.12   1.03
+    ## W1_Education_binary1         -0.08   0.02    -4.50   0.00   1.06
+    ## W1_Income_2019               -0.09   0.03    -3.73   0.00   1.06
+    ## age_sc                       -0.09   0.04    -2.16   0.03   1.03
     ## ----------------------------------------------------------------
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media
 
 ``` r
-se_pol_lab <- lm(W2_Conspiracy_Theory1 ~ 
+se_pol_lab <- lm(conspiracy1_sc ~ 
                    
                    #socio-economic variables
                    W2_Gender_binary +
@@ -974,7 +974,7 @@ summ(se_pol_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -986,39 +986,39 @@ summ(se_pol_lab, vifs = TRUE)
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                   8.00   4.10     1.95   0.05       
-    ## W2_Gender_binary2             3.12   1.64     1.90   0.06   1.06
-    ## W1_Education_binary1         -5.00   1.72    -2.91   0.00   1.12
-    ## W1_Income_2019               -6.41   2.36    -2.72   0.01   1.13
-    ## age_sc                       -0.73   4.18    -0.18   0.86   1.26
-    ## right                         6.37   5.48     1.16   0.25   1.97
-    ## soc_con                       8.88   3.57     2.49   0.01   1.51
-    ## fis_con                      -0.20   5.23    -0.04   0.97   2.08
-    ## nat                          16.16   3.62     4.47   0.00   1.28
-    ## distrust_science             22.61   3.30     6.84   0.00   1.08
-    ## red_top_tabloid               6.71   1.87     3.58   0.00   1.08
-    ## mid_level_news               10.95   1.80     6.07   0.00   1.12
-    ## elite_news                   -2.94   1.73    -1.70   0.09   1.11
-    ## W2_INFO_5                     9.73   2.91     3.35   0.00   1.36
-    ## W2_INFO_9                    13.39   3.09     4.33   0.00   1.21
+    ## (Intercept)                   0.08   0.04     1.95   0.05       
+    ## W2_Gender_binary2             0.03   0.02     1.90   0.06   1.06
+    ## W1_Education_binary1         -0.05   0.02    -2.91   0.00   1.12
+    ## W1_Income_2019               -0.06   0.02    -2.72   0.01   1.13
+    ## age_sc                       -0.01   0.04    -0.18   0.86   1.26
+    ## right                         0.06   0.05     1.16   0.25   1.97
+    ## soc_con                       0.09   0.04     2.49   0.01   1.51
+    ## fis_con                      -0.00   0.05    -0.04   0.97   2.08
+    ## nat                           0.16   0.04     4.47   0.00   1.28
+    ## distrust_science              0.23   0.03     6.84   0.00   1.08
+    ## red_top_tabloid               0.07   0.02     3.58   0.00   1.08
+    ## mid_level_news                0.11   0.02     6.07   0.00   1.12
+    ## elite_news                   -0.03   0.02    -1.70   0.09   1.11
+    ## W2_INFO_5                     0.10   0.03     3.35   0.00   1.36
+    ## W2_INFO_9                     0.13   0.03     4.33   0.00   1.21
     ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_lab)
 ```
 
-    ## [1] 13768.48
+    ## [1] 846.3742
 
 ``` r
 AIC(se_pol_lab)
 ```
 
-    ## [1] 13478.77
+    ## [1] 593.503
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
 
 ``` r
-se_polpsych_lab <- lm(W2_Conspiracy_Theory1 ~
+se_polpsych_lab <- lm(conspiracy1_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -1054,7 +1054,7 @@ summ(se_polpsych_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1063,33 +1063,33 @@ summ(se_polpsych_lab, vifs = TRUE)
     ## Adj. R² = 0.23 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -9.53   5.92    -1.61   0.11       
-    ## W2_Gender_binary2              2.60   1.66     1.56   0.12   1.14
-    ## W1_Education_binary1          -4.08   1.70    -2.41   0.02   1.13
-    ## W1_Income_2019                -5.00   2.39    -2.09   0.04   1.21
-    ## age_sc                         5.02   4.42     1.14   0.26   1.47
-    ## right                          2.72   5.51     0.49   0.62   2.08
-    ## soc_con                        1.73   3.70     0.47   0.64   1.69
-    ## fis_con                       -1.44   5.17    -0.28   0.78   2.12
-    ## nat                            9.94   3.66     2.72   0.01   1.36
-    ## distrust_science              17.81   3.39     5.26   0.00   1.18
-    ## red_top_tabloid                6.19   1.84     3.36   0.00   1.09
-    ## mid_level_news                10.30   1.78     5.80   0.00   1.13
-    ## elite_news                    -1.74   1.71    -1.02   0.31   1.13
-    ## W2_INFO_5                      7.61   2.89     2.64   0.01   1.40
-    ## W2_INFO_9                     13.07   3.06     4.27   0.00   1.24
-    ## SDO                           11.41   5.34     2.13   0.03   1.51
-    ## RWA                           20.15   5.69     3.54   0.00   1.53
-    ## W2_DAI_Total                  17.13   4.38     3.91   0.00   1.54
-    ## W2_IOU_Total                 -12.31   4.98    -2.47   0.01   1.59
-    ## W2_Paranoia_Total             13.55   4.28     3.16   0.00   1.79
-    ## W2_Internal_Total              5.77   5.07     1.14   0.26   1.26
-    ## W2_Chance_Total               -1.30   5.32    -0.24   0.81   1.93
-    ## W2_PO_Total                    6.32   4.96     1.27   0.20   2.23
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.10   0.06    -1.61   0.11       
+    ## W2_Gender_binary2             0.03   0.02     1.56   0.12   1.14
+    ## W1_Education_binary1         -0.04   0.02    -2.41   0.02   1.13
+    ## W1_Income_2019               -0.05   0.02    -2.09   0.04   1.21
+    ## age_sc                        0.05   0.04     1.14   0.26   1.47
+    ## right                         0.03   0.06     0.49   0.62   2.08
+    ## soc_con                       0.02   0.04     0.47   0.64   1.69
+    ## fis_con                      -0.01   0.05    -0.28   0.78   2.12
+    ## nat                           0.10   0.04     2.72   0.01   1.36
+    ## distrust_science              0.18   0.03     5.26   0.00   1.18
+    ## red_top_tabloid               0.06   0.02     3.36   0.00   1.09
+    ## mid_level_news                0.10   0.02     5.80   0.00   1.13
+    ## elite_news                   -0.02   0.02    -1.02   0.31   1.13
+    ## W2_INFO_5                     0.08   0.03     2.64   0.01   1.40
+    ## W2_INFO_9                     0.13   0.03     4.27   0.00   1.24
+    ## SDO                           0.11   0.05     2.13   0.03   1.51
+    ## RWA                           0.20   0.06     3.54   0.00   1.53
+    ## W2_DAI_Total                  0.17   0.04     3.91   0.00   1.54
+    ## W2_IOU_Total                 -0.12   0.05    -2.47   0.01   1.59
+    ## W2_Paranoia_Total             0.14   0.04     3.16   0.00   1.79
+    ## W2_Internal_Total             0.06   0.05     1.14   0.26   1.26
+    ## W2_Chance_Total              -0.01   0.05    -0.24   0.81   1.93
+    ## W2_PO_Total                   0.06   0.05     1.27   0.20   2.23
+    ## ----------------------------------------------------------------
 
 Looking at mulitcollinearity below for the following variables:
 
@@ -1242,7 +1242,7 @@ W2\_Chance\_Total) are dropped due to non-significance.
 ## DV Chinese lab belief - model above minus the aforementioned variables
 
 ``` r
-se_polpsych_lab_2 <- lm(W2_Conspiracy_Theory1 ~
+se_polpsych_lab_2 <- lm(conspiracy1_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -1273,7 +1273,7 @@ summ(se_polpsych_lab_2, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1282,45 +1282,45 @@ summ(se_polpsych_lab_2, vifs = TRUE)
     ## Adj. R² = 0.23 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -5.30   4.82    -1.10   0.27       
-    ## W2_Gender_binary2              2.23   1.63     1.37   0.17   1.10
-    ## W1_Education_binary1          -4.05   1.69    -2.40   0.02   1.12
-    ## W1_Income_2019                -4.86   2.35    -2.07   0.04   1.18
-    ## age_sc                         5.32   4.37     1.22   0.22   1.44
-    ## fis_con                        0.77   4.26     0.18   0.86   1.44
-    ## nat                           10.70   3.60     2.97   0.00   1.33
-    ## distrust_science              18.04   3.31     5.45   0.00   1.13
-    ## red_top_tabloid                6.27   1.84     3.41   0.00   1.09
-    ## mid_level_news                10.42   1.77     5.90   0.00   1.12
-    ## elite_news                    -1.81   1.71    -1.06   0.29   1.13
-    ## W2_INFO_5                      7.76   2.88     2.69   0.01   1.40
-    ## W2_INFO_9                     13.48   3.04     4.43   0.00   1.23
-    ## SDO                           12.06   5.20     2.32   0.02   1.43
-    ## RWA                           20.58   5.42     3.80   0.00   1.39
-    ## W2_DAI_Total                  17.95   4.33     4.15   0.00   1.51
-    ## W2_IOU_Total                 -11.52   4.86    -2.37   0.02   1.52
-    ## W2_Paranoia_Total             14.52   4.10     3.54   0.00   1.64
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.05   0.05    -1.10   0.27       
+    ## W2_Gender_binary2             0.02   0.02     1.37   0.17   1.10
+    ## W1_Education_binary1         -0.04   0.02    -2.40   0.02   1.12
+    ## W1_Income_2019               -0.05   0.02    -2.07   0.04   1.18
+    ## age_sc                        0.05   0.04     1.22   0.22   1.44
+    ## fis_con                       0.01   0.04     0.18   0.86   1.44
+    ## nat                           0.11   0.04     2.97   0.00   1.33
+    ## distrust_science              0.18   0.03     5.45   0.00   1.13
+    ## red_top_tabloid               0.06   0.02     3.41   0.00   1.09
+    ## mid_level_news                0.10   0.02     5.90   0.00   1.12
+    ## elite_news                   -0.02   0.02    -1.06   0.29   1.13
+    ## W2_INFO_5                     0.08   0.03     2.69   0.01   1.40
+    ## W2_INFO_9                     0.13   0.03     4.43   0.00   1.23
+    ## SDO                           0.12   0.05     2.32   0.02   1.43
+    ## RWA                           0.21   0.05     3.80   0.00   1.39
+    ## W2_DAI_Total                  0.18   0.04     4.15   0.00   1.51
+    ## W2_IOU_Total                 -0.12   0.05    -2.37   0.02   1.52
+    ## W2_Paranoia_Total             0.15   0.04     3.54   0.00   1.64
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_pol_lab)
 ```
 
-    ## [1] 13478.77
+    ## [1] 593.503
 
 ``` r
 AIC(se_polpsych_lab_2)
 ```
 
-    ## [1] 13422.8
+    ## [1] 537.5375
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ``` r
-multi_lab <- lm(W2_Conspiracy_Theory1 ~
+multi_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -1358,7 +1358,7 @@ summ(multi_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1367,48 +1367,48 @@ summ(multi_lab, vifs = TRUE)
     ## Adj. R² = 0.24 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -1.65   5.30    -0.31   0.76       
-    ## W2_Gender_binary2              1.24   1.63     0.76   0.45   1.12
-    ## W1_Education_binary1          -3.74   1.68    -2.23   0.03   1.13
-    ## W1_Income_2019                -3.93   2.36    -1.67   0.10   1.20
-    ## age_sc                         0.98   4.42     0.22   0.82   1.50
-    ## fis_con                        1.76   4.22     0.42   0.68   1.44
-    ## nat                           10.37   3.57     2.90   0.00   1.33
-    ## distrust_science              17.89   3.30     5.43   0.00   1.14
-    ## red_top_tabloid                5.50   1.83     3.00   0.00   1.10
-    ## mid_level_news                10.13   1.75     5.78   0.00   1.12
-    ## elite_news                    -1.70   1.69    -1.00   0.32   1.13
-    ## W2_INFO_5                      6.36   2.88     2.21   0.03   1.42
-    ## W2_INFO_9                     11.62   3.04     3.82   0.00   1.25
-    ## SDO                           13.62   5.20     2.62   0.01   1.46
-    ## RWA                           16.26   5.43     3.00   0.00   1.42
-    ## W2_DAI_Total                  13.57   4.39     3.09   0.00   1.58
-    ## W2_IOU_Total                 -11.14   4.86    -2.29   0.02   1.55
-    ## W2_Paranoia_Total             12.89   4.08     3.16   0.00   1.65
-    ## threat                         7.72   3.30     2.34   0.02   1.21
-    ## crt                           -9.96   2.67    -3.73   0.00   1.30
-    ## CRT_test                       3.12   1.67     1.87   0.06   1.10
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.02   0.05    -0.31   0.76       
+    ## W2_Gender_binary2             0.01   0.02     0.76   0.45   1.12
+    ## W1_Education_binary1         -0.04   0.02    -2.23   0.03   1.13
+    ## W1_Income_2019               -0.04   0.02    -1.67   0.10   1.20
+    ## age_sc                        0.01   0.04     0.22   0.82   1.50
+    ## fis_con                       0.02   0.04     0.42   0.68   1.44
+    ## nat                           0.10   0.04     2.90   0.00   1.33
+    ## distrust_science              0.18   0.03     5.43   0.00   1.14
+    ## red_top_tabloid               0.06   0.02     3.00   0.00   1.10
+    ## mid_level_news                0.10   0.02     5.78   0.00   1.12
+    ## elite_news                   -0.02   0.02    -1.00   0.32   1.13
+    ## W2_INFO_5                     0.06   0.03     2.21   0.03   1.42
+    ## W2_INFO_9                     0.12   0.03     3.82   0.00   1.25
+    ## SDO                           0.14   0.05     2.62   0.01   1.46
+    ## RWA                           0.16   0.05     3.00   0.00   1.42
+    ## W2_DAI_Total                  0.14   0.04     3.09   0.00   1.58
+    ## W2_IOU_Total                 -0.11   0.05    -2.29   0.02   1.55
+    ## W2_Paranoia_Total             0.13   0.04     3.16   0.00   1.65
+    ## threat                        0.08   0.03     2.34   0.02   1.21
+    ## crt                          -0.10   0.03    -3.73   0.00   1.30
+    ## CRT_test                      0.03   0.02     1.87   0.06   1.10
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_polpsych_lab_2)
 ```
 
-    ## [1] 13422.8
+    ## [1] 537.5375
 
 ``` r
 AIC(multi_lab)
 ```
 
-    ## [1] 13399.58
+    ## [1] 514.316
 
 ## DV Chinese lab belief - interactions
 
 ``` r
-int_lab <- lm(W2_Conspiracy_Theory1 ~
+int_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -1449,7 +1449,7 @@ summ(int_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1458,52 +1458,52 @@ summ(int_lab, vifs = TRUE)
     ## Adj. R² = 0.24 
     ## 
     ## Standard errors: OLS
-    ## -------------------------------------------------------------------
-    ##                                Est.    S.E.   t val.      p     VIF
-    ## -------------------------- -------- ------- -------- ------ -------
-    ## (Intercept)                   -3.42    6.49    -0.53   0.60        
-    ## W2_Gender_binary2              1.21    1.64     0.74   0.46    1.12
-    ## W1_Education_binary1          -3.74    1.68    -2.22   0.03    1.13
-    ## W1_Income_2019                -3.88    2.36    -1.64   0.10    1.21
-    ## age_sc                         0.89    4.43     0.20   0.84    1.51
-    ## fis_con                        1.92    4.24     0.45   0.65    1.45
-    ## nat                           10.34    3.57     2.89   0.00    1.33
-    ## distrust_science              17.82    3.31     5.38   0.00    1.15
-    ## red_top_tabloid                5.47    1.84     2.98   0.00    1.10
-    ## mid_level_news                10.12    1.75     5.77   0.00    1.12
-    ## elite_news                    -1.67    1.70    -0.98   0.33    1.13
-    ## W2_INFO_5                      6.31    2.88     2.19   0.03    1.42
-    ## W2_INFO_9                     11.69    3.05     3.83   0.00    1.25
-    ## W2_DAI_Total                  13.44    4.40     3.05   0.00    1.59
-    ## W2_IOU_Total                 -11.06    4.87    -2.27   0.02    1.56
-    ## W2_Paranoia_Total             12.92    4.09     3.16   0.00    1.66
-    ## threat                         7.74    3.30     2.35   0.02    1.21
-    ## CRT_test                       3.14    1.68     1.87   0.06    1.11
-    ## crt                           -6.48    8.03    -0.81   0.42   11.73
-    ## RWA                           17.90    8.18     2.19   0.03    3.23
-    ## SDO                           15.86    7.77     2.04   0.04    3.24
-    ## crt:RWA                       -3.09   15.36    -0.20   0.84   12.47
-    ## crt:SDO                       -5.28   14.75    -0.36   0.72    7.96
-    ## -------------------------------------------------------------------
+    ## -----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p     VIF
+    ## -------------------------- ------- ------ -------- ------ -------
+    ## (Intercept)                  -0.03   0.06    -0.53   0.60        
+    ## W2_Gender_binary2             0.01   0.02     0.74   0.46    1.12
+    ## W1_Education_binary1         -0.04   0.02    -2.22   0.03    1.13
+    ## W1_Income_2019               -0.04   0.02    -1.64   0.10    1.21
+    ## age_sc                        0.01   0.04     0.20   0.84    1.51
+    ## fis_con                       0.02   0.04     0.45   0.65    1.45
+    ## nat                           0.10   0.04     2.89   0.00    1.33
+    ## distrust_science              0.18   0.03     5.38   0.00    1.15
+    ## red_top_tabloid               0.05   0.02     2.98   0.00    1.10
+    ## mid_level_news                0.10   0.02     5.77   0.00    1.12
+    ## elite_news                   -0.02   0.02    -0.98   0.33    1.13
+    ## W2_INFO_5                     0.06   0.03     2.19   0.03    1.42
+    ## W2_INFO_9                     0.12   0.03     3.83   0.00    1.25
+    ## W2_DAI_Total                  0.13   0.04     3.05   0.00    1.59
+    ## W2_IOU_Total                 -0.11   0.05    -2.27   0.02    1.56
+    ## W2_Paranoia_Total             0.13   0.04     3.16   0.00    1.66
+    ## threat                        0.08   0.03     2.35   0.02    1.21
+    ## CRT_test                      0.03   0.02     1.87   0.06    1.11
+    ## crt                          -0.06   0.08    -0.81   0.42   11.73
+    ## RWA                           0.18   0.08     2.19   0.03    3.23
+    ## SDO                           0.16   0.08     2.04   0.04    3.24
+    ## crt:RWA                      -0.03   0.15    -0.20   0.84   12.47
+    ## crt:SDO                      -0.05   0.15    -0.36   0.72    7.96
+    ## -----------------------------------------------------------------
 
 ``` r
 AIC(multi_lab)
 ```
 
-    ## [1] 13399.58
+    ## [1] 514.316
 
 ``` r
 AIC(int_lab) # no support for interactions
 ```
 
-    ## [1] 13403.32
+    ## [1] 518.0515
 
 ## DV Chinese lab conspiracy - full model incl. conspiracy ideation
 
 Re-adding in LOC variables for comprehensiveness and transparency.
 
 ``` r
-full_lab <- lm(W2_Conspiracy_Theory1 ~
+full_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -1549,7 +1549,7 @@ summ(full_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1558,37 +1558,37 @@ summ(full_lab, vifs = TRUE)
     ## Adj. R² = 0.29 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                  -11.10   6.32    -1.76   0.08       
-    ## W2_Gender_binary2              1.21   1.59     0.76   0.45   1.14
-    ## W1_Education_binary1          -3.82   1.63    -2.34   0.02   1.13
-    ## W1_Income_2019                -3.20   2.32    -1.38   0.17   1.23
-    ## age_sc                         1.55   4.33     0.36   0.72   1.53
-    ## fis_con                        2.16   4.12     0.53   0.60   1.46
-    ## nat                           10.63   3.51     3.03   0.00   1.36
-    ## distrust_science              10.37   3.34     3.10   0.00   1.25
-    ## red_top_tabloid                4.21   1.79     2.35   0.02   1.12
-    ## mid_level_news                10.12   1.70     5.95   0.00   1.12
-    ## elite_news                    -1.29   1.65    -0.78   0.43   1.14
-    ## W2_INFO_5                      3.96   2.81     1.41   0.16   1.44
-    ## W2_INFO_9                      9.35   2.99     3.13   0.00   1.28
-    ## SDO                           13.32   5.14     2.59   0.01   1.51
-    ## RWA                           14.94   5.34     2.80   0.01   1.46
-    ## W2_DAI_Total                  11.23   4.37     2.57   0.01   1.66
-    ## W2_IOU_Total                 -10.26   4.88    -2.10   0.04   1.66
-    ## W2_Paranoia_Total              8.71   4.15     2.10   0.04   1.83
-    ## W2_Chance_Total                0.59   5.12     0.12   0.91   1.94
-    ## W2_PO_Total                    0.04   4.82     0.01   0.99   2.28
-    ## W2_Internal_Total              6.99   4.93     1.42   0.16   1.30
-    ## threat                         9.60   3.23     2.97   0.00   1.23
-    ## crt                           -6.95   2.62    -2.65   0.01   1.33
-    ## CRT_test                       2.31   1.63     1.42   0.16   1.11
-    ## W1_Conspiracy_Total           25.02   4.04     6.19   0.00   1.14
-    ## conspiracy2_sc               -12.38   2.73    -4.53   0.00   1.10
-    ## conspiracy3_sc                21.52   4.09     5.26   0.00   1.43
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.11   0.06    -1.76   0.08       
+    ## W2_Gender_binary2             0.01   0.02     0.76   0.45   1.14
+    ## W1_Education_binary1         -0.04   0.02    -2.34   0.02   1.13
+    ## W1_Income_2019               -0.03   0.02    -1.38   0.17   1.23
+    ## age_sc                        0.02   0.04     0.36   0.72   1.53
+    ## fis_con                       0.02   0.04     0.53   0.60   1.46
+    ## nat                           0.11   0.04     3.03   0.00   1.36
+    ## distrust_science              0.10   0.03     3.10   0.00   1.25
+    ## red_top_tabloid               0.04   0.02     2.35   0.02   1.12
+    ## mid_level_news                0.10   0.02     5.95   0.00   1.12
+    ## elite_news                   -0.01   0.02    -0.78   0.43   1.14
+    ## W2_INFO_5                     0.04   0.03     1.41   0.16   1.44
+    ## W2_INFO_9                     0.09   0.03     3.13   0.00   1.28
+    ## SDO                           0.13   0.05     2.59   0.01   1.51
+    ## RWA                           0.15   0.05     2.80   0.01   1.46
+    ## W2_DAI_Total                  0.11   0.04     2.57   0.01   1.66
+    ## W2_IOU_Total                 -0.10   0.05    -2.10   0.04   1.66
+    ## W2_Paranoia_Total             0.09   0.04     2.10   0.04   1.83
+    ## W2_Chance_Total               0.01   0.05     0.12   0.91   1.94
+    ## W2_PO_Total                   0.00   0.05     0.01   0.99   2.28
+    ## W2_Internal_Total             0.07   0.05     1.42   0.16   1.30
+    ## threat                        0.10   0.03     2.97   0.00   1.23
+    ## crt                          -0.07   0.03    -2.65   0.01   1.33
+    ## CRT_test                      0.02   0.02     1.42   0.16   1.11
+    ## W1_Conspiracy_Total           0.25   0.04     6.19   0.00   1.14
+    ## conspiracy2_sc               -0.12   0.03    -4.53   0.00   1.10
+    ## conspiracy3_sc                0.22   0.04     5.26   0.00   1.43
+    ## ----------------------------------------------------------------
 
 ``` r
 par(mfrow = c(2,2))
@@ -1601,18 +1601,18 @@ plot(full_lab)
 AIC(multi_lab)
 ```
 
-    ## [1] 13399.58
+    ## [1] 514.316
 
 ``` r
 AIC(full_lab)
 ```
 
-    ## [1] 13319.14
+    ## [1] 433.8714
 
 # Interaction model
 
 ``` r
-full_int_lab <- lm(W2_Conspiracy_Theory1 ~
+full_int_lab <- lm(conspiracy1_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -1661,7 +1661,7 @@ summ(full_int_lab, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory1
+    ## Dependent Variable: conspiracy1_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1670,37 +1670,37 @@ summ(full_int_lab, vifs = TRUE)
     ## Adj. R² = 0.29 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------------------------
-    ##                                Est.    S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------- -------- ------ ------
-    ## (Intercept)                   -8.49    6.69    -1.27   0.20       
-    ## W2_Gender_binary2              1.76    1.59     1.11   0.27   1.12
-    ## W1_Education_binary1          -3.93    1.63    -2.41   0.02   1.13
-    ## W1_Income_2019                -3.35    2.32    -1.44   0.15   1.23
-    ## age_sc                         2.79    4.32     0.64   0.52   1.52
-    ## fis_con                        4.42    4.07     1.09   0.28   1.42
-    ## nat                           11.94    3.49     3.42   0.00   1.34
-    ## distrust_science              10.27    3.36     3.06   0.00   1.25
-    ## red_top_tabloid                4.34    1.80     2.41   0.02   1.12
-    ## mid_level_news                10.57    1.70     6.23   0.00   1.11
-    ## elite_news                    -1.92    1.64    -1.17   0.24   1.12
-    ## W2_INFO_5                      3.90    2.82     1.39   0.17   1.44
-    ## W2_INFO_9                      9.41    3.00     3.14   0.00   1.28
-    ## SDO                           18.88    7.51     2.51   0.01   3.21
-    ## W2_DAI_Total                  11.46    4.38     2.62   0.01   1.66
-    ## W2_IOU_Total                  -9.99    4.90    -2.04   0.04   1.67
-    ## W2_Paranoia_Total              9.19    4.16     2.21   0.03   1.82
-    ## W2_Chance_Total                0.34    5.14     0.07   0.95   1.94
-    ## W2_PO_Total                   -0.94    4.83    -0.20   0.84   2.27
-    ## W2_Internal_Total              6.82    4.94     1.38   0.17   1.30
-    ## threat                        10.27    3.24     3.17   0.00   1.23
-    ## CRT_test                       2.50    1.63     1.53   0.13   1.11
-    ## W1_Conspiracy_Total           26.44    4.04     6.55   0.00   1.13
-    ## conspiracy2_sc               -12.59    2.75    -4.59   0.00   1.10
-    ## conspiracy3_sc                20.43    4.10     4.99   0.00   1.42
-    ## crt                           -5.89    5.41    -1.09   0.28   5.63
-    ## SDO:crt                       -4.92   13.19    -0.37   0.71   6.74
-    ## ------------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.08   0.07    -1.27   0.20       
+    ## W2_Gender_binary2             0.02   0.02     1.11   0.27   1.12
+    ## W1_Education_binary1         -0.04   0.02    -2.41   0.02   1.13
+    ## W1_Income_2019               -0.03   0.02    -1.44   0.15   1.23
+    ## age_sc                        0.03   0.04     0.64   0.52   1.52
+    ## fis_con                       0.04   0.04     1.09   0.28   1.42
+    ## nat                           0.12   0.03     3.42   0.00   1.34
+    ## distrust_science              0.10   0.03     3.06   0.00   1.25
+    ## red_top_tabloid               0.04   0.02     2.41   0.02   1.12
+    ## mid_level_news                0.11   0.02     6.23   0.00   1.11
+    ## elite_news                   -0.02   0.02    -1.17   0.24   1.12
+    ## W2_INFO_5                     0.04   0.03     1.39   0.17   1.44
+    ## W2_INFO_9                     0.09   0.03     3.14   0.00   1.28
+    ## SDO                           0.19   0.08     2.51   0.01   3.21
+    ## W2_DAI_Total                  0.11   0.04     2.62   0.01   1.66
+    ## W2_IOU_Total                 -0.10   0.05    -2.04   0.04   1.67
+    ## W2_Paranoia_Total             0.09   0.04     2.21   0.03   1.82
+    ## W2_Chance_Total               0.00   0.05     0.07   0.95   1.94
+    ## W2_PO_Total                  -0.01   0.05    -0.20   0.84   2.27
+    ## W2_Internal_Total             0.07   0.05     1.38   0.17   1.30
+    ## threat                        0.10   0.03     3.17   0.00   1.23
+    ## CRT_test                      0.02   0.02     1.53   0.13   1.11
+    ## W1_Conspiracy_Total           0.26   0.04     6.55   0.00   1.13
+    ## conspiracy2_sc               -0.13   0.03    -4.59   0.00   1.10
+    ## conspiracy3_sc                0.20   0.04     4.99   0.00   1.42
+    ## crt                          -0.06   0.05    -1.09   0.28   5.63
+    ## SDO:crt                      -0.05   0.13    -0.37   0.71   6.74
+    ## ----------------------------------------------------------------
 
 ``` r
 par(mfrow = c(2,2))
@@ -1713,13 +1713,13 @@ plot(full_int_lab)
 AIC(full_lab)
 ```
 
-    ## [1] 13319.14
+    ## [1] 433.8714
 
 ``` r
 AIC(full_int_lab) # no support for interaction effect
 ```
 
-    ## [1] 13326.97
+    ## [1] 441.7011
 
 # Modelling for belief in 5G origin conspiracy
 
@@ -1787,7 +1787,7 @@ conspiracies %>%
 ## DV 5G conspiracy - singular IV models
 
 ``` r
-sdo_5g <- lm(W2_Conspiracy_Theory3 ~ SDO,
+sdo_5g <- lm(conspiracy3_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_5g)
@@ -1795,7 +1795,7 @@ summ(sdo_5g)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1804,15 +1804,15 @@ summ(sdo_5g)
     ## Adj. R² = 0.05 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)          0.72   1.28     0.57   0.57
-    ## SDO                 28.79   3.17     9.08   0.00
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.01   0.01     0.57   0.57
+    ## SDO                 0.29   0.03     9.08   0.00
+    ## -----------------------------------------------
 
 ``` r
-rwa_5g <- lm(W2_Conspiracy_Theory3 ~ RWA,
+rwa_5g <- lm(conspiracy3_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_5g)
@@ -1820,7 +1820,7 @@ summ(rwa_5g)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1832,12 +1832,12 @@ summ(rwa_5g)
     ## -----------------------------------------------
     ##                     Est.   S.E.   t val.      p
     ## ----------------- ------ ------ -------- ------
-    ## (Intercept)         8.19   1.86     4.40   0.00
-    ## RWA                 5.75   3.44     1.67   0.09
+    ## (Intercept)         0.08   0.02     4.40   0.00
+    ## RWA                 0.06   0.03     1.67   0.09
     ## -----------------------------------------------
 
 ``` r
-mid_news_5g <- lm(W2_Conspiracy_Theory3 ~ mid_level_news,
+mid_news_5g <- lm(conspiracy3_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_5g)
@@ -1845,7 +1845,7 @@ summ(mid_news_5g)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1857,12 +1857,12 @@ summ(mid_news_5g)
     ## --------------------------------------------------
     ##                        Est.   S.E.   t val.      p
     ## -------------------- ------ ------ -------- ------
-    ## (Intercept)            9.67   0.70    13.72   0.00
-    ## mid_level_news         4.64   1.25     3.72   0.00
+    ## (Intercept)            0.10   0.01    13.72   0.00
+    ## mid_level_news         0.05   0.01     3.72   0.00
     ## --------------------------------------------------
 
 ``` r
-social_m_5g <- lm(W2_Conspiracy_Theory3 ~ W2_INFO_5,
+social_m_5g <- lm(conspiracy3_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_5g)
@@ -1870,7 +1870,7 @@ summ(social_m_5g)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1879,17 +1879,17 @@ summ(social_m_5g)
     ## Adj. R² = 0.06 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)          6.06   0.78     7.78   0.00
-    ## W2_INFO_5           16.79   1.77     9.50   0.00
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.06   0.01     7.78   0.00
+    ## W2_INFO_5           0.17   0.02     9.50   0.00
+    ## -----------------------------------------------
 
 ## DV 5G conspiracy - socio-economic variables
 
 ``` r
-se_5g <- lm(W2_Conspiracy_Theory3 ~ W2_Gender_binary +
+se_5g <- lm(conspiracy3_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -1900,7 +1900,7 @@ summ(se_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1403 (3 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1909,15 +1909,15 @@ summ(se_5g, vifs = TRUE)
     ## Adj. R² = 0.05 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   25.69   1.87    13.71   0.00       
-    ## W2_Gender_binary2             -1.11   1.16    -0.96   0.34   1.03
-    ## W1_Education_binary1          -2.41   1.20    -2.01   0.04   1.06
-    ## W1_Income_2019                -6.58   1.64    -4.02   0.00   1.06
-    ## age_sc                       -20.39   2.70    -7.54   0.00   1.03
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.26   0.02    13.71   0.00       
+    ## W2_Gender_binary2            -0.01   0.01    -0.96   0.34   1.03
+    ## W1_Education_binary1         -0.02   0.01    -2.01   0.04   1.06
+    ## W1_Income_2019               -0.07   0.02    -4.02   0.00   1.06
+    ## age_sc                       -0.20   0.03    -7.54   0.00   1.03
+    ## ----------------------------------------------------------------
 
 ## DV 5G conspiracy - socio-economic variables + political/media
 
@@ -1925,7 +1925,7 @@ As with modelling above, fis\_con is included instead of soc\_con and
 right to avoid multicollinearity problem.
 
 ``` r
-se_pol_5g <- lm(W2_Conspiracy_Theory3 ~ 
+se_pol_5g <- lm(conspiracy3_sc ~ 
                    #socio-economic variables
                    W2_Gender_binary +
                    W1_Education_binary +
@@ -1948,7 +1948,7 @@ summ(se_pol_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -1957,40 +1957,40 @@ summ(se_pol_5g, vifs = TRUE)
     ## Adj. R² = 0.20 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -2.93   2.67    -1.10   0.27       
-    ## W2_Gender_binary2             -0.85   1.07    -0.79   0.43   1.05
-    ## W1_Education_binary1          -1.05   1.13    -0.93   0.35   1.12
-    ## W1_Income_2019                -4.20   1.54    -2.72   0.01   1.12
-    ## age_sc                       -10.95   2.75    -3.99   0.00   1.26
-    ## fis_con                        4.80   2.67     1.80   0.07   1.25
-    ## nat                            7.36   2.35     3.13   0.00   1.25
-    ## distrust_science              23.35   2.14    10.92   0.00   1.04
-    ## red_top_tabloid                6.15   1.23     4.99   0.00   1.08
-    ## mid_level_news                 0.67   1.18     0.57   0.57   1.10
-    ## elite_news                     0.15   1.13     0.13   0.90   1.09
-    ## W2_INFO_5                      9.23   1.91     4.83   0.00   1.36
-    ## W2_INFO_9                      7.64   2.04     3.75   0.00   1.21
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.03   0.03    -1.10   0.27       
+    ## W2_Gender_binary2            -0.01   0.01    -0.79   0.43   1.05
+    ## W1_Education_binary1         -0.01   0.01    -0.93   0.35   1.12
+    ## W1_Income_2019               -0.04   0.02    -2.72   0.01   1.12
+    ## age_sc                       -0.11   0.03    -3.99   0.00   1.26
+    ## fis_con                       0.05   0.03     1.80   0.07   1.25
+    ## nat                           0.07   0.02     3.13   0.00   1.25
+    ## distrust_science              0.23   0.02    10.92   0.00   1.04
+    ## red_top_tabloid               0.06   0.01     4.99   0.00   1.08
+    ## mid_level_news                0.01   0.01     0.57   0.57   1.10
+    ## elite_news                    0.00   0.01     0.13   0.90   1.09
+    ## W2_INFO_5                     0.09   0.02     4.83   0.00   1.36
+    ## W2_INFO_9                     0.08   0.02     3.75   0.00   1.21
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_5g)
 ```
 
-    ## [1] 12573.69
+    ## [1] -348.4171
 
 ``` r
 AIC(se_pol_5g)
 ```
 
-    ## [1] 12309.17
+    ## [1] -576.0983
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
 
 ``` r
-se_polpsych_5g <- lm(W2_Conspiracy_Theory3 ~
+se_polpsych_5g <- lm(conspiracy3_sc ~
                         #socio-economic variables
                         W2_Gender_binary +
                         W1_Education_binary +
@@ -2023,7 +2023,7 @@ summ(se_polpsych_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -2032,50 +2032,50 @@ summ(se_polpsych_5g, vifs = TRUE)
     ## Adj. R² = 0.27 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                  -11.14   3.77    -2.96   0.00       
-    ## W2_Gender_binary2              0.50   1.05     0.48   0.63   1.11
-    ## W1_Education_binary1          -0.54   1.08    -0.50   0.62   1.13
-    ## W1_Income_2019                -2.77   1.52    -1.82   0.07   1.20
-    ## age_sc                        -1.63   2.82    -0.58   0.56   1.46
-    ## fis_con                        1.68   2.74     0.61   0.54   1.45
-    ## nat                            2.97   2.32     1.28   0.20   1.35
-    ## distrust_science              16.49   2.14     7.69   0.00   1.15
-    ## red_top_tabloid                5.86   1.18     4.98   0.00   1.09
-    ## mid_level_news                 0.53   1.13     0.47   0.64   1.12
-    ## elite_news                     0.56   1.09     0.51   0.61   1.13
-    ## W2_INFO_5                      7.12   1.84     3.86   0.00   1.40
-    ## W2_INFO_9                      7.77   1.96     3.97   0.00   1.24
-    ## SDO                           19.42   3.33     5.83   0.00   1.43
-    ## RWA                           -8.94   3.48    -2.57   0.01   1.40
-    ## W2_DAI_Total                  18.19   2.79     6.51   0.00   1.53
-    ## W2_IOU_Total                 -13.35   3.18    -4.20   0.00   1.59
-    ## W2_Paranoia_Total             12.02   2.74     4.39   0.00   1.79
-    ## W2_Internal_Total              1.23   3.24     0.38   0.70   1.26
-    ## W2_Chance_Total               -2.94   3.40    -0.87   0.39   1.93
-    ## W2_PO_Total                    8.63   3.17     2.72   0.01   2.23
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.11   0.04    -2.96   0.00       
+    ## W2_Gender_binary2             0.01   0.01     0.48   0.63   1.11
+    ## W1_Education_binary1         -0.01   0.01    -0.50   0.62   1.13
+    ## W1_Income_2019               -0.03   0.02    -1.82   0.07   1.20
+    ## age_sc                       -0.02   0.03    -0.58   0.56   1.46
+    ## fis_con                       0.02   0.03     0.61   0.54   1.45
+    ## nat                           0.03   0.02     1.28   0.20   1.35
+    ## distrust_science              0.16   0.02     7.69   0.00   1.15
+    ## red_top_tabloid               0.06   0.01     4.98   0.00   1.09
+    ## mid_level_news                0.01   0.01     0.47   0.64   1.12
+    ## elite_news                    0.01   0.01     0.51   0.61   1.13
+    ## W2_INFO_5                     0.07   0.02     3.86   0.00   1.40
+    ## W2_INFO_9                     0.08   0.02     3.97   0.00   1.24
+    ## SDO                           0.19   0.03     5.83   0.00   1.43
+    ## RWA                          -0.09   0.03    -2.57   0.01   1.40
+    ## W2_DAI_Total                  0.18   0.03     6.51   0.00   1.53
+    ## W2_IOU_Total                 -0.13   0.03    -4.20   0.00   1.59
+    ## W2_Paranoia_Total             0.12   0.03     4.39   0.00   1.79
+    ## W2_Internal_Total             0.01   0.03     0.38   0.70   1.26
+    ## W2_Chance_Total              -0.03   0.03    -0.87   0.39   1.93
+    ## W2_PO_Total                   0.09   0.03     2.72   0.01   2.23
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_pol_5g)
 ```
 
-    ## [1] 12309.17
+    ## [1] -576.0983
 
 ``` r
 AIC(se_polpsych_5g)
 ```
 
-    ## [1] 12175.88
+    ## [1] -709.3845
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
 
 Dropping locus of control variables, internal and chance.
 
 ``` r
-multi_5g <- lm(W2_Conspiracy_Theory3 ~ 
+multi_5g <- lm(conspiracy3_sc ~ 
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -2113,7 +2113,7 @@ summ(multi_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -2122,44 +2122,44 @@ summ(multi_5g, vifs = TRUE)
     ## Adj. R² = 0.29 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -4.20   3.44    -1.22   0.22       
-    ## W2_Gender_binary2             -0.26   1.05    -0.25   0.80   1.13
-    ## W1_Education_binary1          -0.21   1.07    -0.20   0.85   1.13
-    ## W1_Income_2019                -1.52   1.51    -1.00   0.32   1.21
-    ## age_sc                        -2.32   2.84    -0.82   0.41   1.51
-    ## fis_con                        2.11   2.71     0.78   0.44   1.45
-    ## nat                            2.98   2.29     1.30   0.19   1.33
-    ## distrust_science              15.60   2.12     7.36   0.00   1.15
-    ## red_top_tabloid                5.33   1.17     4.54   0.00   1.10
-    ## mid_level_news                 0.34   1.12     0.30   0.76   1.12
-    ## elite_news                     0.87   1.09     0.80   0.42   1.13
-    ## W2_INFO_5                      6.05   1.84     3.28   0.00   1.42
-    ## W2_INFO_9                      7.20   1.95     3.69   0.00   1.25
-    ## SDO                           18.62   3.33     5.60   0.00   1.46
-    ## RWA                          -10.53   3.48    -3.02   0.00   1.43
-    ## W2_DAI_Total                  16.89   2.83     5.98   0.00   1.60
-    ## W2_IOU_Total                 -11.99   3.16    -3.79   0.00   1.60
-    ## W2_Paranoia_Total             10.99   2.71     4.05   0.00   1.79
-    ## W2_PO_Total                    7.08   2.55     2.77   0.01   1.47
-    ## threat                        -2.50   2.11    -1.19   0.24   1.21
-    ## crt                           -8.73   1.71    -5.11   0.00   1.30
-    ## CRT_test                      -0.29   1.07    -0.27   0.78   1.10
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.04   0.03    -1.22   0.22       
+    ## W2_Gender_binary2            -0.00   0.01    -0.25   0.80   1.13
+    ## W1_Education_binary1         -0.00   0.01    -0.20   0.85   1.13
+    ## W1_Income_2019               -0.02   0.02    -1.00   0.32   1.21
+    ## age_sc                       -0.02   0.03    -0.82   0.41   1.51
+    ## fis_con                       0.02   0.03     0.78   0.44   1.45
+    ## nat                           0.03   0.02     1.30   0.19   1.33
+    ## distrust_science              0.16   0.02     7.36   0.00   1.15
+    ## red_top_tabloid               0.05   0.01     4.54   0.00   1.10
+    ## mid_level_news                0.00   0.01     0.30   0.76   1.12
+    ## elite_news                    0.01   0.01     0.80   0.42   1.13
+    ## W2_INFO_5                     0.06   0.02     3.28   0.00   1.42
+    ## W2_INFO_9                     0.07   0.02     3.69   0.00   1.25
+    ## SDO                           0.19   0.03     5.60   0.00   1.46
+    ## RWA                          -0.11   0.03    -3.02   0.00   1.43
+    ## W2_DAI_Total                  0.17   0.03     5.98   0.00   1.60
+    ## W2_IOU_Total                 -0.12   0.03    -3.79   0.00   1.60
+    ## W2_Paranoia_Total             0.11   0.03     4.05   0.00   1.79
+    ## W2_PO_Total                   0.07   0.03     2.77   0.01   1.47
+    ## threat                       -0.03   0.02    -1.19   0.24   1.21
+    ## crt                          -0.09   0.02    -5.11   0.00   1.30
+    ## CRT_test                     -0.00   0.01    -0.27   0.78   1.10
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_polpsych_5g)
 ```
 
-    ## [1] 12175.88
+    ## [1] -709.3845
 
 ``` r
 AIC(multi_5g)
 ```
 
-    ## [1] 12151.07
+    ## [1] -734.1927
 
 As with the Chinese lab belief, the locus of control variables
 (W2\_Internal\_Total and W2\_Chance\_Total) appear unrelated to the DV,
@@ -2168,7 +2168,7 @@ and are omitted in subsequent models.
 ## DV 5G conspiracy - multivariate and interaction model
 
 ``` r
-int_5g <- lm(W2_Conspiracy_Theory3 ~
+int_5g <- lm(conspiracy3_sc ~
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -2208,7 +2208,7 @@ summ(int_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -2217,52 +2217,52 @@ summ(int_5g, vifs = TRUE)
     ## Adj. R² = 0.29 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -7.37   3.82    -1.93   0.05       
-    ## W2_Gender_binary2             -0.30   1.05    -0.28   0.78   1.13
-    ## W1_Education_binary1          -0.16   1.07    -0.15   0.88   1.13
-    ## W1_Income_2019                -1.46   1.51    -0.97   0.33   1.21
-    ## age_sc                        -2.45   2.83    -0.87   0.39   1.51
-    ## fis_con                        2.37   2.71     0.87   0.38   1.45
-    ## nat                            2.96   2.28     1.30   0.20   1.33
-    ## distrust_science              15.33   2.12     7.23   0.00   1.15
-    ## red_top_tabloid                5.25   1.17     4.48   0.00   1.10
-    ## mid_level_news                 0.28   1.12     0.25   0.80   1.12
-    ## elite_news                     0.94   1.08     0.86   0.39   1.14
-    ## W2_INFO_5                      5.92   1.84     3.21   0.00   1.42
-    ## W2_INFO_9                      7.37   1.95     3.78   0.00   1.25
-    ## RWA                           -9.43   3.53    -2.67   0.01   1.47
-    ## W2_DAI_Total                  16.66   2.83     5.90   0.00   1.60
-    ## W2_IOU_Total                 -11.70   3.16    -3.70   0.00   1.61
-    ## W2_Paranoia_Total             10.97   2.71     4.05   0.00   1.79
-    ## W2_PO_Total                    6.90   2.55     2.70   0.01   1.47
-    ## threat                        -2.39   2.11    -1.13   0.26   1.21
-    ## CRT_test                      -0.31   1.07    -0.29   0.77   1.10
-    ## crt                           -2.67   3.59    -0.74   0.46   5.76
-    ## SDO                           25.37   4.84     5.24   0.00   3.09
-    ## crt:SDO                      -16.72   8.73    -1.92   0.06   6.83
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.07   0.04    -1.93   0.05       
+    ## W2_Gender_binary2            -0.00   0.01    -0.28   0.78   1.13
+    ## W1_Education_binary1         -0.00   0.01    -0.15   0.88   1.13
+    ## W1_Income_2019               -0.01   0.02    -0.97   0.33   1.21
+    ## age_sc                       -0.02   0.03    -0.87   0.39   1.51
+    ## fis_con                       0.02   0.03     0.87   0.38   1.45
+    ## nat                           0.03   0.02     1.30   0.20   1.33
+    ## distrust_science              0.15   0.02     7.23   0.00   1.15
+    ## red_top_tabloid               0.05   0.01     4.48   0.00   1.10
+    ## mid_level_news                0.00   0.01     0.25   0.80   1.12
+    ## elite_news                    0.01   0.01     0.86   0.39   1.14
+    ## W2_INFO_5                     0.06   0.02     3.21   0.00   1.42
+    ## W2_INFO_9                     0.07   0.02     3.78   0.00   1.25
+    ## RWA                          -0.09   0.04    -2.67   0.01   1.47
+    ## W2_DAI_Total                  0.17   0.03     5.90   0.00   1.60
+    ## W2_IOU_Total                 -0.12   0.03    -3.70   0.00   1.61
+    ## W2_Paranoia_Total             0.11   0.03     4.05   0.00   1.79
+    ## W2_PO_Total                   0.07   0.03     2.70   0.01   1.47
+    ## threat                       -0.02   0.02    -1.13   0.26   1.21
+    ## CRT_test                     -0.00   0.01    -0.29   0.77   1.10
+    ## crt                          -0.03   0.04    -0.74   0.46   5.76
+    ## SDO                           0.25   0.05     5.24   0.00   3.09
+    ## crt:SDO                      -0.17   0.09    -1.92   0.06   6.83
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(multi_5g)
 ```
 
-    ## [1] 12151.07
+    ## [1] -734.1927
 
 ``` r
 AIC(int_5g) # very weak support for interaction term at this point
 ```
 
-    ## [1] 12149.34
+    ## [1] -735.9218
 
 ## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
 
 Re-adding in LOC variables for comprehensiveness and transparency.
 
 ``` r
-full_5g <- lm(W2_Conspiracy_Theory3 ~
+full_5g <- lm(conspiracy3_sc ~
                 #socio-economic variables
                 W2_Gender_binary +
                 W1_Education_binary +
@@ -2307,7 +2307,7 @@ summ(full_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -2316,37 +2316,37 @@ summ(full_5g, vifs = TRUE)
     ## Adj. R² = 0.30 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -4.81   4.13    -1.17   0.24       
-    ## W2_Gender_binary2             -0.38   1.04    -0.37   0.71   1.14
-    ## W1_Education_binary1           0.13   1.07     0.12   0.91   1.14
-    ## W1_Income_2019                -1.28   1.51    -0.84   0.40   1.24
-    ## age_sc                        -2.40   2.83    -0.85   0.40   1.53
-    ## fis_con                        1.94   2.69     0.72   0.47   1.46
-    ## nat                            1.95   2.30     0.85   0.40   1.37
-    ## distrust_science              13.65   2.16     6.32   0.00   1.22
-    ## red_top_tabloid                4.76   1.17     4.08   0.00   1.11
-    ## mid_level_news                -0.60   1.12    -0.54   0.59   1.15
-    ## elite_news                     1.04   1.08     0.96   0.33   1.14
-    ## W2_INFO_5                      5.35   1.83     2.92   0.00   1.43
-    ## W2_INFO_9                      6.25   1.95     3.20   0.00   1.28
-    ## SDO                           17.65   3.33     5.29   0.00   1.49
-    ## RWA                          -12.46   3.48    -3.58   0.00   1.46
-    ## W2_DAI_Total                  16.00   2.83     5.66   0.00   1.63
-    ## W2_IOU_Total                 -10.93   3.18    -3.44   0.00   1.66
-    ## W2_Paranoia_Total             10.22   2.71     3.78   0.00   1.81
-    ## W2_PO_Total                    7.97   3.14     2.54   0.01   2.27
-    ## W2_Chance_Total               -3.29   3.35    -0.98   0.33   1.94
-    ## W2_Internal_Total             -0.00   3.22    -0.00   1.00   1.30
-    ## threat                        -3.41   2.12    -1.61   0.11   1.24
-    ## crt                           -7.77   1.70    -4.56   0.00   1.31
-    ## CRT_test                      -0.65   1.06    -0.61   0.54   1.11
-    ## W1_Conspiracy_Total            2.60   2.68     0.97   0.33   1.17
-    ## conspiracy1_sc                 9.19   1.75     5.26   0.00   1.41
-    ## conspiracy2_sc                 1.04   1.80     0.58   0.56   1.11
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.05   0.04    -1.17   0.24       
+    ## W2_Gender_binary2            -0.00   0.01    -0.37   0.71   1.14
+    ## W1_Education_binary1          0.00   0.01     0.12   0.91   1.14
+    ## W1_Income_2019               -0.01   0.02    -0.84   0.40   1.24
+    ## age_sc                       -0.02   0.03    -0.85   0.40   1.53
+    ## fis_con                       0.02   0.03     0.72   0.47   1.46
+    ## nat                           0.02   0.02     0.85   0.40   1.37
+    ## distrust_science              0.14   0.02     6.32   0.00   1.22
+    ## red_top_tabloid               0.05   0.01     4.08   0.00   1.11
+    ## mid_level_news               -0.01   0.01    -0.54   0.59   1.15
+    ## elite_news                    0.01   0.01     0.96   0.33   1.14
+    ## W2_INFO_5                     0.05   0.02     2.92   0.00   1.43
+    ## W2_INFO_9                     0.06   0.02     3.20   0.00   1.28
+    ## SDO                           0.18   0.03     5.29   0.00   1.49
+    ## RWA                          -0.12   0.03    -3.58   0.00   1.46
+    ## W2_DAI_Total                  0.16   0.03     5.66   0.00   1.63
+    ## W2_IOU_Total                 -0.11   0.03    -3.44   0.00   1.66
+    ## W2_Paranoia_Total             0.10   0.03     3.78   0.00   1.81
+    ## W2_PO_Total                   0.08   0.03     2.54   0.01   2.27
+    ## W2_Chance_Total              -0.03   0.03    -0.98   0.33   1.94
+    ## W2_Internal_Total            -0.00   0.03    -0.00   1.00   1.30
+    ## threat                       -0.03   0.02    -1.61   0.11   1.24
+    ## crt                          -0.08   0.02    -4.56   0.00   1.31
+    ## CRT_test                     -0.01   0.01    -0.61   0.54   1.11
+    ## W1_Conspiracy_Total           0.03   0.03     0.97   0.33   1.17
+    ## conspiracy1_sc                0.09   0.02     5.26   0.00   1.41
+    ## conspiracy2_sc                0.01   0.02     0.58   0.56   1.11
+    ## ----------------------------------------------------------------
 
 ``` r
 par(mfrow = c(2,2))
@@ -2359,16 +2359,16 @@ plot(full_5g)
 AIC(multi_5g)
 ```
 
-    ## [1] 12151.07
+    ## [1] -734.1927
 
 ``` r
 AIC(full_5g)
 ```
 
-    ## [1] 12128.51
+    ## [1] -756.7554
 
 ``` r
-full_int_5g <- lm(W2_Conspiracy_Theory3 ~
+full_int_5g <- lm(conspiracy3_sc ~
                 #socio-economic variables
                 W2_Gender_binary +
                 W1_Education_binary +
@@ -2416,7 +2416,7 @@ summ(full_int_5g, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory3
+    ## Dependent Variable: conspiracy3_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -2425,38 +2425,38 @@ summ(full_int_5g, vifs = TRUE)
     ## Adj. R² = 0.30 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   -8.17   4.49    -1.82   0.07       
-    ## W2_Gender_binary2             -0.42   1.04    -0.40   0.69   1.14
-    ## W1_Education_binary1           0.17   1.07     0.16   0.87   1.14
-    ## W1_Income_2019                -1.23   1.51    -0.81   0.42   1.24
-    ## age_sc                        -2.56   2.83    -0.90   0.37   1.53
-    ## fis_con                        2.20   2.69     0.82   0.41   1.46
-    ## nat                            1.94   2.30     0.84   0.40   1.37
-    ## distrust_science              13.37   2.16     6.18   0.00   1.22
-    ## red_top_tabloid                4.69   1.17     4.02   0.00   1.11
-    ## mid_level_news                -0.64   1.12    -0.57   0.57   1.15
-    ## elite_news                     1.11   1.08     1.03   0.30   1.14
-    ## W2_INFO_5                      5.22   1.83     2.85   0.00   1.43
-    ## W2_INFO_9                      6.42   1.95     3.29   0.00   1.28
-    ## RWA                          -11.40   3.52    -3.24   0.00   1.49
-    ## W2_DAI_Total                  15.80   2.83     5.59   0.00   1.63
-    ## W2_IOU_Total                 -10.67   3.18    -3.35   0.00   1.66
-    ## W2_Paranoia_Total             10.21   2.70     3.78   0.00   1.81
-    ## W2_PO_Total                    7.76   3.14     2.47   0.01   2.27
-    ## W2_Internal_Total              0.24   3.22     0.08   0.94   1.30
-    ## W2_Chance_Total               -3.22   3.34    -0.96   0.34   1.94
-    ## threat                        -3.26   2.12    -1.54   0.12   1.24
-    ## CRT_test                      -0.68   1.06    -0.64   0.52   1.11
-    ## W1_Conspiracy_Total            2.92   2.68     1.09   0.28   1.18
-    ## conspiracy1_sc                 9.09   1.75     5.21   0.00   1.41
-    ## conspiracy2_sc                 0.87   1.80     0.48   0.63   1.12
-    ## crt                           -1.77   3.58    -0.50   0.62   5.82
-    ## SDO                           24.39   4.86     5.02   0.00   3.17
-    ## crt:SDO                      -16.54   8.68    -1.91   0.06   6.88
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  -0.08   0.04    -1.82   0.07       
+    ## W2_Gender_binary2            -0.00   0.01    -0.40   0.69   1.14
+    ## W1_Education_binary1          0.00   0.01     0.16   0.87   1.14
+    ## W1_Income_2019               -0.01   0.02    -0.81   0.42   1.24
+    ## age_sc                       -0.03   0.03    -0.90   0.37   1.53
+    ## fis_con                       0.02   0.03     0.82   0.41   1.46
+    ## nat                           0.02   0.02     0.84   0.40   1.37
+    ## distrust_science              0.13   0.02     6.18   0.00   1.22
+    ## red_top_tabloid               0.05   0.01     4.02   0.00   1.11
+    ## mid_level_news               -0.01   0.01    -0.57   0.57   1.15
+    ## elite_news                    0.01   0.01     1.03   0.30   1.14
+    ## W2_INFO_5                     0.05   0.02     2.85   0.00   1.43
+    ## W2_INFO_9                     0.06   0.02     3.29   0.00   1.28
+    ## RWA                          -0.11   0.04    -3.24   0.00   1.49
+    ## W2_DAI_Total                  0.16   0.03     5.59   0.00   1.63
+    ## W2_IOU_Total                 -0.11   0.03    -3.35   0.00   1.66
+    ## W2_Paranoia_Total             0.10   0.03     3.78   0.00   1.81
+    ## W2_PO_Total                   0.08   0.03     2.47   0.01   2.27
+    ## W2_Internal_Total             0.00   0.03     0.08   0.94   1.30
+    ## W2_Chance_Total              -0.03   0.03    -0.96   0.34   1.94
+    ## threat                       -0.03   0.02    -1.54   0.12   1.24
+    ## CRT_test                     -0.01   0.01    -0.64   0.52   1.11
+    ## W1_Conspiracy_Total           0.03   0.03     1.09   0.28   1.18
+    ## conspiracy1_sc                0.09   0.02     5.21   0.00   1.41
+    ## conspiracy2_sc                0.01   0.02     0.48   0.63   1.12
+    ## crt                          -0.02   0.04    -0.50   0.62   5.82
+    ## SDO                           0.24   0.05     5.02   0.00   3.17
+    ## crt:SDO                      -0.17   0.09    -1.91   0.06   6.88
+    ## ----------------------------------------------------------------
 
 ``` r
 par(mfrow = c(2,2))
@@ -2470,13 +2470,13 @@ plot(full_int_5g)
 AIC(full_5g)
 ```
 
-    ## [1] 12128.51
+    ## [1] -756.7554
 
 ``` r
 AIC(full_int_5g) # very weak support for interaction effect
 ```
 
-    ## [1] 12126.81
+    ## [1] -758.4582
 
 ## DV 5G IHS conspiracy - singular IV models
 
@@ -3527,7 +3527,7 @@ varImpPlot(rf_mod_5g)
 ## DV Chinese meat market - singular IV models
 
 ``` r
-sdo_meat <- lm(W2_Conspiracy_Theory2 ~ SDO,
+sdo_meat <- lm(conspiracy2_sc ~ SDO,
               data = conspiracies)
 
 summ(sdo_meat)
@@ -3535,7 +3535,7 @@ summ(sdo_meat)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3544,15 +3544,15 @@ summ(sdo_meat)
     ## Adj. R² = -0.00 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         63.79   1.73    36.94   0.00
-    ## SDO                  0.47   4.28     0.11   0.91
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.64   0.02    36.94   0.00
+    ## SDO                 0.00   0.04     0.11   0.91
+    ## -----------------------------------------------
 
 ``` r
-rwa_meat <- lm(W2_Conspiracy_Theory2 ~ RWA,
+rwa_meat <- lm(conspiracy2_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_meat)
@@ -3560,7 +3560,7 @@ summ(rwa_meat)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3569,15 +3569,15 @@ summ(rwa_meat)
     ## Adj. R² = -0.00 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------
-    ##                      Est.   S.E.   t val.      p
-    ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         61.75   2.44    25.31   0.00
-    ## RWA                  4.31   4.51     0.96   0.34
-    ## ------------------------------------------------
+    ## -----------------------------------------------
+    ##                     Est.   S.E.   t val.      p
+    ## ----------------- ------ ------ -------- ------
+    ## (Intercept)         0.62   0.02    25.31   0.00
+    ## RWA                 0.04   0.05     0.96   0.34
+    ## -----------------------------------------------
 
 ``` r
-mid_news_meat <- lm(W2_Conspiracy_Theory2 ~ mid_level_news,
+mid_news_meat <- lm(conspiracy2_sc ~ mid_level_news,
               data = conspiracies)
 
 summ(mid_news_meat)
@@ -3585,7 +3585,7 @@ summ(mid_news_meat)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3594,15 +3594,15 @@ summ(mid_news_meat)
     ## Adj. R² = 0.00 
     ## 
     ## Standard errors: OLS
-    ## ---------------------------------------------------
-    ##                         Est.   S.E.   t val.      p
-    ## -------------------- ------- ------ -------- ------
-    ## (Intercept)            63.27   0.93    68.25   0.00
-    ## mid_level_news          2.17   1.64     1.32   0.19
-    ## ---------------------------------------------------
+    ## --------------------------------------------------
+    ##                        Est.   S.E.   t val.      p
+    ## -------------------- ------ ------ -------- ------
+    ## (Intercept)            0.63   0.01    68.25   0.00
+    ## mid_level_news         0.02   0.02     1.32   0.19
+    ## --------------------------------------------------
 
 ``` r
-social_m_meat <- lm(W2_Conspiracy_Theory2 ~ W2_INFO_5,
+social_m_meat <- lm(conspiracy2_sc ~ W2_INFO_5,
               data = conspiracies)
 
 summ(social_m_meat)
@@ -3610,7 +3610,7 @@ summ(social_m_meat)
 
     ## MODEL INFO:
     ## Observations: 1406
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3622,14 +3622,14 @@ summ(social_m_meat)
     ## ------------------------------------------------
     ##                      Est.   S.E.   t val.      p
     ## ----------------- ------- ------ -------- ------
-    ## (Intercept)         64.51   1.05    61.26   0.00
-    ## W2_INFO_5           -1.80   2.39    -0.75   0.45
+    ## (Intercept)          0.65   0.01    61.26   0.00
+    ## W2_INFO_5           -0.02   0.02    -0.75   0.45
     ## ------------------------------------------------
 
 ## DV Chinese meat market belief - socio-economic variables
 
 ``` r
-se_meat <- lm(W2_Conspiracy_Theory2 ~ W2_Gender_binary +
+se_meat <- lm(conspiracy2_sc ~ W2_Gender_binary +
                W1_Education_binary +
                W1_Income_2019 +
                age_sc,
@@ -3640,7 +3640,7 @@ summ(se_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1403 (3 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3652,17 +3652,17 @@ summ(se_meat, vifs = TRUE)
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  57.89   2.51    23.08   0.00       
-    ## W2_Gender_binary2            -0.59   1.55    -0.38   0.70   1.03
-    ## W1_Education_binary1         -1.56   1.61    -0.97   0.33   1.06
-    ## W1_Income_2019                6.59   2.19     3.01   0.00   1.06
-    ## age_sc                        8.71   3.62     2.41   0.02   1.03
+    ## (Intercept)                   0.58   0.03    23.08   0.00       
+    ## W2_Gender_binary2            -0.01   0.02    -0.38   0.70   1.03
+    ## W1_Education_binary1         -0.02   0.02    -0.97   0.33   1.06
+    ## W1_Income_2019                0.07   0.02     3.01   0.00   1.06
+    ## age_sc                        0.09   0.04     2.41   0.02   1.03
     ## ----------------------------------------------------------------
 
 ## DV Chinese meat market belief - socio-economic variables + political/media
 
 ``` r
-se_pol_meat <- lm(W2_Conspiracy_Theory2 ~ 
+se_pol_meat <- lm(conspiracy2_sc ~ 
                    
                    #socio-economic variables
                    W2_Gender_binary +
@@ -3688,7 +3688,7 @@ summ(se_pol_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3697,42 +3697,42 @@ summ(se_pol_meat, vifs = TRUE)
     ## Adj. R² = 0.03 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   52.95   3.88    13.64   0.00       
-    ## W2_Gender_binary2              0.03   1.55     0.02   0.98   1.06
-    ## W1_Education_binary1          -1.20   1.63    -0.74   0.46   1.12
-    ## W1_Income_2019                 5.52   2.24     2.47   0.01   1.13
-    ## age_sc                         5.63   3.96     1.42   0.16   1.26
-    ## right                          1.29   5.19     0.25   0.80   1.97
-    ## soc_con                        1.74   3.38     0.52   0.61   1.51
-    ## fis_con                       -0.09   4.96    -0.02   0.99   2.08
-    ## nat                           14.66   3.43     4.28   0.00   1.28
-    ## distrust_science             -13.38   3.13    -4.28   0.00   1.08
-    ## red_top_tabloid                0.56   1.77     0.32   0.75   1.08
-    ## mid_level_news                 0.75   1.71     0.44   0.66   1.12
-    ## elite_news                     2.31   1.64     1.41   0.16   1.11
-    ## W2_INFO_5                     -0.21   2.75    -0.08   0.94   1.36
-    ## W2_INFO_9                      0.02   2.93     0.01   1.00   1.21
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.53   0.04    13.64   0.00       
+    ## W2_Gender_binary2             0.00   0.02     0.02   0.98   1.06
+    ## W1_Education_binary1         -0.01   0.02    -0.74   0.46   1.12
+    ## W1_Income_2019                0.06   0.02     2.47   0.01   1.13
+    ## age_sc                        0.06   0.04     1.42   0.16   1.26
+    ## right                         0.01   0.05     0.25   0.80   1.97
+    ## soc_con                       0.02   0.03     0.52   0.61   1.51
+    ## fis_con                      -0.00   0.05    -0.02   0.99   2.08
+    ## nat                           0.15   0.03     4.28   0.00   1.28
+    ## distrust_science             -0.13   0.03    -4.28   0.00   1.08
+    ## red_top_tabloid               0.01   0.02     0.32   0.75   1.08
+    ## mid_level_news                0.01   0.02     0.44   0.66   1.12
+    ## elite_news                    0.02   0.02     1.41   0.16   1.11
+    ## W2_INFO_5                    -0.00   0.03    -0.08   0.94   1.36
+    ## W2_INFO_9                     0.00   0.03     0.01   1.00   1.21
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_meat)
 ```
 
-    ## [1] 13392.6
+    ## [1] 470.4944
 
 ``` r
 AIC(se_pol_meat)
 ```
 
-    ## [1] 13327.15
+    ## [1] 441.8828
 
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych
 
 ``` r
-se_polpsych_meat <- lm(W2_Conspiracy_Theory2 ~
+se_polpsych_meat <- lm(conspiracy2_sc ~
                         
                         #socio-economic variables
                         W2_Gender_binary +
@@ -3766,7 +3766,7 @@ summ(se_polpsych_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3778,45 +3778,45 @@ summ(se_polpsych_meat, vifs = TRUE)
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  33.71   5.61     6.01   0.00       
-    ## W2_Gender_binary2            -0.74   1.57    -0.47   0.64   1.11
-    ## W1_Education_binary1         -1.07   1.61    -0.66   0.51   1.13
-    ## W1_Income_2019                4.74   2.27     2.09   0.04   1.20
-    ## age_sc                        4.78   4.20     1.14   0.26   1.46
-    ## fis_con                       1.40   4.08     0.34   0.73   1.45
-    ## nat                          13.29   3.46     3.84   0.00   1.35
-    ## distrust_science             -9.60   3.19    -3.01   0.00   1.15
-    ## red_top_tabloid               0.26   1.75     0.15   0.88   1.09
-    ## mid_level_news                0.83   1.68     0.50   0.62   1.12
-    ## elite_news                    1.84   1.63     1.13   0.26   1.13
-    ## W2_INFO_5                    -1.82   2.75    -0.66   0.51   1.40
-    ## W2_INFO_9                    -2.11   2.92    -0.72   0.47   1.24
-    ## SDO                          -2.29   4.96    -0.46   0.65   1.43
-    ## RWA                          -3.06   5.18    -0.59   0.56   1.40
-    ## W2_DAI_Total                  5.23   4.16     1.26   0.21   1.53
-    ## W2_IOU_Total                 16.48   4.74     3.48   0.00   1.59
-    ## W2_Paranoia_Total            -5.98   4.08    -1.47   0.14   1.79
-    ## W2_Internal_Total            18.87   4.82     3.91   0.00   1.26
-    ## W2_Chance_Total              15.10   5.06     2.98   0.00   1.93
-    ## W2_PO_Total                  -7.85   4.72    -1.66   0.10   2.23
+    ## (Intercept)                   0.34   0.06     6.01   0.00       
+    ## W2_Gender_binary2            -0.01   0.02    -0.47   0.64   1.11
+    ## W1_Education_binary1         -0.01   0.02    -0.66   0.51   1.13
+    ## W1_Income_2019                0.05   0.02     2.09   0.04   1.20
+    ## age_sc                        0.05   0.04     1.14   0.26   1.46
+    ## fis_con                       0.01   0.04     0.34   0.73   1.45
+    ## nat                           0.13   0.03     3.84   0.00   1.35
+    ## distrust_science             -0.10   0.03    -3.01   0.00   1.15
+    ## red_top_tabloid               0.00   0.02     0.15   0.88   1.09
+    ## mid_level_news                0.01   0.02     0.50   0.62   1.12
+    ## elite_news                    0.02   0.02     1.13   0.26   1.13
+    ## W2_INFO_5                    -0.02   0.03    -0.66   0.51   1.40
+    ## W2_INFO_9                    -0.02   0.03    -0.72   0.47   1.24
+    ## SDO                          -0.02   0.05    -0.46   0.65   1.43
+    ## RWA                          -0.03   0.05    -0.59   0.56   1.40
+    ## W2_DAI_Total                  0.05   0.04     1.26   0.21   1.53
+    ## W2_IOU_Total                  0.16   0.05     3.48   0.00   1.59
+    ## W2_Paranoia_Total            -0.06   0.04    -1.47   0.14   1.79
+    ## W2_Internal_Total             0.19   0.05     3.91   0.00   1.26
+    ## W2_Chance_Total               0.15   0.05     2.98   0.00   1.93
+    ## W2_PO_Total                  -0.08   0.05    -1.66   0.10   2.23
     ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_pol_meat)
 ```
 
-    ## [1] 13327.15
+    ## [1] 441.8828
 
 ``` r
 AIC(se_polpsych_meat)
 ```
 
-    ## [1] 13290.1
+    ## [1] 404.8347
 
 ## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ``` r
-multi_meat <- lm(W2_Conspiracy_Theory2 ~
+multi_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -3859,7 +3859,7 @@ summ(multi_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3871,50 +3871,50 @@ summ(multi_meat, vifs = TRUE)
     ## ----------------------------------------------------------------
     ##                               Est.   S.E.   t val.      p    VIF
     ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  28.16   6.01     4.68   0.00       
-    ## W2_Gender_binary2            -0.58   1.57    -0.37   0.71   1.13
-    ## W1_Education_binary1         -1.36   1.61    -0.85   0.40   1.13
-    ## W1_Income_2019                4.02   2.28     1.76   0.08   1.23
-    ## age_sc                        2.27   4.27     0.53   0.59   1.53
-    ## fis_con                       1.50   4.06     0.37   0.71   1.46
-    ## nat                          13.06   3.44     3.79   0.00   1.35
-    ## distrust_science             -8.54   3.19    -2.68   0.01   1.17
-    ## red_top_tabloid               0.18   1.76     0.10   0.92   1.11
-    ## mid_level_news                0.75   1.68     0.45   0.65   1.12
-    ## elite_news                    1.43   1.62     0.88   0.38   1.14
-    ## W2_INFO_5                    -1.93   2.76    -0.70   0.48   1.43
-    ## W2_INFO_9                    -3.33   2.93    -1.14   0.26   1.27
-    ## W2_Internal_Total            20.60   4.82     4.28   0.00   1.27
-    ## W2_Chance_Total              15.26   5.03     3.03   0.00   1.93
-    ## SDO                           0.28   4.98     0.06   0.95   1.46
-    ## RWA                          -4.07   5.21    -0.78   0.43   1.43
-    ## W2_DAI_Total                  2.48   4.24     0.59   0.56   1.61
-    ## W2_IOU_Total                 13.85   4.76     2.91   0.00   1.63
-    ## W2_Paranoia_Total            -6.66   4.07    -1.64   0.10   1.80
-    ## W2_PO_Total                  -7.68   4.70    -1.63   0.10   2.23
-    ## threat                       13.35   3.16     4.22   0.00   1.22
-    ## crt                           2.43   2.55     0.95   0.34   1.30
-    ## CRT_test                     -1.18   1.60    -0.73   0.46   1.10
+    ## (Intercept)                   0.28   0.06     4.68   0.00       
+    ## W2_Gender_binary2            -0.01   0.02    -0.37   0.71   1.13
+    ## W1_Education_binary1         -0.01   0.02    -0.85   0.40   1.13
+    ## W1_Income_2019                0.04   0.02     1.76   0.08   1.23
+    ## age_sc                        0.02   0.04     0.53   0.59   1.53
+    ## fis_con                       0.01   0.04     0.37   0.71   1.46
+    ## nat                           0.13   0.03     3.79   0.00   1.35
+    ## distrust_science             -0.09   0.03    -2.68   0.01   1.17
+    ## red_top_tabloid               0.00   0.02     0.10   0.92   1.11
+    ## mid_level_news                0.01   0.02     0.45   0.65   1.12
+    ## elite_news                    0.01   0.02     0.88   0.38   1.14
+    ## W2_INFO_5                    -0.02   0.03    -0.70   0.48   1.43
+    ## W2_INFO_9                    -0.03   0.03    -1.14   0.26   1.27
+    ## W2_Internal_Total             0.21   0.05     4.28   0.00   1.27
+    ## W2_Chance_Total               0.15   0.05     3.03   0.00   1.93
+    ## SDO                           0.00   0.05     0.06   0.95   1.46
+    ## RWA                          -0.04   0.05    -0.78   0.43   1.43
+    ## W2_DAI_Total                  0.02   0.04     0.59   0.56   1.61
+    ## W2_IOU_Total                  0.14   0.05     2.91   0.00   1.63
+    ## W2_Paranoia_Total            -0.07   0.04    -1.64   0.10   1.80
+    ## W2_PO_Total                  -0.08   0.05    -1.63   0.10   2.23
+    ## threat                        0.13   0.03     4.22   0.00   1.22
+    ## crt                           0.02   0.03     0.95   0.34   1.30
+    ## CRT_test                     -0.01   0.02    -0.73   0.46   1.10
     ## ----------------------------------------------------------------
 
 ``` r
 AIC(se_polpsych_meat)
 ```
 
-    ## [1] 13290.1
+    ## [1] 404.8347
 
 ``` r
 AIC(multi_meat)
 ```
 
-    ## [1] 13277.23
+    ## [1] 391.9616
 
 ## DV Chinese meat market belief - full model incl. conspiracy ideation
 
 Re-adding in LOC variables for comprehensiveness and transparency.
 
 ``` r
-full_meat <- lm(W2_Conspiracy_Theory2 ~
+full_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -3960,7 +3960,7 @@ summ(full_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -3969,40 +3969,40 @@ summ(full_meat, vifs = TRUE)
     ## Adj. R² = 0.09 
     ## 
     ## Standard errors: OLS
-    ## -----------------------------------------------------------------
-    ##                                Est.   S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------ -------- ------ ------
-    ## (Intercept)                   26.61   6.15     4.32   0.00       
-    ## W2_Gender_binary2             -0.43   1.56    -0.27   0.79   1.14
-    ## W1_Education_binary1          -1.79   1.60    -1.12   0.26   1.13
-    ## W1_Income_2019                 3.58   2.27     1.58   0.12   1.23
-    ## age_sc                         2.42   4.25     0.57   0.57   1.53
-    ## fis_con                        1.72   4.04     0.43   0.67   1.46
-    ## nat                           14.13   3.43     4.12   0.00   1.36
-    ## distrust_science              -7.08   3.28    -2.16   0.03   1.25
-    ## red_top_tabloid                0.69   1.76     0.39   0.69   1.13
-    ## mid_level_news                 1.95   1.69     1.15   0.25   1.15
-    ## elite_news                     1.25   1.61     0.78   0.44   1.14
-    ## W2_INFO_5                     -1.40   2.75    -0.51   0.61   1.44
-    ## W2_INFO_9                     -2.16   2.94    -0.74   0.46   1.29
-    ## SDO                            1.83   5.05     0.36   0.72   1.52
-    ## RWA                           -2.18   5.24    -0.41   0.68   1.47
-    ## W2_DAI_Total                   3.78   4.29     0.88   0.38   1.67
-    ## W2_IOU_Total                  12.45   4.78     2.61   0.01   1.66
-    ## W2_Paranoia_Total             -5.51   4.08    -1.35   0.18   1.83
-    ## W2_Internal_Total             21.17   4.80     4.41   0.00   1.28
-    ## W2_Chance_Total               15.11   5.00     3.02   0.00   1.93
-    ## W2_PO_Total                   -7.46   4.72    -1.58   0.11   2.28
-    ## threat                        14.30   3.15     4.53   0.00   1.22
-    ## crt                            1.53   2.57     0.59   0.55   1.33
-    ## CRT_test                      -0.87   1.60    -0.55   0.59   1.11
-    ## W1_Conspiracy_Total            2.45   4.01     0.61   0.54   1.17
-    ## conspiracy1_sc               -11.89   2.63    -4.53   0.00   1.41
-    ## conspiracy3_sc                 2.35   4.05     0.58   0.56   1.45
-    ## -----------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.27   0.06     4.32   0.00       
+    ## W2_Gender_binary2            -0.00   0.02    -0.27   0.79   1.14
+    ## W1_Education_binary1         -0.02   0.02    -1.12   0.26   1.13
+    ## W1_Income_2019                0.04   0.02     1.58   0.12   1.23
+    ## age_sc                        0.02   0.04     0.57   0.57   1.53
+    ## fis_con                       0.02   0.04     0.43   0.67   1.46
+    ## nat                           0.14   0.03     4.12   0.00   1.36
+    ## distrust_science             -0.07   0.03    -2.16   0.03   1.25
+    ## red_top_tabloid               0.01   0.02     0.39   0.69   1.13
+    ## mid_level_news                0.02   0.02     1.15   0.25   1.15
+    ## elite_news                    0.01   0.02     0.78   0.44   1.14
+    ## W2_INFO_5                    -0.01   0.03    -0.51   0.61   1.44
+    ## W2_INFO_9                    -0.02   0.03    -0.74   0.46   1.29
+    ## SDO                           0.02   0.05     0.36   0.72   1.52
+    ## RWA                          -0.02   0.05    -0.41   0.68   1.47
+    ## W2_DAI_Total                  0.04   0.04     0.88   0.38   1.67
+    ## W2_IOU_Total                  0.12   0.05     2.61   0.01   1.66
+    ## W2_Paranoia_Total            -0.06   0.04    -1.35   0.18   1.83
+    ## W2_Internal_Total             0.21   0.05     4.41   0.00   1.28
+    ## W2_Chance_Total               0.15   0.05     3.02   0.00   1.93
+    ## W2_PO_Total                  -0.07   0.05    -1.58   0.11   2.28
+    ## threat                        0.14   0.03     4.53   0.00   1.22
+    ## crt                           0.02   0.03     0.59   0.55   1.33
+    ## CRT_test                     -0.01   0.02    -0.55   0.59   1.11
+    ## W1_Conspiracy_Total           0.02   0.04     0.61   0.54   1.17
+    ## conspiracy1_sc               -0.12   0.03    -4.53   0.00   1.41
+    ## conspiracy3_sc                0.02   0.04     0.58   0.56   1.45
+    ## ----------------------------------------------------------------
 
 ``` r
-full_int_meat <- lm(W2_Conspiracy_Theory2 ~
+full_int_meat <- lm(conspiracy2_sc ~
                   
                   #socio-economic variables
                   W2_Gender_binary +
@@ -4051,7 +4051,7 @@ summ(full_int_meat, vifs = TRUE)
 
     ## MODEL INFO:
     ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: W2_Conspiracy_Theory2
+    ## Dependent Variable: conspiracy2_sc
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
@@ -4060,56 +4060,56 @@ summ(full_int_meat, vifs = TRUE)
     ## Adj. R² = 0.09 
     ## 
     ## Standard errors: OLS
-    ## ------------------------------------------------------------------
-    ##                                Est.    S.E.   t val.      p    VIF
-    ## -------------------------- -------- ------- -------- ------ ------
-    ## (Intercept)                   21.48    6.71     3.20   0.00       
-    ## W2_Gender_binary2             -0.48    1.56    -0.31   0.76   1.14
-    ## W1_Education_binary1          -1.72    1.60    -1.08   0.28   1.14
-    ## W1_Income_2019                 3.63    2.27     1.60   0.11   1.23
-    ## age_sc                         2.17    4.24     0.51   0.61   1.53
-    ## fis_con                        2.10    4.04     0.52   0.60   1.46
-    ## nat                           14.09    3.43     4.11   0.00   1.36
-    ## distrust_science              -7.42    3.28    -2.26   0.02   1.25
-    ## red_top_tabloid                0.60    1.76     0.34   0.73   1.13
-    ## mid_level_news                 1.88    1.68     1.11   0.27   1.15
-    ## elite_news                     1.36    1.61     0.84   0.40   1.14
-    ## W2_INFO_5                     -1.58    2.75    -0.57   0.57   1.44
-    ## W2_INFO_9                     -1.88    2.94    -0.64   0.52   1.29
-    ## RWA                           -0.63    5.30    -0.12   0.90   1.50
-    ## W2_DAI_Total                   3.53    4.29     0.82   0.41   1.67
-    ## W2_IOU_Total                  12.77    4.78     2.67   0.01   1.66
-    ## W2_Paranoia_Total             -5.47    4.07    -1.34   0.18   1.83
-    ## W2_Internal_Total             21.49    4.80     4.48   0.00   1.28
-    ## W2_Chance_Total               15.16    5.00     3.03   0.00   1.93
-    ## W2_PO_Total                   -7.72    4.72    -1.64   0.10   2.28
-    ## threat                        14.47    3.15     4.59   0.00   1.22
-    ## CRT_test                      -0.91    1.59    -0.57   0.57   1.11
-    ## W1_Conspiracy_Total            2.93    4.02     0.73   0.47   1.18
-    ## conspiracy1_sc               -11.97    2.62    -4.56   0.00   1.41
-    ## conspiracy3_sc                 1.95    4.05     0.48   0.63   1.46
-    ## SDO                           12.02    7.35     1.64   0.10   3.23
-    ## crt                           10.50    5.36     1.96   0.05   5.80
-    ## SDO:crt                      -24.82   13.01    -1.91   0.06   6.88
-    ## ------------------------------------------------------------------
+    ## ----------------------------------------------------------------
+    ##                               Est.   S.E.   t val.      p    VIF
+    ## -------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                   0.21   0.07     3.20   0.00       
+    ## W2_Gender_binary2            -0.00   0.02    -0.31   0.76   1.14
+    ## W1_Education_binary1         -0.02   0.02    -1.08   0.28   1.14
+    ## W1_Income_2019                0.04   0.02     1.60   0.11   1.23
+    ## age_sc                        0.02   0.04     0.51   0.61   1.53
+    ## fis_con                       0.02   0.04     0.52   0.60   1.46
+    ## nat                           0.14   0.03     4.11   0.00   1.36
+    ## distrust_science             -0.07   0.03    -2.26   0.02   1.25
+    ## red_top_tabloid               0.01   0.02     0.34   0.73   1.13
+    ## mid_level_news                0.02   0.02     1.11   0.27   1.15
+    ## elite_news                    0.01   0.02     0.84   0.40   1.14
+    ## W2_INFO_5                    -0.02   0.03    -0.57   0.57   1.44
+    ## W2_INFO_9                    -0.02   0.03    -0.64   0.52   1.29
+    ## RWA                          -0.01   0.05    -0.12   0.90   1.50
+    ## W2_DAI_Total                  0.04   0.04     0.82   0.41   1.67
+    ## W2_IOU_Total                  0.13   0.05     2.67   0.01   1.66
+    ## W2_Paranoia_Total            -0.05   0.04    -1.34   0.18   1.83
+    ## W2_Internal_Total             0.21   0.05     4.48   0.00   1.28
+    ## W2_Chance_Total               0.15   0.05     3.03   0.00   1.93
+    ## W2_PO_Total                  -0.08   0.05    -1.64   0.10   2.28
+    ## threat                        0.14   0.03     4.59   0.00   1.22
+    ## CRT_test                     -0.01   0.02    -0.57   0.57   1.11
+    ## W1_Conspiracy_Total           0.03   0.04     0.73   0.47   1.18
+    ## conspiracy1_sc               -0.12   0.03    -4.56   0.00   1.41
+    ## conspiracy3_sc                0.02   0.04     0.48   0.63   1.46
+    ## SDO                           0.12   0.07     1.64   0.10   3.23
+    ## crt                           0.10   0.05     1.96   0.05   5.80
+    ## SDO:crt                      -0.25   0.13    -1.91   0.06   6.88
+    ## ----------------------------------------------------------------
 
 ``` r
 AIC(multi_meat)
 ```
 
-    ## [1] 13277.23
+    ## [1] 391.9616
 
 ``` r
 AIC(full_meat)
 ```
 
-    ## [1] 13262.45
+    ## [1] 377.181
 
 ``` r
 AIC(full_int_meat) # very weak support for interactions
 ```
 
-    ## [1] 13260.74
+    ## [1] 375.472
 
 # Summary of final models
 
@@ -4306,30 +4306,27 @@ summary(full_meat)$adj.r.squared
 ``` r
 model_vars <- c("W1_Education_binary1","crt",
                 "red_top_tabloid","mid_level_news",
-                "W2_INFO_5","W2_INFO_9",
-                "distrust_science","SDO",
-                "RWA","W1_Conspiracy_Total","conspiracy1_sc",
-                "conspiracy2_sc","conspiracy3_sc")
+                "W2_INFO_5","W2_INFO_9","SDO",
+                "RWA")
 names(model_vars) <- c("Post-secondary education","CRT",
                        "Tabloid news","Mid-level news",
                        "Social media",
-                       "Family and friends","Distrusts science",
-                       "SDO","RWA","Conspiracy ideation","Wuhan lab",
-                       "Meat market","5G")
+                       "Family and friends",
+                       "SDO","RWA")
 
 plot_coefs(
-  full_lab,full_5g,
-  model.names = c("Wuhan lab","5G"),
+  full_lab,full_5g,full_meat,
+  model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
   theme(legend.position = "top") +
   labs(
     caption = "Model Coefficients: Multivariate Linear Regression"
   ) +
-  theme(plot.caption = element_text(hjust = 0.5,
+  theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
-                                    hjust = 0.36),
+                                    hjust = 0.43),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
@@ -4341,7 +4338,7 @@ plot_coefs(
 ## Conspiracies and social distancing
 
 ``` r
-# loading paackage for multi nom
+# loading package for multi nom
 pacman::p_load(nnet)
 ```
 
@@ -4801,35 +4798,9 @@ var_summaries <- tibble(
   variable = names(all_vars),
   mean = all_vars %>% map_dbl(mean, na.rm = TRUE),
   sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
-) %>% 
-  filter(!variable %in% c("conspiracy1_sc","conspiracy2_sc",
-                          "conspiracy3_sc"))
-write.csv(
-  rbind(
-    var_summaries,
-    tibble(
-      variable = c("Wuhan lab belief","Chinese meat market belief",
-                 "5G belief"),
-      mean = c(
-        mean(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        mean(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        mean(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE)
-        ),
-      sd = c(
-        sd(conspiracies$W2_Conspiracy_Theory1[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        sd(conspiracies$W2_Conspiracy_Theory2[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE),
-        sd(conspiracies$W2_Conspiracy_Theory3[conspiracies$pid %in% 
-                                         conspiracies2$pid], na.rm = TRUE)
-        )
-      )
-    ), 
-  "variable_summaries.csv"
 )
+
+write.csv(var_summaries,"variable_summaries.csv")
 ```
 
 ``` r
