@@ -2197,9 +2197,8 @@ plot_coefs(
   full_lab,full_5g,full_meat,
   model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
-  theme(legend.position = "top") +
   labs(
-    caption = "Model Coefficients: Multivariate Linear Regression"
+    caption = "Figure 4: OLS model comparison"
   ) +
   theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
@@ -2330,8 +2329,32 @@ dist_full <- lm(social_distance ~
                   conspiracy3_sc,
                 data = conspiracies2)
 
+dist_plots <- c("age_sc","W2_Gender_binary2","W2_INFO_9",
+                "threat","W2_DAI_Total","distrust_science",
+                "W2_IOU_Total","W2_Internal_Total","RWA","SDO",
+                "W1_Conspiracy_Total","conspiracy3_sc",
+                "conspiracy2_sc","conspiracy1_sc")
+names(dist_plots) <- c("Age","Gender",
+              "Family and friends","COVID-19 anxiety","Death anxiety",
+              "Distrust scientists","Intolerance of uncertainty",
+              "LOC: internal","RWA",
+              "SDO","Conspiracy ideation","5G belief",
+              "Meat market belief","Wuhan lab belief")
+
+
 summ(dist_full, vifs = TRUE)
-plot_coefs(dist_full)
+plot_coefs(dist_full,
+           coefs = dist_plots
+           ) +
+  labs(
+    caption = "Figure 5: Social distancing motivation"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.55,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.41)
+  )
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
@@ -2386,36 +2409,64 @@ vax_full <- multinom(W2_C19_Vax_Self ~
 
 
 ```{r}
-sum_table <- summary(vax_full)
+vax_plots <- c("age_sc","W2_Gender_binary2","W1_Income_2019","threat",
+               "distrust_science","nat","RWA","SDO","W1_Conspiracy_Total",
+               "conspiracy3_sc","conspiracy2_sc","conspiracy1_sc")
 
-results <- left_join(
-  coef(vax_full) %>% as_tibble() %>% 
-    gather(variable,coefficient,`(Intercept)`:conspiracy3_sc) %>% 
-    mutate(response = rep(c("No","Maybe"),28)),
-  sum_table$standard.errors %>% as_tibble() %>% 
-    gather(variable, std_error,`(Intercept)`:conspiracy3_sc) %>% 
-    mutate(response = rep(c("No","Maybe"),28)),
-  by = c("variable","response")
-) %>% 
-  dplyr::select(variable,response,everything()) %>% 
+names(vax_plots) <- c("Age","Gender","Income","COVID-19 anxiety",
+                      "Distrust scientists","Nationalism",
+                      "RWA","SDO","Conspiracy ideation",
+                      "5G belief","Meat market belief","Wuhan lab belief")
+
+tidies <- tidy(vax_full) %>%
+  filter(term %in% vax_plots) %>% 
   mutate(
-    upper_ci = coefficient + std_error * qnorm(0.975),
-    lower_ci = coefficient - std_error * qnorm(0.975)
-  )
+    odds_ratio = exp(estimate),
+    conf.low = estimate - std.error * qnorm(0.975),
+    conf.high = estimate + std.error * qnorm(0.975),
+    conf.low.exp = exp(estimate - std.error * qnorm(0.975)),
+    conf.high.exp = exp(estimate + std.error * qnorm(0.975)),
+    y.level = fct_recode(as.factor(y.level),
+                              "No" = "2",
+                              "Maybe" = "3"),
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots)))) %>%
+  rename(Level = y.level)  
 
-results %>% 
-  filter(variable != "(Intercept)") %>% 
-  ggplot(aes(x = variable, y = coefficient)) +
-  geom_hline(yintercept = 0, colour = "black", linetype = "dashed") +
-  geom_line(data = results %>% filter(variable != "(Intercept)") %>% 
-              gather(interval,estimate,upper_ci:lower_ci),
-            aes(x = variable, y = estimate), colour = "black") + 
-  geom_point(size = 2, colour = "black") +
-  geom_point(size = 1.5, colour = "white") +
-  facet_wrap(~response) +
-  coord_flip() +
-  theme_bw() +
-  labs(title = "Vaccine acceptance (baseline = Yes)")
+ggplot(data = tidies, 
+       aes(y = term, 
+           x = estimate, xmin = conf.low,
+                          xmax = conf.high, colour = Level)) + 
+  geom_vline(xintercept = 0, linetype = 2, size = .25) +
+  ggstance::geom_linerangeh(
+  aes(y = term, xmin = conf.low,
+      xmax = conf.high, colour = Level),
+  position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+  geom_point(
+    aes(y = term, 
+        x = estimate, colour = Level, shape = Level),
+    position = ggstance::position_dodgev(height = 0.62),
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice(legend.pos = "right") +
+  scale_shape_manual(values = c(21,22)) +
+  scale_y_discrete(labels = rev(names(vax_plots))) +
+  drop_y_gridlines() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 10),
+        panel.grid.major.x = element_line(linetype = "solid")) +
+  labs(
+    caption = "Figure 6: Vaccine acceptance - multinomial logit regression",
+    x = "Estimate"
+  ) +
+  theme(plot.caption = element_text(hjust = 0.61,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.43),
+        legend.title = element_text(size = 9),
+        legend.position = c(1,1), legend.direction = "vertical",
+        legend.justification = c(1,1),
+        legend.background = element_rect(colour = "darkgrey", fill = NA))
 ```
 
 ## Conspiracy belief and trust in government institutions
