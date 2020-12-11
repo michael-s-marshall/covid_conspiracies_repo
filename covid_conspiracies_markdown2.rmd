@@ -866,8 +866,8 @@ full_int_lab <- lm(conspiracy1_sc ~
                   W2_INFO_9 + #family and friends
                   
                   #political-psychology variables
-                  SDO +
-                  #RWA +
+                  #SDO +
+                  RWA +
                   W2_DAI_Total +
                   W2_IOU_Total +
                   W2_Paranoia_Total +
@@ -2105,22 +2105,26 @@ names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
               "LOC: powerful others","Nationalism","Paranoia","RWA",
               "SDO","CRT","CRT pre-exposure","Conspiracy ideation")
 
-lab_vars <- c(to_plot, "conspiracy3_sc","conspiracy2_sc")
-names(lab_vars) <- c(names(to_plot), "5G belief", "Meat market belief")
+lab_vars1 <- c(to_plot, "conspiracy3_sc","conspiracy2_sc")
+names(lab_vars1) <- c(names(to_plot), "5G belief", "Meat market belief")
+lab_vars1 <- lab_vars1[sort(names(lab_vars1))]
+lab_vars <- c(lab_vars1[-1],"conspiracy3_sc")
+names(lab_vars) <- c(names(lab_vars1)[-1],"5G belief")
+
 
 plot_coefs(
   full_lab,
   coefs = lab_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 1 - Model 1 coefficients: belief in Wuhan laboratory origin"
+    caption = "Figure 1: Model 1 - belief in Wuhan laboratory origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
                                     hjust = 0.36)
-  )
+        )
 
 summary(full_lab)$r.squared
 summary(full_lab)$adj.r.squared
@@ -2131,13 +2135,14 @@ summary(full_lab)$adj.r.squared
 fiveg_vars <- c(to_plot, "conspiracy2_sc","conspiracy1_sc")
 names(fiveg_vars) <- c(names(to_plot),"Meat market belief",
                      "Wuhan lab belief")
+fiveg_vars <- fiveg_vars[sort(names(fiveg_vars))]
 
 plot_coefs(
   full_5g,
   coefs = fiveg_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 3 - Model 3 coefficients: belief in 5G origin"
+    caption = "Figure 2: Model 2 - belief in 5G origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -2152,22 +2157,60 @@ summary(full_5g)$adj.r.squared
 ```
 
 ```{r}
+# plot for IHS model
+plot_coefs(
+  full_5g_ihs,
+  coefs = fiveg_vars) +
+  theme(legend.position = "top") +
+  labs(
+    caption = "Figure 2A: Model 2a - belief in 5G origin IHS transformation"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.38)
+  )
+```
+
+
+
+```{r}
 # 5G belief - full set of variables and interaction term
 summ(full_int_5g_poiss)
-plot_coefs(full_int_5g_poiss)
+int_vars <- c(fiveg_vars,"crt:SDO")
+names(int_vars) <- c(names(fiveg_vars),"CRT:SDO")
+int_vars <- int_vars[sort(names(int_vars))]
+plot_coefs(
+  full_int_5g_poiss,
+  coefs = int_vars
+  ) +
+  labs(
+    caption = "Figure 2B: Model 2b - belief in 5G origin poisson with interaction"
+  ) + 
+  theme(plot.caption = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.4)
+  )
 ```
+
 
 ```{r}
 # Chinese meat market model - full set of variables
-meat_vars <- c(to_plot, "conspiracy3_sc","conspiracy1_sc")
-names(meat_vars) <- c(names(to_plot),"5G belief",
+meat_vars1 <- c(to_plot, "conspiracy3_sc","conspiracy1_sc")
+names(meat_vars1) <- c(names(to_plot),"5G belief",
                      "Wuhan lab belief")
+meat_vars1 <- meat_vars1[sort(names(meat_vars1))]
+meat_vars <- c(meat_vars1[-1],"conspiracy3_sc")
+names(meat_vars) <- c(names(meat_vars1)[-1],"5G belief")
 
 plot_coefs(
   full_meat,
   coefs = meat_vars) +
   labs(
-    caption = "Figure 2 - Model 2 coefficients: belief in meat market origin"
+    caption = "Figure 3: Model 3 - belief in meat market origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -2193,6 +2236,8 @@ names(model_vars) <- c("Post-secondary education","CRT",
                        "Family and friends",
                        "SDO","RWA")
 
+model_vars <- model_vars[sort(names(model_vars))]
+
 plot_coefs(
   full_lab,full_5g,full_meat,
   model.names = c("Wuhan lab","5G","Meat market"),
@@ -2208,7 +2253,8 @@ plot_coefs(
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
-        legend.background = element_rect(colour = "darkgrey", fill = NA))
+        legend.background = element_rect(colour = "darkgrey", 
+                                         fill = "white"))
 ```
 
 
@@ -2329,17 +2375,21 @@ dist_full <- lm(social_distance ~
                   conspiracy3_sc,
                 data = conspiracies2)
 
-dist_plots <- c("age_sc","W2_Gender_binary2","W2_INFO_9",
+dist_plots1 <- c("age_sc","W2_Gender_binary2","W2_INFO_9",
                 "threat","W2_DAI_Total","distrust_science",
                 "W2_IOU_Total","W2_Internal_Total","RWA","SDO",
                 "W1_Conspiracy_Total","conspiracy3_sc",
                 "conspiracy2_sc","conspiracy1_sc")
-names(dist_plots) <- c("Age","Gender",
+names(dist_plots1) <- c("Age","Gender",
               "Family and friends","COVID-19 anxiety","Death anxiety",
               "Distrust scientists","Intolerance of uncertainty",
               "LOC: internal","RWA",
               "SDO","Conspiracy ideation","5G belief",
               "Meat market belief","Wuhan lab belief")
+
+dist_plots1 <- dist_plots1[sort(names(dist_plots1))]
+dist_plots <- c(dist_plots1[-1],"conspiracy3_sc")
+names(dist_plots) <- c(names(dist_plots1)[-1],"5G belief")
 
 
 summ(dist_full, vifs = TRUE)
@@ -2409,14 +2459,18 @@ vax_full <- multinom(W2_C19_Vax_Self ~
 
 
 ```{r}
-vax_plots <- c("age_sc","W2_Gender_binary2","W1_Income_2019","threat",
+vax_plots1 <- c("age_sc","W2_Gender_binary2","W1_Income_2019","threat",
                "distrust_science","nat","RWA","SDO","W1_Conspiracy_Total",
                "conspiracy3_sc","conspiracy2_sc","conspiracy1_sc")
 
-names(vax_plots) <- c("Age","Gender","Income","COVID-19 anxiety",
+names(vax_plots1) <- c("Age","Gender","Income","COVID-19 anxiety",
                       "Distrust scientists","Nationalism",
                       "RWA","SDO","Conspiracy ideation",
                       "5G belief","Meat market belief","Wuhan lab belief")
+
+vax_plots1 <- vax_plots1[sort(names(vax_plots1))]
+vax_plots <- c(vax_plots1[-1],"conspiracy3_sc")
+names(vax_plots) <- c(names(vax_plots1[-1]),"5G belief")
 
 tidies <- tidy(vax_full) %>%
   filter(term %in% vax_plots) %>% 
@@ -2462,81 +2516,12 @@ ggplot(data = tidies,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
-                                    hjust = 0.43),
+                                    hjust = 0.54),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
-        legend.background = element_rect(colour = "darkgrey", fill = NA))
-```
-
-## Conspiracy belief and trust in government institutions
-
-```{r}
-# governmental trust scale
-trust_keys <- list(sd = cs(W2_Trust_Body1,W2_Trust_Body2,
-                           W2_Trust_Body5
-                           ))
-
-trust_test <- scoreItems(trust_keys, conspiracies2, min = 1, max = 5)
-head(trust_test$scores)
-trust_test$alpha  # Scale alpha
-conspiracies2$govt_distrust <- rescale01(trust_test$scores, na.rm = TRUE)
-conspiracies2$govt_distrust <- c(conspiracies2$govt_distrust)  # Ensure variable is numeric and not matrix class
-conspiracies2$govt_trust <- 0 - conspiracies2$govt_distrust
-
-describe(conspiracies2$govt_trust)
-ggplot(conspiracies2, aes(x = govt_trust, y = ..density..)) +
-  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
-```
-
-Note: trust in science (distrust_science) removed, as may be tapping into a latent 'distrustful' disposition invalidating the exogeneity assumption.  
-
-```{r}
-trust_full <- lm(govt_trust ~ 
-                  #socio-economic variables
-                  W2_Gender_binary +
-                  W1_Education_binary +
-                  W1_Income_2019 +
-                  age_sc +
-                  
-                  #political and media variables
-                  fis_con +
-                  nat +
-                  #distrust_science + #distrust of scientists
-                  red_top_tabloid + 
-                  mid_level_news + 
-                  elite_news +
-                  W2_INFO_5 + #social media
-                  W2_INFO_9 + #family and friends
-                  
-                  #political-psychology variables
-                  SDO +
-                  RWA +
-                  W2_DAI_Total +
-                  W2_IOU_Total +
-                  W2_Paranoia_Total +
-                  W2_Chance_Total +
-                  W2_PO_Total +
-                  W2_Internal_Total +
-                  
-                  #covid-anxiety
-                  threat +
-                 
-                  #CRT
-                  crt +
-                  CRT_test +
-                  
-                  #conspiracies
-                  W1_Conspiracy_Total +
-                  conspiracy1_sc +
-                  conspiracy2_sc +
-                  conspiracy3_sc,
-                 data = conspiracies2)
-
-summ(trust_full, vifs = TRUE)
-plot_coefs(trust_full)
-par(mfrow = c(2,2))
-plot(trust_full)
+        legend.background = element_rect(colour = "darkgrey", 
+                                         fill = "white"))
 ```
 
 ## Table summarising variables
