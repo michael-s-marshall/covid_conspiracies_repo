@@ -31,33 +31,24 @@ df %>%
   dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
   gather(conspiracy_code, belief,
          W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
-  mutate(
-    conspiracy_code = as.factor(conspiracy_code),
-    conspiracy = ifelse(
-      conspiracy_code == "W2_Conspiracy_Theory1",
-      "Chinese lab",
-      ifelse(conspiracy_code == "W2_Conspiracy_Theory2",
-             "Chinese meat market",
-             ifelse(conspiracy_code == "W2_Conspiracy_Theory3",
-                    "5G",
-                    ifelse(conspiracy_code == "W2_Conspiracy_Theory4",
-                           "No worse than flu",
-                           "Vitamin C treatment"))))
-  ) %>% 
-  ggplot(aes(x = belief, y = conspiracy, height = ..density..)) +
-  geom_density_ridges(aes(fill = conspiracy,
-                          rel_min_height = 0.005),
+  mutate(conspiracy_code = as.factor(conspiracy_code)) %>%
+  filter(!conspiracy_code %in% c("W2_Conspiracy_Theory4",
+                                 "W2_Conspiracy_Theory5")) %>% 
+  ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
+  geom_density_ridges(aes(rel_min_height = 0.005),
                       stat = "density",
-                      #bins = 20,
-                      show.legend = FALSE) +
-  scale_fill_brewer(palette = "Dark2") +
-  theme_ridges()
+                      fill = "grey") +
+  theme_nice() +
+  scale_y_discrete(labels = c("Wuhan laboratory","Meat market","5G")) +
+  labs(y = NULL, x = "Belief scale (0-100)",
+       caption = "Figure 1: Distribution of origin theory belief") +
+  theme(plot.caption = element_text(hjust = 0.65,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.5)
+  )
 ```
-
-    ## Warning: attributes are not identical across measure variables;
-    ## they will be dropped
-
-    ## Warning: Removed 7360 rows containing non-finite values (stat_density).
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -4142,7 +4133,7 @@ plot_coefs(
   coefs = lab_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 1: Model 1 - belief in Wuhan laboratory origin"
+    caption = "Figure 2: Model 1 - belief in Wuhan laboratory origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4180,7 +4171,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 2: Model 2 - belief in 5G origin"
+    caption = "Figure 3: Model 2 - belief in 5G origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4213,7 +4204,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 2A: Model 2a - belief in 5G origin IHS transformation"
+    caption = "Figure 3A: Model 2a - belief in 5G origin IHS transformation"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4293,7 +4284,7 @@ plot_coefs(
   coefs = int_vars
   ) +
   labs(
-    caption = "Figure 2B: Model 2b - belief in 5G origin poisson with interaction"
+    caption = "Figure 3B: Model 2b - belief in 5G origin poisson with interaction"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4320,7 +4311,7 @@ plot_coefs(
   full_meat,
   coefs = meat_vars) +
   labs(
-    caption = "Figure 3: Model 3 - belief in meat market origin"
+    caption = "Figure 4: Model 3 - belief in meat market origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4366,7 +4357,7 @@ plot_coefs(
   model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
   labs(
-    caption = "Figure 4: OLS model comparison"
+    caption = "Figure 5: OLS model comparison"
   ) +
   theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
@@ -4593,7 +4584,7 @@ plot_coefs(dist_full,
            coefs = dist_plots
            ) +
   labs(
-    caption = "Figure 5: Social distancing motivation"
+    caption = "Figure 6: Social distancing motivation"
   ) + 
   theme(plot.caption = element_text(hjust = 0.55,
                                     face = "bold",
@@ -4729,7 +4720,7 @@ ggplot(data = tidies,
         axis.text.y = element_text(size = 10),
         panel.grid.major.x = element_line(linetype = "solid")) +
   labs(
-    caption = "Figure 6: Vaccine acceptance - multinomial logit regression",
+    caption = "Figure 7: Vaccine acceptance - multinomial logit regression",
     x = "Estimate"
   ) +
   theme(plot.caption = element_text(hjust = 0.61,
