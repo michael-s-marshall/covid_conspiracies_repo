@@ -41,8 +41,8 @@ df %>%
   theme_nice() +
   scale_y_discrete(labels = c("Wuhan laboratory","Meat market","5G")) +
   labs(y = NULL, x = "Belief scale (0-100)",
-       caption = "Figure 1: Distribution of origin theory belief") +
-  theme(plot.caption = element_text(hjust = 0.65,
+       caption = "Distribution of origin theory belief") +
+  theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
@@ -4133,7 +4133,7 @@ plot_coefs(
   coefs = lab_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 2: Model 1 - belief in Wuhan laboratory origin"
+    caption = "Figure 1: Model 1 - belief in Wuhan laboratory origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4171,7 +4171,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 3: Model 2 - belief in 5G origin"
+    caption = "Figure 2: Model 2 - belief in 5G origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4204,7 +4204,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 3A: Model 2a - belief in 5G origin IHS transformation"
+    caption = "Figure A1: Model 2a - belief in 5G origin IHS transformation"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4284,7 +4284,7 @@ plot_coefs(
   coefs = int_vars
   ) +
   labs(
-    caption = "Figure 3B: Model 2b - belief in 5G origin poisson with interaction"
+    caption = "Figure A2: Model 2b - belief in 5G origin poisson with interaction"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4311,7 +4311,7 @@ plot_coefs(
   full_meat,
   coefs = meat_vars) +
   labs(
-    caption = "Figure 4: Model 3 - belief in meat market origin"
+    caption = "Figure 3: Model 3 - belief in meat market origin"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
@@ -4357,7 +4357,7 @@ plot_coefs(
   model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
   labs(
-    caption = "Figure 5: OLS model comparison"
+    caption = "Figure 4: OLS model comparison"
   ) +
   theme(plot.caption = element_text(hjust = 0.61,
                                     face = "bold",
@@ -4584,7 +4584,7 @@ plot_coefs(dist_full,
            coefs = dist_plots
            ) +
   labs(
-    caption = "Figure 6: Social distancing motivation"
+    caption = "Figure 5: Model 4 - Social distancing motivation"
   ) + 
   theme(plot.caption = element_text(hjust = 0.55,
                                     face = "bold",
@@ -4608,14 +4608,11 @@ plot(dist_full)
 ## Multinomial model for vaccine acceptance
 
 ``` r
-count(conspiracies2,W2_C19_Vax_Self) %>%  mutate(`%` = n / sum(n))
+count(conspiracies2,sum()) %>%  mutate(`%` = n / sum(n))
 ```
 
-    ##   W2_C19_Vax_Self   n           %
-    ## 1               1 939 0.671193710
-    ## 2               2 126 0.090064332
-    ## 3               3 325 0.232308792
-    ## 4              NA   9 0.006433167
+    ##   sum()    n %
+    ## 1     0 1399 1
 
 ``` r
 vax_full <- multinom(W2_C19_Vax_Self ~ 
@@ -4720,7 +4717,7 @@ ggplot(data = tidies,
         axis.text.y = element_text(size = 10),
         panel.grid.major.x = element_line(linetype = "solid")) +
   labs(
-    caption = "Figure 7: Vaccine acceptance - multinomial logit regression",
+    caption = "Figure 6: Model 5 - Vaccine acceptance",
     x = "Estimate"
   ) +
   theme(plot.caption = element_text(hjust = 0.61,
@@ -4747,7 +4744,7 @@ var_summaries <- tibble(
   sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
 )
 
-write.csv(var_summaries,"variable_summaries.csv")
+#write.csv(var_summaries,"variable_summaries.csv")
 ```
 
 ``` r
