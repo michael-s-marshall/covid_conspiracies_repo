@@ -2173,22 +2173,19 @@ plot_coefs(
 
 ```{r}
 # 5G belief - full set of variables and interaction term
-summ(full_int_5g_poiss)
-int_vars <- c(fiveg_vars,"crt:SDO")
-names(int_vars) <- c(names(fiveg_vars),"CRT:SDO")
-int_vars <- int_vars[sort(names(int_vars))]
+summ(full_5g_poiss)
 plot_coefs(
-  full_int_5g_poiss,
-  coefs = int_vars
+  full_5g_poiss,
+  coefs = fiveg_vars
   ) +
   labs(
-    caption = "Figure A2: Model 2b - belief in 5G origin poisson with interaction"
+    caption = "Figure A2: Model 2b - belief in 5G origin poisson regression"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
-                                    hjust = 0.4)
+                                    hjust = 0.41)
   )
 ```
 

@@ -4220,7 +4220,7 @@ plot_coefs(
 
 ``` r
 # 5G belief - full set of variables and interaction term
-summ(full_int_5g_poiss)
+summ(full_5g_poiss)
 ```
 
     ## Note: Pseudo-R2 for quasibinomial/quasipoisson families is calculated by
@@ -4234,63 +4234,59 @@ summ(full_int_5g_poiss)
     ##   Link function: log 
     ## 
     ## MODEL FIT:
-    ## <U+03C7>²(27) = 17667.78, p = 0.00
+    ## <U+03C7>²(26) = 17475.91, p = 0.00
     ## Pseudo-R² (Cragg-Uhler) = 1.00
-    ## Pseudo-R² (McFadden) = 0.40
+    ## Pseudo-R² (McFadden) = 0.39
     ## AIC =  NA, BIC =  NA 
     ## 
     ## Standard errors: MLE
     ## ---------------------------------------------------------
     ##                               Est.   S.E.   t val.      p
     ## -------------------------- ------- ------ -------- ------
-    ## (Intercept)                   1.39   0.40     3.46   0.00
-    ## W2_Gender_binary2             0.01   0.10     0.13   0.89
-    ## W1_Education_binary1          0.00   0.10     0.04   0.97
-    ## W1_Income_2019                0.00   0.15     0.03   0.97
-    ## age_sc                       -0.39   0.26    -1.50   0.13
-    ## fis_con                      -0.07   0.23    -0.30   0.76
+    ## (Intercept)                   0.99   0.37     2.68   0.01
+    ## W2_Gender_binary2             0.02   0.09     0.16   0.87
+    ## W1_Education_binary1          0.02   0.10     0.17   0.87
+    ## W1_Income_2019                0.00   0.15     0.01   0.99
+    ## age_sc                       -0.41   0.26    -1.60   0.11
+    ## fis_con                      -0.05   0.23    -0.20   0.84
     ## nat                           0.09   0.22     0.43   0.67
-    ## distrust_science              0.80   0.17     4.57   0.00
-    ## red_top_tabloid               0.37   0.10     3.89   0.00
-    ## mid_level_news               -0.03   0.10    -0.30   0.76
-    ## elite_news                    0.05   0.10     0.46   0.65
-    ## W2_INFO_5                     0.30   0.17     1.79   0.07
-    ## W2_INFO_9                     0.47   0.18     2.59   0.01
-    ## RWA                          -0.57   0.35    -1.62   0.10
-    ## W2_DAI_Total                  1.41   0.27     5.18   0.00
+    ## distrust_science              0.77   0.17     4.40   0.00
+    ## red_top_tabloid               0.36   0.10     3.79   0.00
+    ## mid_level_news               -0.02   0.10    -0.23   0.82
+    ## elite_news                    0.05   0.10     0.55   0.58
+    ## W2_INFO_5                     0.27   0.17     1.60   0.11
+    ## W2_INFO_9                     0.48   0.18     2.67   0.01
+    ## SDO                           1.66   0.32     5.21   0.00
+    ## RWA                          -0.43   0.34    -1.26   0.21
+    ## W2_DAI_Total                  1.41   0.27     5.16   0.00
     ## W2_IOU_Total                 -1.05   0.28    -3.74   0.00
-    ## W2_Paranoia_Total             0.78   0.25     3.06   0.00
-    ## W2_PO_Total                   0.62   0.31     1.98   0.05
-    ## W2_Internal_Total            -0.73   0.28    -2.56   0.01
-    ## W2_Chance_Total              -0.31   0.37    -0.85   0.40
-    ## threat                       -0.28   0.20    -1.40   0.16
+    ## W2_Paranoia_Total             0.79   0.25     3.12   0.00
+    ## W2_PO_Total                   0.61   0.31     1.96   0.05
+    ## W2_Internal_Total            -0.72   0.28    -2.57   0.01
+    ## W2_Chance_Total              -0.29   0.37    -0.78   0.43
+    ## threat                       -0.28   0.20    -1.39   0.17
+    ## crt                          -0.86   0.18    -4.67   0.00
     ## CRT_test                      0.01   0.10     0.10   0.92
     ## W1_Conspiracy_Total           0.49   0.24     2.05   0.04
-    ## conspiracy1_sc                0.89   0.17     5.25   0.00
-    ## conspiracy2_sc               -0.10   0.17    -0.60   0.55
-    ## crt                          -2.02   0.51    -3.92   0.00
-    ## SDO                           0.98   0.42     2.33   0.02
-    ## crt:SDO                       2.61   1.05     2.47   0.01
+    ## conspiracy1_sc                0.91   0.17     5.35   0.00
+    ## conspiracy2_sc               -0.09   0.17    -0.55   0.58
     ## ---------------------------------------------------------
     ## 
-    ## Estimated dispersion parameter = 30.71
+    ## Estimated dispersion parameter = 30.49
 
 ``` r
-int_vars <- c(fiveg_vars,"crt:SDO")
-names(int_vars) <- c(names(fiveg_vars),"CRT:SDO")
-int_vars <- int_vars[sort(names(int_vars))]
 plot_coefs(
-  full_int_5g_poiss,
-  coefs = int_vars
+  full_5g_poiss,
+  coefs = fiveg_vars
   ) +
   labs(
-    caption = "Figure A2: Model 2b - belief in 5G origin poisson with interaction"
+    caption = "Figure A2: Model 2b - belief in 5G origin poisson regression"
   ) + 
   theme(plot.caption = element_text(hjust = 0.5,
                                     face = "bold",
                                     size = 10),
         axis.title.x = element_text(size = 8,
-                                    hjust = 0.4)
+                                    hjust = 0.41)
   )
 ```
 
