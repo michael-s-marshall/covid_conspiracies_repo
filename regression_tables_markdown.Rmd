@@ -49,34 +49,17 @@ to_plot <- to_plot[sort(names(to_plot))]
 
 
 ```{r, results='asis'}
-stargazer(full_lab, full_5g, full_meat, 
-          title="Table A2: OLS Regression Results Origin Theory Belief",
-          dep.var.labels=c("Wuhan lab","5G","Meat market"),
+stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat, 
+          title="Table A2: Regression Results Origin Theory Belief",
+          dep.var.labels=c("Wuhan lab","5G","5G","5G","Meat market"),
+          column.labels = c("OLS","OLS","OLS (IHS)","Poisson","OLS"),
           order = to_plot,
           covariate.labels = names(to_plot),
           #omit.stat=c("LL","ser","f","bic"),
-          keep.stat = c("n","rsq","adj.rsq","aic"),
-          single.row=TRUE,
-          align = TRUE,
-          report = "vcs*",
-          type = "html")
-```
-
-
-```{r, results='asis'}
-
-stargazer(full_5g_ihs, full_5g_poiss, 
-          title="Table A3: Supplementary Models 5G Belief",
-          dep.var.labels=c("5G belief","5G belief"),
-          multicolumn = TRUE,
-          column.labels = c("IHS","Poisson"),
+          keep.stat = c("n","rsq","adj.rsq"),
           model.names = FALSE,
-          model.numbers = FALSE,
-          order = to_plot[-1],
-          covariate.labels = names(to_plot)[-1],
-          #omit.stat=c("LL","ser","f","bic"),
-          keep.stat = c("n"),
           single.row=TRUE,
+          model.numbers = FALSE,
           align = TRUE,
           report = "vcs*",
           type = "html")
@@ -85,7 +68,7 @@ stargazer(full_5g_ihs, full_5g_poiss,
 
 ```{r, results = "asis"}
 stargazer(full_dist, full_vax,
-          title="Table A4: Public Health Measures Model Results",
+          title="Table A3: Public Health Measures Model Results",
           dep.var.labels=c("Social distancing (OLS)",
                            "Vaccine (multi logit)",
                            "Vaccine (multi logit)"),
