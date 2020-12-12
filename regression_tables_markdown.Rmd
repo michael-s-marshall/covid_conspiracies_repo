@@ -1,0 +1,104 @@
+---
+title: "Tables"
+author: "Michael Marshall"
+date: "12/12/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps,
+               psych, corrr, cowplot, expss, haven, interplot,
+               interactions, jtools,labelled, pscl, psych, 
+               sjPlot, skimr, stargazer, texreg)
+```
+
+```{r}
+# loading models
+full_lab <- readRDS("full_lab.RDS")
+full_5g <- readRDS("full_5g.RDS")
+full_5g_ihs <- readRDS("full_5g_ihs.RDS")
+full_5g_poiss <- readRDS("full_5g_poiss.RDS")
+full_meat <- readRDS("full_meat.RDS")
+full_dist <- readRDS("full_dist.RDS")
+full_vax <- readRDS("full_vax.RDS")
+conspiracies2 <- readRDS("conspiracies2.RDS")
+```
+
+## Stargazer
+
+```{r}
+# setting up variable orders
+to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
+             "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
+             "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
+             "distrust_science","fis_con","W2_IOU_Total","W2_Chance_Total",
+             "W2_Internal_Total","W2_PO_Total","nat","W2_Paranoia_Total",
+             "RWA","SDO","crt","CRT_test","W1_Conspiracy_Total",
+             "conspiracy1_sc","conspiracy2_sc","conspiracy3_sc")
+names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
+              "Family and friends","Mid-level news","Social media",
+              "Tabloid news","COVID-19 anxiety","Death anxiety",
+              "Distrust scientists","Fiscal conservatism",
+              "Intolerance of uncertainty","LOC: chance","LOC: internal",
+              "LOC: powerful others","Nationalism","Paranoia","RWA",
+              "SDO","CRT","CRT pre-exposure","Conspiracy ideation",
+              "Wuhan lab belief","Meat market belief","5G belief")
+
+to_plot <- to_plot[sort(names(to_plot))]
+```
+
+
+```{r, results='asis'}
+stargazer(full_lab, full_5g, full_meat, 
+          title="Table A2: OLS Regression Results Origin Theory Belief",
+          dep.var.labels=c("Wuhan lab","5G","Meat market"),
+          order = to_plot,
+          covariate.labels = names(to_plot),
+          #omit.stat=c("LL","ser","f","bic"),
+          keep.stat = c("n","rsq","adj.rsq","aic"),
+          single.row=TRUE,
+          align = TRUE,
+          report = "vcs*",
+          type = "html")
+```
+
+
+```{r, results='asis'}
+
+stargazer(full_5g_ihs, full_5g_poiss, 
+          title="Table A3: Supplementary Models 5G Belief",
+          dep.var.labels=c("5G belief","5G belief"),
+          multicolumn = TRUE,
+          column.labels = c("IHS","Poisson"),
+          model.names = FALSE,
+          model.numbers = FALSE,
+          order = to_plot[-1],
+          covariate.labels = names(to_plot)[-1],
+          #omit.stat=c("LL","ser","f","bic"),
+          keep.stat = c("n"),
+          single.row=TRUE,
+          align = TRUE,
+          report = "vcs*",
+          type = "html")
+```
+
+
+```{r, results = "asis"}
+stargazer(full_dist, full_vax,
+          title="Table A4: Public Health Measures Model Results",
+          dep.var.labels=c("Social distancing (OLS)",
+                           "Vaccine (multi logit)",
+                           "Vaccine (multi logit)"),
+          multicolumn = TRUE,
+          column.labels = c(" ", "No", "Maybe"),
+          model.names = FALSE,
+          model.numbers = FALSE,
+          order = to_plot,
+          covariate.labels = names(to_plot),
+          #omit.stat=c("LL","ser","f","bic"),
+          keep.stat = c("n","rsq","adj.rsq","aic"),
+          single.row=TRUE,
+          align = TRUE,
+          report = "vcs*",
+          type = "html")
+```
