@@ -39,7 +39,7 @@ df %>%
   ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
   geom_density_ridges(aes(rel_min_height = 0.005),
                       stat = "density",
-                      fill = "grey") +
+                      fill = get_colors("CUD Bright",num.colors = 1)) +
   theme_nice() +
   scale_y_discrete(labels = c("Wuhan laboratory","Meat market","5G")) +
   labs(y = NULL, x = "Belief scale (0-100)",
@@ -51,6 +51,37 @@ df %>%
                                     hjust = 0.5)
   )
 ```
+
+```{r}
+#pacman::p_load(patchwork)
+df %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  gather(conspiracy_code, belief,
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+  mutate(conspiracy_code = fct_recode(
+    as.factor(conspiracy_code),
+    "Wuhan laboratory" = "W2_Conspiracy_Theory1",
+    "Meat market" = "W2_Conspiracy_Theory2",
+    "5G" = "W2_Conspiracy_Theory3",
+    "4" = "W2_Conspiracy_Theory4",
+    "5" = "W2_Conspiracy_Theory5")
+    ) %>%
+  filter(!conspiracy_code %in% c("4","5")) %>% 
+  ggplot(aes(x = belief)) +
+  geom_density(fill = get_colors("CUD Bright",num.colors = 1),
+               alpha = 0.8) +
+  theme_nice() +
+  facet_wrap(~conspiracy_code, scales = "free_y", ncol = 1) +
+  labs(y = "Density", x = "Belief scale (0-100)",
+       caption = "Distribution of origin theory belief") +
+  theme(plot.caption = element_text(hjust = 0.55,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.5)
+  )
+```
+
 
 ## Cleaning dataset
 
@@ -237,6 +268,68 @@ summary(conspiracies$W2_Age_year)
 conspiracies$age_sc <- rescale01(conspiracies$W2_Age_year)
 ```
 
+```{r}
+# conspiracy ideation alpha
+consp_keys <- list(consp = cs(W1_Conspiracy_1,
+                          W1_Conspiracy_2,
+                          W1_Conspiracy_3,
+                          W1_Conspiracy_4,
+                          W1_Conspiracy_5))
+consp_test <- scoreItems(consp_keys, conspiracies, min = 1, max = 11)
+head(consp_test$scores)
+consp_test$alpha  # Scale alpha
+
+cor(consp_test$scores, conspiracies$W1_Conspiracy_Total)
+```
+
+```{r}
+# conspiracy ideation alpha
+iou_keys <- list(iou = cs(W2_IOU1, W2_IOU2,W2_IOU3, W2_IOU4,
+                          W2_IOU5, W2_IOU5,W2_IOU6,W2_IOU7,
+                          W2_IOU7,W2_IOU8,W2_IOU9,W2_IOU10,
+                          W2_IOU11,W2_IOU12))
+iou_test <- scoreItems(iou_keys, conspiracies, min = 1, max = 5)
+head(iou_test$scores)
+iou_test$alpha  # Scale alpha
+
+cor(iou_test$scores, conspiracies$W2_IOU_Total)
+```
+
+```{r}
+# conspiracy ideation alpha
+chance_keys <- list(chance = cs(W2_LOC1,
+                                W2_LOC3,
+                                W2_LOC9))
+chance_test <- scoreItems(chance_keys, conspiracies, min = 1, max = 7)
+head(chance_test$scores)
+chance_test$alpha  # Scale alpha
+
+cor(chance_test$scores, conspiracies$W2_Chance_Total)
+```
+
+```{r}
+# conspiracy ideation alpha
+int_keys <- list(int = cs(W2_LOC5,
+                          W2_LOC6,
+                          W2_LOC8))
+int_test <- scoreItems(int_keys, conspiracies, min = 1, max = 7)
+head(int_test$scores)
+int_test$alpha  # Scale alpha
+
+cor(int_test$scores, conspiracies$W2_Internal_Total)
+```
+
+```{r}
+# conspiracy ideation alpha
+po_keys <- list(po = cs(W2_LOC2,
+                        W2_LOC4,
+                        W2_LOC7))
+po_test <- scoreItems(po_keys, conspiracies, min = 1, max = 7)
+head(po_test$scores)
+po_test$alpha  # Scale alpha
+
+cor(po_test$scores, conspiracies$W2_PO_Total)
+```
 
 ```{r}
 factors <- c("W1_Ethnicity","W1_C19_Infected","W1_BornUK","W1_EURef",

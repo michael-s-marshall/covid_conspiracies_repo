@@ -37,7 +37,7 @@ df %>%
   ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
   geom_density_ridges(aes(rel_min_height = 0.005),
                       stat = "density",
-                      fill = "grey") +
+                      fill = get_colors("CUD Bright",num.colors = 1)) +
   theme_nice() +
   scale_y_discrete(labels = c("Wuhan laboratory","Meat market","5G")) +
   labs(y = NULL, x = "Belief scale (0-100)",
@@ -51,6 +51,43 @@ df %>%
 ```
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+#pacman::p_load(patchwork)
+df %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  gather(conspiracy_code, belief,
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+  mutate(conspiracy_code = fct_recode(
+    as.factor(conspiracy_code),
+    "Wuhan laboratory" = "W2_Conspiracy_Theory1",
+    "Meat market" = "W2_Conspiracy_Theory2",
+    "5G" = "W2_Conspiracy_Theory3",
+    "4" = "W2_Conspiracy_Theory4",
+    "5" = "W2_Conspiracy_Theory5")
+    ) %>%
+  filter(!conspiracy_code %in% c("4","5")) %>% 
+  ggplot(aes(x = belief)) +
+  geom_density(fill = get_colors("CUD Bright",num.colors = 1),
+               alpha = 0.8) +
+  theme_nice() +
+  facet_wrap(~conspiracy_code, scales = "free_y", ncol = 1) +
+  labs(y = "Density", x = "Belief scale (0-100)",
+       caption = "Distribution of origin theory belief") +
+  theme(plot.caption = element_text(hjust = 0.55,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.5)
+  )
+```
+
+    ## Warning: attributes are not identical across measure variables;
+    ## they will be dropped
+
+    ## Warning: Removed 4416 rows containing non-finite values (stat_density).
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Cleaning dataset
 
@@ -461,6 +498,169 @@ conspiracies$age_sc <- rescale01(conspiracies$W2_Age_year)
 ```
 
 ``` r
+# conspiracy ideation alpha
+consp_keys <- list(consp = cs(W1_Conspiracy_1,
+                          W1_Conspiracy_2,
+                          W1_Conspiracy_3,
+                          W1_Conspiracy_4,
+                          W1_Conspiracy_5))
+consp_test <- scoreItems(consp_keys, conspiracies, min = 1, max = 11)
+```
+
+    ## Number of categories should be increased  in order to count frequencies.
+
+``` r
+head(consp_test$scores)
+```
+
+    ##      consp
+    ## [1,]   5.8
+    ## [2,]   9.0
+    ## [3,]   7.0
+    ## [4,]   8.6
+    ## [5,]   6.0
+    ## [6,]   8.8
+
+``` r
+consp_test$alpha  # Scale alpha
+```
+
+    ##           consp
+    ## alpha 0.8537269
+
+``` r
+cor(consp_test$scores, conspiracies$W1_Conspiracy_Total)
+```
+
+    ##       [,1]
+    ## consp    1
+
+``` r
+# conspiracy ideation alpha
+iou_keys <- list(iou = cs(W2_IOU1, W2_IOU2,W2_IOU3, W2_IOU4,
+                          W2_IOU5, W2_IOU5,W2_IOU6,W2_IOU7,
+                          W2_IOU7,W2_IOU8,W2_IOU9,W2_IOU10,
+                          W2_IOU11,W2_IOU12))
+iou_test <- scoreItems(iou_keys, conspiracies, min = 1, max = 5)
+head(iou_test$scores)
+```
+
+    ##           iou
+    ## [1,] 3.416667
+    ## [2,] 3.916667
+    ## [3,] 4.250000
+    ## [4,] 3.083333
+    ## [5,] 3.000000
+    ## [6,] 2.500000
+
+``` r
+iou_test$alpha  # Scale alpha
+```
+
+    ##             iou
+    ## alpha 0.9097412
+
+``` r
+cor(iou_test$scores, conspiracies$W2_IOU_Total)
+```
+
+    ##     [,1]
+    ## iou    1
+
+``` r
+# conspiracy ideation alpha
+chance_keys <- list(chance = cs(W2_LOC1,
+                                W2_LOC3,
+                                W2_LOC9))
+chance_test <- scoreItems(chance_keys, conspiracies, min = 1, max = 7)
+head(chance_test$scores)
+```
+
+    ##        chance
+    ## [1,] 1.666667
+    ## [2,] 4.333333
+    ## [3,] 4.666667
+    ## [4,] 4.333333
+    ## [5,] 4.000000
+    ## [6,] 4.333333
+
+``` r
+chance_test$alpha  # Scale alpha
+```
+
+    ##          chance
+    ## alpha 0.7136639
+
+``` r
+cor(chance_test$scores, conspiracies$W2_Chance_Total)
+```
+
+    ##        [,1]
+    ## chance    1
+
+``` r
+# conspiracy ideation alpha
+int_keys <- list(int = cs(W2_LOC5,
+                          W2_LOC6,
+                          W2_LOC8))
+int_test <- scoreItems(int_keys, conspiracies, min = 1, max = 7)
+head(int_test$scores)
+```
+
+    ##           int
+    ## [1,] 5.666667
+    ## [2,] 5.000000
+    ## [3,] 4.333333
+    ## [4,] 5.333333
+    ## [5,] 4.000000
+    ## [6,] 4.666667
+
+``` r
+int_test$alpha  # Scale alpha
+```
+
+    ##             int
+    ## alpha 0.7170552
+
+``` r
+cor(int_test$scores, conspiracies$W2_Internal_Total)
+```
+
+    ##     [,1]
+    ## int    1
+
+``` r
+# conspiracy ideation alpha
+po_keys <- list(po = cs(W2_LOC2,
+                        W2_LOC4,
+                        W2_LOC7))
+po_test <- scoreItems(po_keys, conspiracies, min = 1, max = 7)
+head(po_test$scores)
+```
+
+    ##            po
+    ## [1,] 1.333333
+    ## [2,] 3.333333
+    ## [3,] 4.333333
+    ## [4,] 5.666667
+    ## [5,] 4.000000
+    ## [6,] 2.333333
+
+``` r
+po_test$alpha  # Scale alpha
+```
+
+    ##              po
+    ## alpha 0.8507852
+
+``` r
+cor(po_test$scores, conspiracies$W2_PO_Total)
+```
+
+    ##    [,1]
+    ## po    1
+
+``` r
 factors <- c("W1_Ethnicity","W1_C19_Infected","W1_BornUK","W1_EURef",
              "W2_Gender_binary","W2_Living_alone","W2_Employment",
              "W1_Education_binary","W1_Housing_tenure")
@@ -653,11 +853,11 @@ for(i in seq_along(plot_vars)){
 }
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-3.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-4.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-5.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-6.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-7.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-8.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-9.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-3.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-4.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-5.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-6.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-7.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-8.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-9.png)<!-- -->
 
     ## Warning: Removed 4 rows containing non-finite values (stat_density).
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-10.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-11.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-12.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-13.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-14.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-15.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-16.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-17.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-24-18.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-10.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-11.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-12.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-13.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-14.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-15.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-16.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-17.png)<!-- -->![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-30-18.png)<!-- -->
 
 # Principal Components Analysis - PCA
 
@@ -675,14 +875,14 @@ biplot(pca_fit,
        col = c("lightgrey","red"))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 ``` r
 biplot(pca_fit, choices = 3:4,
        col = c("lightgrey","red"))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-32-2.png)<!-- -->
 
 ``` r
 pca_fit$rotation[,1:4]
@@ -725,7 +925,7 @@ pc %>%
   labs(x = "Principal Component 1 (IHS)")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 pc %>% 
@@ -734,7 +934,7 @@ pc %>%
   labs(x = "Principal Component 2")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-33-2.png)<!-- -->
 
 ``` r
 pc %>% 
@@ -743,7 +943,7 @@ pc %>%
   labs(x = "Principal Component 3")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-33-3.png)<!-- -->
 
 ``` r
 pc %>% 
@@ -752,7 +952,7 @@ pc %>%
   labs(x = "Principal Component 4")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-27-4.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-33-4.png)<!-- -->
 
 Principal components 1 to 3 explain most of the variation in the data.
 
@@ -765,7 +965,7 @@ par(mfrow = c(2,2))
 plot(conspiracy_mod)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ``` r
 summ(conspiracy_mod, vifs = TRUE)
@@ -1586,7 +1786,7 @@ par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 ``` r
 AIC(multi_lab)
@@ -1699,7 +1899,7 @@ par(mfrow = c(2,2))
 plot(full_int_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
 ``` r
 AIC(full_lab)
@@ -1761,7 +1961,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
 
 ``` r
 conspiracies <- conspiracies %>% 
@@ -1774,7 +1974,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-59-2.png)<!-- -->
 
 ## DV 5G conspiracy - singular IV models
 
@@ -2345,7 +2545,7 @@ par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-73-1.png)<!-- -->
 
 ``` r
 AIC(multi_5g)
@@ -2455,7 +2655,7 @@ par(mfrow = c(2,2))
 plot(full_int_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
 
 ``` r
 # comparing AIC with and without interaction
@@ -3036,7 +3236,7 @@ par(mfrow = c(2,2))
 plot(full_5g_ihs)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
 
 ``` r
 AIC(multi_5g_ihs)
@@ -3338,7 +3538,7 @@ cons %>%
   theme_classic()
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
 
 ## DV 5G belief - poisson regression, interaction term
 
@@ -3475,7 +3675,7 @@ cons %>%
   theme_classic()
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-98-1.png)<!-- -->
 
 ``` r
 # drop in deviance test
@@ -3512,7 +3712,7 @@ rf_mod_5g <- randomForest(y ~ .,
 varImpPlot(rf_mod_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-100-1.png)<!-- -->
 
 # Modelling for belief in Chinese meat market origin
 
@@ -4145,7 +4345,7 @@ plot_coefs(
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-109-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-115-1.png)<!-- -->
 
 ``` r
 summary(full_lab)$r.squared
@@ -4183,7 +4383,7 @@ plot_coefs(
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-110-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-116-1.png)<!-- -->
 
 ``` r
 summary(full_5g)$r.squared
@@ -4216,7 +4416,7 @@ plot_coefs(
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-111-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-117-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables and interaction term
@@ -4292,7 +4492,7 @@ plot_coefs(
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-112-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-118-1.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
@@ -4319,7 +4519,7 @@ plot_coefs(
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-113-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-119-1.png)<!-- -->
 
 ``` r
 summary(full_meat)$r.squared
@@ -4367,7 +4567,7 @@ plot_coefs(
                                          fill = "white"))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-114-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-120-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -4467,7 +4667,7 @@ ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-118-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-124-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -4592,14 +4792,14 @@ plot_coefs(dist_full,
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-119-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-125-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-119-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-125-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -4728,7 +4928,7 @@ ggplot(data = tidies,
                                          fill = "white"))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-121-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-127-1.png)<!-- -->
 
 ## Table summarising variables
 
