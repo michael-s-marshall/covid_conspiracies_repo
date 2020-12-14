@@ -67,19 +67,18 @@ df %>%
     "5" = "W2_Conspiracy_Theory5")
     ) %>%
   filter(!conspiracy_code %in% c("4","5")) %>% 
+  mutate(
+    order_var = ifelse(conspiracy_code == "Meat market", 1,
+                       ifelse(conspiracy_code == "Wuhan laboratory",2,3))
+  ) %>% 
   ggplot(aes(x = belief)) +
   geom_density(fill = get_colors("CUD Bright",num.colors = 1),
                alpha = 0.8) +
   theme_nice() +
-  facet_wrap(~conspiracy_code, scales = "free_y", ncol = 1) +
-  labs(y = "Density", x = "Belief scale (0-100)",
-       caption = "Distribution of origin theory belief") +
-  theme(plot.caption = element_text(hjust = 0.55,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.5)
-  )
+  facet_wrap(~fct_reorder(conspiracy_code,order_var), 
+             scales = "free_y", ncol = 1) +
+  labs(y = "Density", 
+       x = "Distribution of origin theory belief")
 ```
 
 
@@ -329,7 +328,38 @@ head(po_test$scores)
 po_test$alpha  # Scale alpha
 
 cor(po_test$scores, conspiracies$W2_PO_Total)
+
+ggplot(data = NULL, aes(x = po_test$scores,
+                        conspiracies$W2_PO_Total)) +
+  geom_point(alpha = 1/3)
+
 ```
+
+```{r}
+# paranoia alpha
+par_keys <- list(par = cs(W2_Paranoia1,
+                        W2_Paranoia2,
+                        W2_Paranoia3, W2_Paranoia4, W2_Paranoia5))
+par_test <- scoreItems(par_keys, conspiracies, min = 1, max = 5)
+head(par_test$scores)
+par_test$alpha  # Scale alpha
+
+cor(par_test$scores, conspiracies$W2_Paranoia_Total)
+```
+
+```{r}
+# dai alpha
+dai_keys <- list(dai = cs(W2_DAI1,W2_DAI2,W2_DAI3,W2_DAI4,W2_DAI5,
+                        W2_DAI6,W2_DAI7,W2_DAI8,W2_DAI9,W2_DAI10,
+                        W2_DAI11, W2_DAI12, W2_DAI13,W2_DAI14,
+                        W2_DAI15,W2_DAI16,W2_DAI17))
+dai_test <- scoreItems(dai_keys, conspiracies, min = 1, max = 5)
+head(dai_test$scores)
+dai_test$alpha  # Scale alpha
+
+cor(dai_test$scores, conspiracies$W2_DAI_Total)
+```
+
 
 ```{r}
 factors <- c("W1_Ethnicity","W1_C19_Infected","W1_BornUK","W1_EURef",
@@ -2206,13 +2236,9 @@ plot_coefs(
   coefs = lab_vars) +
   theme(legend.position = "top") +
   labs(
-    caption = "Figure 1: Model 1 - belief in Wuhan laboratory origin"
+    x = "Estimate: Belief in Wuhan laboratory origin"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.5,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.36)
+  theme(axis.title.x = element_text(hjust = 0.25)
         )
 
 summary(full_lab)$r.squared
@@ -2229,16 +2255,11 @@ fiveg_vars <- fiveg_vars[sort(names(fiveg_vars))]
 plot_coefs(
   full_5g,
   coefs = fiveg_vars) +
-  theme(legend.position = "top") +
   labs(
-    caption = "Figure 2: Model 2 - belief in 5G origin"
+    x = "Estimate: Belief in 5G origin"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.5,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.44)
-  )
+  theme(axis.title.x = element_text(hjust = 0.4)
+        )
 
 summary(full_5g)$r.squared
 summary(full_5g)$adj.r.squared
@@ -2250,36 +2271,27 @@ summary(full_5g)$adj.r.squared
 plot_coefs(
   full_5g_ihs,
   coefs = fiveg_vars) +
-  theme(legend.position = "top") +
   labs(
-    caption = "Figure A1: Model 2a - belief in 5G origin IHS transformation"
+    x = "Estimate: Belief in 5G origin (IHS transformation)"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.5,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.38)
-  )
+  theme(axis.title.x = element_text(hjust = 0.22)
+        )
 ```
 
 
 
 ```{r}
-# 5G belief - full set of variables and interaction term
+# 5G belief - full set of variables and poisson
 summ(full_5g_poiss)
 plot_coefs(
   full_5g_poiss,
   coefs = fiveg_vars
   ) +
   labs(
-    caption = "Figure A2: Model 2b - belief in 5G origin poisson regression"
+    x = "Estimate: Belief in 5G origin (poisson)"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.5,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.41)
-  )
+  theme(axis.title.x = element_text(hjust = 0.31)
+        )
 ```
 
 
@@ -2296,14 +2308,10 @@ plot_coefs(
   full_meat,
   coefs = meat_vars) +
   labs(
-    caption = "Figure 3: Model 3 - belief in meat market origin"
+    x = "Estimate: Belief in meat market origin"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.5,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.36)
-  )
+  theme(axis.title.x = element_text(hjust = 0.33)
+        )
 
 summary(full_meat)$r.squared
 summary(full_meat)$adj.r.squared
@@ -2329,13 +2337,9 @@ plot_coefs(
   model.names = c("Wuhan lab","5G","Meat market"),
   coefs = model_vars) +
   labs(
-    caption = "Figure 4: OLS model comparison"
-  ) +
-  theme(plot.caption = element_text(hjust = 0.61,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.43),
+    x = "Estimate: OLS model comparison"
+  ) + 
+  theme(axis.title.x = element_text(hjust = 0.33),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
@@ -2483,14 +2487,10 @@ plot_coefs(dist_full,
            coefs = dist_plots
            ) +
   labs(
-    caption = "Figure 5: Model 4 - Social distancing motivation"
+    x = "Estimate: social distancing motivation"
   ) + 
-  theme(plot.caption = element_text(hjust = 0.55,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.41)
-  )
+  theme(axis.title.x = element_text(hjust = 0.31)
+        )
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
@@ -2595,14 +2595,9 @@ ggplot(data = tidies,
         axis.text.y = element_text(size = 10),
         panel.grid.major.x = element_line(linetype = "solid")) +
   labs(
-    caption = "Figure 6: Model 5 - Vaccine acceptance",
-    x = "Estimate"
-  ) +
-  theme(plot.caption = element_text(hjust = 0.61,
-                                    face = "bold",
-                                    size = 10),
-        axis.title.x = element_text(size = 8,
-                                    hjust = 0.54),
+    x = "Estimate: Vaccine acceptance"
+  ) + 
+  theme(axis.title.x = element_text(hjust = 0.4),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
