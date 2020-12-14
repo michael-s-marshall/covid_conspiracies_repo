@@ -4404,9 +4404,7 @@ plot_coefs(
   theme(legend.position = "top") +
   labs(
     x = "Estimate: Belief in Wuhan laboratory origin"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.25)
-        )
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4437,9 +4435,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   labs(
     x = "Estimate: Belief in 5G origin"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.4)
-        )
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4465,9 +4461,7 @@ plot_coefs(
   coefs = fiveg_vars) +
   labs(
     x = "Estimate: Belief in 5G origin (IHS transformation)"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.22)
-        )
+  ) 
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4537,9 +4531,7 @@ plot_coefs(
   ) +
   labs(
     x = "Estimate: Belief in 5G origin (poisson)"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.31)
-        )
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4560,9 +4552,7 @@ plot_coefs(
   coefs = meat_vars) +
   labs(
     x = "Estimate: Belief in meat market origin"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.33)
-        )
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4603,7 +4593,7 @@ plot_coefs(
   labs(
     x = "Estimate: OLS model comparison"
   ) + 
-  theme(axis.title.x = element_text(hjust = 0.33),
+  theme(#axis.title.x = element_text(hjust = 0.33),
         legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
@@ -4825,9 +4815,7 @@ plot_coefs(dist_full,
            ) +
   labs(
     x = "Estimate: social distancing motivation"
-  ) + 
-  theme(axis.title.x = element_text(hjust = 0.31)
-        )
+  )
 ```
 
     ## Loading required namespace: broom.mixed
@@ -4955,8 +4943,7 @@ ggplot(data = tidies,
   labs(
     x = "Estimate: Vaccine acceptance"
   ) + 
-  theme(axis.title.x = element_text(hjust = 0.4),
-        legend.title = element_text(size = 9),
+  theme(legend.title = element_text(size = 9),
         legend.position = c(1,1), legend.direction = "vertical",
         legend.justification = c(1,1),
         legend.background = element_rect(colour = "darkgrey", 
