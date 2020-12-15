@@ -2260,39 +2260,58 @@ AIC(full_meat)
 # Summary of final models
 
 ``` r
-# Chinese lab belief - full set of variables
-to_plot <- c("W1_Education_binary1",
-             "elite_news","W2_INFO_9","mid_level_news",
-             "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
-             "distrust_science","fis_con","W2_IOU_Total",
-             "nat","W2_Paranoia_Total",
-             "RWA","SDO","crt","CRT_test","W1_Conspiracy_Total")
-names(to_plot) <- c("Education","Elite news",
-              "Family and friends","Mid-level news","Social media",
-              "Tabloid news","COVID-19 anxiety","Death anxiety",
-              "Distrust scientists","Fiscal conservatism",
-              "Intolerance of uncertainty","Nationalism","Paranoia","RWA",
-              "SDO","CRT","CRT pre-exposure","Conspiracy ideation")
+# setting up groups -----------------------------------------
+accuracy <- c("crt","CRT_test","W1_Education_binary1")
+names(accuracy) <- c("CRT","CRT pre-exposure","Education")
 
-lab_vars1 <- c(to_plot, "conspiracy3_sc","conspiracy2_sc")
-names(lab_vars1) <- c(names(to_plot), "5G belief", "Meat market belief")
-lab_vars1 <- lab_vars1[sort(names(lab_vars1))]
-lab_vars <- c(lab_vars1[-1],"conspiracy3_sc")
-names(lab_vars) <- c(names(lab_vars1)[-1],"5G belief")
+motivation <- c("threat","W2_DAI_Total","distrust_science",
+                "fis_con","W2_IOU_Total",
+                "nat","W2_Paranoia_Total",
+                "RWA","SDO")
+names(motivation) <- c("COVID-19 anxiety","Death anxiety",
+                       "Distrust scientists","Fiscal conservatism",
+                       "IOU","Nationalism","Paranoia",
+                       "RWA","SDO")
 
+inform <- c("W2_INFO_9","elite_news","mid_level_news",
+            "red_top_tabloid","W2_INFO_5")
+names(inform) <- c("Family and friends","News: elite",
+                   "News: mid-level","News: tabloid","Social media")
 
+conspiracy <- c("W1_Conspiracy_Total","conspiracy2_sc","conspiracy1_sc",
+                "conspiracy3_sc")
+names(conspiracy) <- c("Conspiracy ideation","Meat market belief",
+                       "Wuhan lab belief","5G belief")
+full_list <- c(accuracy, motivation, inform, conspiracy)
+```
+
+``` r
+# chinese lab figure 
 plot_coefs(
   full_lab,
-  coefs = lab_vars) +
-  theme(legend.position = "top") +
-  labs(
-    x = "Estimate: Belief in Wuhan laboratory origin"
-  )
+  coefs = full_list,
+  groups = list(
+    Accuracy = names(accuracy), 
+    Motivation = names(motivation), 
+    Information = names(inform), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: Wuhan laboratory belief") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 0))
 ```
 
     ## Loading required namespace: broom.mixed
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+    ## Registered S3 method overwritten by 'broom.mixed':
+    ##   method      from 
+    ##   tidy.gamlss broom
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
 
 ``` r
 summ(full_lab, vifs = TRUE)
@@ -2343,26 +2362,29 @@ par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-79-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-80-2.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables, raw data is DV
-fiveg_vars <- c(to_plot, "conspiracy2_sc","conspiracy1_sc")
-names(fiveg_vars) <- c(names(to_plot),"Meat market belief",
-                     "Wuhan lab belief")
-fiveg_vars <- fiveg_vars[sort(names(fiveg_vars))]
-
 plot_coefs(
   full_5g,
-  coefs = fiveg_vars) +
-  labs(
-    x = "Estimate: Belief in 5G origin"
-  )
+  coefs = full_list,
+  groups = list(
+    Accuracy = names(accuracy), 
+    Motivation = names(motivation), 
+    Information = names(inform), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: 5G belief") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-    ## Loading required namespace: broom.mixed
-
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
 
 ``` r
 summ(full_5g, vifs = TRUE)
@@ -2413,57 +2435,73 @@ par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-80-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-81-2.png)<!-- -->
 
 ``` r
 # plot for IHS model
 plot_coefs(
   full_5g_ihs,
-  coefs = fiveg_vars) +
-  labs(
-    x = "Estimate: Belief in 5G origin (IHS transformation)"
-  ) 
+  coefs = full_list,
+  groups = list(
+    Accuracy = names(accuracy), 
+    Motivation = names(motivation), 
+    Information = names(inform), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: 5G belief (IHS)") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-    ## Loading required namespace: broom.mixed
-
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-82-1.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables and poisson
 plot_coefs(
   full_5g_poiss,
-  coefs = fiveg_vars
-  ) +
-  labs(
-    x = "Estimate: Belief in 5G origin (poisson)"
-  )
+  coefs = full_list,
+  groups = list(
+    Accuracy = names(accuracy), 
+    Motivation = names(motivation), 
+    Information = names(inform), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: 5G belief (poisson)") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-    ## Loading required namespace: broom.mixed
-
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-82-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
-meat_vars1 <- c(to_plot, "conspiracy3_sc","conspiracy1_sc")
-names(meat_vars1) <- c(names(to_plot),"5G belief",
-                     "Wuhan lab belief")
-meat_vars1 <- meat_vars1[sort(names(meat_vars1))]
-meat_vars <- c(meat_vars1[-1],"conspiracy3_sc")
-names(meat_vars) <- c(names(meat_vars1)[-1],"5G belief")
-
 plot_coefs(
   full_meat,
-  coefs = meat_vars) +
-  labs(
-    x = "Estimate: Belief in meat market origin"
-  )
+  coefs = full_list,
+  groups = list(
+    Accuracy = names(accuracy), 
+    Motivation = names(motivation), 
+    Information = names(inform), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: Meat market belief") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-    ## Loading required namespace: broom.mixed
-
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
 
 ``` r
 summ(full_meat, vifs = TRUE)
@@ -2514,39 +2552,34 @@ par(mfrow = c(2,2))
 plot(full_meat)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-83-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-84-2.png)<!-- -->
 
 ## Combined plot of models
 
 ``` r
-model_vars <- c("W1_Education_binary1","crt",
-                "red_top_tabloid","mid_level_news",
-                "W2_INFO_5","W2_INFO_9","SDO",
-                "RWA")
-names(model_vars) <- c("Education","CRT",
-                       "Tabloid news","Mid-level news",
+model_vars <- full_list[c("CRT","Education",
+                       "News: mid-level","News: tabloid",
                        "Social media",
                        "Family and friends",
-                       "SDO","RWA")
+                       "SDO","RWA")]
 
 model_vars <- model_vars[sort(names(model_vars))]
 
 plot_coefs(
   full_lab,full_5g,full_meat,
   model.names = c("Wuhan lab","5G","Meat market"),
-  coefs = model_vars) +
+  coefs = model_vars
+  ) +
   labs(
     x = "Estimate: OLS model comparison"
   ) + 
-  theme(#axis.title.x = element_text(hjust = 0.33),
-        legend.title = element_text(size = 9),
-        legend.position = c(1,1), legend.direction = "vertical",
-        legend.justification = c(1,1),
-        legend.background = element_rect(colour = "darkgrey", 
-                                         fill = "white"))
+  theme(legend.position = "top",
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-85-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -2632,7 +2665,7 @@ ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
   geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-87-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-88-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -2672,87 +2705,43 @@ dist_full <- lm(social_distance ~
                   conspiracy2_sc +
                   conspiracy3_sc,
                 data = conspiracies2)
-
-dist_plots1 <- c("age_sc","W2_Gender_binary2","W2_INFO_9",
-                "threat","W2_DAI_Total","distrust_science",
-                "W2_IOU_Total","RWA","SDO","W2_Paranoia_Total",
-                "W1_Conspiracy_Total","conspiracy3_sc",
-                "conspiracy2_sc","conspiracy1_sc")
-names(dist_plots1) <- c("Age","Gender",
-              "Family and friends","COVID-19 anxiety","Death anxiety",
-              "Distrust scientists","Intolerance of uncertainty",
-              "RWA","SDO",
-              "Paranoia","Conspiracy ideation","5G belief",
-              "Meat market belief","Wuhan lab belief")
-
-dist_plots1 <- dist_plots1[sort(names(dist_plots1))]
-dist_plots <- c(dist_plots1[-1],"conspiracy3_sc")
-names(dist_plots) <- c(names(dist_plots1)[-1],"5G belief")
-
-
-summ(dist_full, vifs = TRUE)
 ```
-
-    ## MODEL INFO:
-    ## Observations: 1399
-    ## Dependent Variable: social_distance
-    ## Type: OLS linear regression 
-    ## 
-    ## MODEL FIT:
-    ## F(24,1374) = 22.20, p = 0.00
-    ## R² = 0.28
-    ## Adj. R² = 0.27 
-    ## 
-    ## Standard errors: OLS
-    ## ----------------------------------------------------------------
-    ##                               Est.   S.E.   t val.      p    VIF
-    ## -------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                   0.65   0.03    20.58   0.00       
-    ## W2_Gender_binary2             0.04   0.01     4.22   0.00   1.12
-    ## W1_Education_binary1          0.01   0.01     1.25   0.21   1.13
-    ## W1_Income_2019                0.02   0.01     1.30   0.19   1.21
-    ## age_sc                        0.15   0.02     6.22   0.00   1.50
-    ## fis_con                       0.01   0.02     0.39   0.70   1.44
-    ## nat                           0.03   0.02     1.70   0.09   1.36
-    ## distrust_science             -0.14   0.02    -7.40   0.00   1.23
-    ## red_top_tabloid              -0.01   0.01    -0.62   0.53   1.12
-    ## mid_level_news                0.00   0.01     0.09   0.93   1.15
-    ## elite_news                    0.01   0.01     0.93   0.35   1.14
-    ## W2_INFO_5                    -0.01   0.02    -0.66   0.51   1.44
-    ## W2_INFO_9                     0.06   0.02     3.39   0.00   1.27
-    ## SDO                          -0.20   0.03    -6.73   0.00   1.52
-    ## RWA                           0.13   0.03     4.16   0.00   1.46
-    ## W2_DAI_Total                 -0.09   0.02    -3.84   0.00   1.64
-    ## W2_IOU_Total                  0.07   0.03     2.72   0.01   1.60
-    ## W2_Paranoia_Total            -0.05   0.02    -2.03   0.04   1.69
-    ## threat                        0.04   0.02     2.27   0.02   1.23
-    ## crt                           0.01   0.01     0.90   0.37   1.33
-    ## CRT_test                      0.01   0.01     0.57   0.57   1.11
-    ## W1_Conspiracy_Total           0.04   0.02     1.76   0.08   1.14
-    ## conspiracy1_sc                0.02   0.02     1.08   0.28   1.43
-    ## conspiracy2_sc                0.07   0.02     4.42   0.00   1.09
-    ## conspiracy3_sc               -0.11   0.02    -4.85   0.00   1.45
-    ## ----------------------------------------------------------------
 
 ``` r
-plot_coefs(dist_full,
-           coefs = dist_plots
-           ) +
-  labs(
-    x = "Estimate: social distancing motivation"
-  )
+# social distance model plot
+socio_dem <- c("age_sc","W2_Gender_binary2")
+names(socio_dem) <- c("Age","Gender")
+motivation2 <- motivation[c("COVID-19 anxiety","Death anxiety",
+                            "Distrust scientists","IOU",
+                            "Paranoia","RWA","SDO")]
+inform2 <- inform["Family and friends"]
+
+plot_coefs(
+  dist_full,
+  coefs = c(socio_dem,motivation2,inform2,conspiracy),
+  groups = list(
+    Demographic = names(socio_dem), 
+    Motivation = names(motivation2), 
+    Information = names(inform2), 
+    Conspiracy = names(conspiracy)
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Estimate: Social distancing") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1))
 ```
 
-    ## Loading required namespace: broom.mixed
-
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-88-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-90-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-88-2.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-90-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -2847,18 +2836,17 @@ p_value(vax_full)
     ## 3          0.04810296     0.72362178     0.04962821   8.579475e-01
 
 ``` r
-vax_plots1 <- c("age_sc","W2_Gender_binary2","W1_Income_2019","threat",
-               "distrust_science","nat","RWA","SDO","W1_Conspiracy_Total",
-               "conspiracy3_sc","conspiracy2_sc","conspiracy1_sc")
+fuller_list <- c(full_list,socio_dem,"W1_Income_2019")
+names(fuller_list) <- c(names(full_list),names(socio_dem),"Income")
 
-names(vax_plots1) <- c("Age","Gender","Income","COVID-19 anxiety",
-                      "Distrust scientists","Nationalism",
-                      "RWA","SDO","Conspiracy ideation",
-                      "5G belief","Meat market belief","Wuhan lab belief")
-
-vax_plots1 <- vax_plots1[sort(names(vax_plots1))]
-vax_plots <- c(vax_plots1[-1],"conspiracy3_sc")
-names(vax_plots) <- c(names(vax_plots1[-1]),"5G belief")
+vax_plots <- fuller_list[c("Age","Gender",
+                        "Income","COVID-19 anxiety",
+                        "Distrust scientists","Nationalism",
+                        "RWA","SDO",
+                        "Conspiracy ideation",
+                        "Meat market belief",
+                        "Wuhan lab belief",
+                        "5G belief")]
 
 tidies <- tidy(vax_full) %>%
   filter(term %in% vax_plots) %>% 
@@ -2869,20 +2857,39 @@ tidies <- tidy(vax_full) %>%
     conf.low.exp = exp(estimate - std.error * qnorm(0.975)),
     conf.high.exp = exp(estimate + std.error * qnorm(0.975)),
     y.level = fct_recode(as.factor(y.level),
-                              "No" = "2",
-                              "Maybe" = "3"),
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots)))) %>%
+                         "No" = "2",
+                         "Maybe" = "3"),
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    group_facet = ifelse(term %in% accuracy, 
+                         "Accuracy",
+                         ifelse(term %in% motivation, "Motivation",
+                                ifelse(term %in% conspiracy, "Conspiracy",
+                                       "Demographic"))),
+    term = fct_recode(term,
+                      "Age" = "age_sc",
+                      "Gender" = "W2_Gender_binary2",
+                      "Income" = "W1_Income_2019",
+                      "COVID-19 anxiety" = "threat",
+                      "Distrust scientists" = "distrust_science",
+                      "Nationalism" = "nat",
+                      "RWA" = "RWA",
+                      "SDO" = "SDO",
+                      "Conspiracy ideation" = "W1_Conspiracy_Total",
+                      "Meat market belief" = "conspiracy2_sc",
+                      "Wuhan lab belief" = "conspiracy1_sc",
+                      "5G belief" = "conspiracy3_sc")
+    ) %>%
   rename(Level = y.level)  
 
 ggplot(data = tidies, 
        aes(y = term, 
            x = estimate, xmin = conf.low,
-                          xmax = conf.high, colour = Level)) + 
+           xmax = conf.high, colour = Level)) + 
   geom_vline(xintercept = 0, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
-  aes(y = term, xmin = conf.low,
-      xmax = conf.high, colour = Level),
-  position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+    aes(y = term, xmin = conf.low,
+        xmax = conf.high, colour = Level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
   geom_point(
     aes(y = term, 
         x = estimate, colour = Level, shape = Level),
@@ -2891,22 +2898,23 @@ ggplot(data = tidies,
   scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
   theme_nice(legend.pos = "right") +
   scale_shape_manual(values = c(21,22)) +
-  scale_y_discrete(labels = rev(names(vax_plots))) +
   drop_y_gridlines() +
+  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
+             strip.position = "left") +
   theme(axis.title.y = element_blank(),
-        axis.text.y = element_text(size = 10),
-        panel.grid.major.x = element_line(linetype = "solid")) +
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10,
+                                   hjust = 1),
+        panel.grid.major.x = element_line(linetype = "solid"),
+        strip.text.x = element_text(size = 8),
+        legend.position = "top") +
   labs(
     x = "Estimate: Vaccine acceptance"
-  ) + 
-  theme(legend.title = element_text(size = 9),
-        legend.position = c(1,1), legend.direction = "vertical",
-        legend.justification = c(1,1),
-        legend.background = element_rect(colour = "darkgrey", 
-                                         fill = "white"))
+  ) 
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
 
 ## Table summarising variables
 
