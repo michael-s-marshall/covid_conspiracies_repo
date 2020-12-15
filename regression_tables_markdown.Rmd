@@ -49,10 +49,10 @@ to_plot <- to_plot[sort(names(to_plot))]
 
 
 ```{r, results='asis'}
-stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat, 
+stargazer(full_meat, full_lab, full_5g, full_5g_ihs, full_5g_poiss, 
           title="Table A2: Regression Results Origin Theory Belief",
-          dep.var.labels=c("Wuhan lab","5G","5G","5G","Meat market"),
-          column.labels = c("OLS","OLS","OLS (IHS)","Poisson","OLS"),
+          dep.var.labels=c("Meat market", "Wuhan lab","5G","5G","5G"),
+          column.labels = c("OLS","OLS","OLS","OLS (IHS)","Poisson"),
           order = to_plot,
           covariate.labels = names(to_plot),
           #omit.stat=c("LL","ser","f","bic"),
@@ -62,6 +62,7 @@ stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat,
           model.numbers = FALSE,
           align = TRUE,
           report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
           type = "html")
 ```
 
@@ -83,5 +84,6 @@ stargazer(full_dist, full_vax,
           single.row=TRUE,
           align = TRUE,
           report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
           type = "html")
 ```

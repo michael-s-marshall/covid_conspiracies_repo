@@ -39,10 +39,10 @@ to_plot <- to_plot[sort(names(to_plot))]
 ```
 
 ``` r
-stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat, 
+stargazer(full_meat, full_lab, full_5g, full_5g_ihs, full_5g_poiss, 
           title="Table A2: Regression Results Origin Theory Belief",
-          dep.var.labels=c("Wuhan lab","5G","5G","5G","Meat market"),
-          column.labels = c("OLS","OLS","OLS (IHS)","Poisson","OLS"),
+          dep.var.labels=c("Meat market", "Wuhan lab","5G","5G","5G"),
+          column.labels = c("OLS","OLS","OLS","OLS (IHS)","Poisson"),
           order = to_plot,
           covariate.labels = names(to_plot),
           #omit.stat=c("LL","ser","f","bic"),
@@ -52,6 +52,7 @@ stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat,
           model.numbers = FALSE,
           align = TRUE,
           report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
           type = "html")
 ```
 
@@ -105,6 +106,12 @@ stargazer(full_lab, full_5g, full_5g_ihs, full_5g_poiss, full_meat,
 
 <td>
 
+Meat market
+
+</td>
+
+<td>
+
 Wuhan lab
 
 </td>
@@ -127,17 +134,17 @@ Wuhan lab
 
 </td>
 
-<td>
-
-Meat market
-
-</td>
-
 </tr>
 
 <tr>
 
 <td style="text-align:left">
+
+</td>
+
+<td>
+
+OLS
 
 </td>
 
@@ -165,12 +172,6 @@ Poisson
 
 </td>
 
-<td>
-
-OLS
-
-</td>
-
 </tr>
 
 <tr>
@@ -186,6 +187,12 @@ OLS
 <td style="text-align:left">
 
 5G belief
+
+</td>
+
+<td>
+
+0.023 (0.040)
 
 </td>
 
@@ -207,12 +214,6 @@ OLS
 
 </td>
 
-<td>
-
-0.023 (0.040)
-
-</td>
-
 </tr>
 
 <tr>
@@ -220,6 +221,12 @@ OLS
 <td style="text-align:left">
 
 Age
+
+</td>
+
+<td>
+
+0.024 (0.042)
 
 </td>
 
@@ -247,12 +254,6 @@ Age
 
 </td>
 
-<td>
-
-0.024 (0.042)
-
-</td>
-
 </tr>
 
 <tr>
@@ -260,6 +261,12 @@ Age
 <td style="text-align:left">
 
 Conspiracy ideation
+
+</td>
+
+<td>
+
+0.024 (0.040)
 
 </td>
 
@@ -283,13 +290,7 @@ Conspiracy ideation
 
 <td>
 
-0.492 (0.240)<sup>\*\*</sup>
-
-</td>
-
-<td>
-
-0.024 (0.040)
+0.492 (0.240)<sup>\*</sup>
 
 </td>
 
@@ -305,7 +306,13 @@ COVID-19 anxiety
 
 <td>
 
-0.096 (0.032)<sup>\*\*\*</sup>
+0.143 (0.032)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+0.096 (0.032)<sup>\*\*</sup>
 
 </td>
 
@@ -317,19 +324,13 @@ COVID-19 anxiety
 
 <td>
 
-\-0.081 (0.042)<sup>\*</sup>
+\-0.081 (0.042)
 
 </td>
 
 <td>
 
 \-0.280 (0.202)
-
-</td>
-
-<td>
-
-0.143 (0.032)<sup>\*\*\*</sup>
 
 </td>
 
@@ -345,7 +346,13 @@ CRT
 
 <td>
 
-\-0.069 (0.026)<sup>\*\*\*</sup>
+0.015 (0.026)
+
+</td>
+
+<td>
+
+\-0.069 (0.026)<sup>\*\*</sup>
 
 </td>
 
@@ -367,12 +374,6 @@ CRT
 
 </td>
 
-<td>
-
-0.015 (0.026)
-
-</td>
-
 </tr>
 
 <tr>
@@ -380,6 +381,12 @@ CRT
 <td style="text-align:left">
 
 CRT pre-exposure
+
+</td>
+
+<td>
+
+\-0.009 (0.016)
 
 </td>
 
@@ -407,12 +414,6 @@ CRT pre-exposure
 
 </td>
 
-<td>
-
-\-0.009 (0.016)
-
-</td>
-
 </tr>
 
 <tr>
@@ -425,7 +426,13 @@ Death anxiety
 
 <td>
 
-0.112 (0.044)<sup>\*\*</sup>
+0.038 (0.043)
+
+</td>
+
+<td>
+
+0.112 (0.044)<sup>\*</sup>
 
 </td>
 
@@ -447,12 +454,6 @@ Death anxiety
 
 </td>
 
-<td>
-
-0.038 (0.043)
-
-</td>
-
 </tr>
 
 <tr>
@@ -465,7 +466,13 @@ Distrust scientists
 
 <td>
 
-0.104 (0.033)<sup>\*\*\*</sup>
+\-0.071 (0.033)<sup>\*</sup>
+
+</td>
+
+<td>
+
+0.104 (0.033)<sup>\*\*</sup>
 
 </td>
 
@@ -487,12 +494,6 @@ Distrust scientists
 
 </td>
 
-<td>
-
-\-0.071 (0.033)<sup>\*\*</sup>
-
-</td>
-
 </tr>
 
 <tr>
@@ -505,7 +506,13 @@ Education
 
 <td>
 
-\-0.038 (0.016)<sup>\*\*</sup>
+\-0.018 (0.016)
+
+</td>
+
+<td>
+
+\-0.038 (0.016)<sup>\*</sup>
 
 </td>
 
@@ -527,12 +534,6 @@ Education
 
 </td>
 
-<td>
-
-\-0.018 (0.016)
-
-</td>
-
 </tr>
 
 <tr>
@@ -540,6 +541,12 @@ Education
 <td style="text-align:left">
 
 Elite news
+
+</td>
+
+<td>
+
+0.013 (0.016)
 
 </td>
 
@@ -567,12 +574,6 @@ Elite news
 
 </td>
 
-<td>
-
-0.013 (0.016)
-
-</td>
-
 </tr>
 
 <tr>
@@ -585,31 +586,31 @@ Family and friends
 
 <td>
 
-0.094 (0.030)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
-0.063 (0.020)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
-0.099 (0.038)<sup>\*\*</sup>
-
-</td>
-
-<td>
-
-0.483 (0.181)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
 \-0.022 (0.029)
+
+</td>
+
+<td>
+
+0.094 (0.030)<sup>\*\*</sup>
+
+</td>
+
+<td>
+
+0.063 (0.020)<sup>\*\*</sup>
+
+</td>
+
+<td>
+
+0.099 (0.038)<sup>\*</sup>
+
+</td>
+
+<td>
+
+0.483 (0.181)<sup>\*\*</sup>
 
 </td>
 
@@ -620,6 +621,12 @@ Family and friends
 <td style="text-align:left">
 
 Fiscal conservatism
+
+</td>
+
+<td>
+
+0.017 (0.040)
 
 </td>
 
@@ -647,12 +654,6 @@ Fiscal conservatism
 
 </td>
 
-<td>
-
-0.017 (0.040)
-
-</td>
-
 </tr>
 
 <tr>
@@ -660,6 +661,12 @@ Fiscal conservatism
 <td style="text-align:left">
 
 Gender
+
+</td>
+
+<td>
+
+\-0.004 (0.016)
 
 </td>
 
@@ -677,19 +684,13 @@ Gender
 
 <td>
 
-0.041 (0.021)<sup>\*\*</sup>
+0.041 (0.021)<sup>\*</sup>
 
 </td>
 
 <td>
 
 0.016 (0.095)
-
-</td>
-
-<td>
-
-\-0.004 (0.016)
 
 </td>
 
@@ -700,6 +701,12 @@ Gender
 <td style="text-align:left">
 
 Income
+
+</td>
+
+<td>
+
+0.036 (0.023)
 
 </td>
 
@@ -727,12 +734,6 @@ Income
 
 </td>
 
-<td>
-
-0.036 (0.023)
-
-</td>
-
 </tr>
 
 <tr>
@@ -745,7 +746,13 @@ Intolerance of uncertainty
 
 <td>
 
-\-0.103 (0.049)<sup>\*\*</sup>
+0.125 (0.048)<sup>\*\*</sup>
+
+</td>
+
+<td>
+
+\-0.103 (0.049)<sup>\*</sup>
 
 </td>
 
@@ -757,19 +764,13 @@ Intolerance of uncertainty
 
 <td>
 
-\-0.163 (0.063)<sup>\*\*\*</sup>
+\-0.163 (0.063)<sup>\*\*</sup>
 
 </td>
 
 <td>
 
 \-1.053 (0.281)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
-0.125 (0.048)<sup>\*\*\*</sup>
 
 </td>
 
@@ -780,6 +781,12 @@ Intolerance of uncertainty
 <td style="text-align:left">
 
 LOC: chance
+
+</td>
+
+<td>
+
+0.151 (0.050)<sup>\*\*</sup>
 
 </td>
 
@@ -807,12 +814,6 @@ LOC: chance
 
 </td>
 
-<td>
-
-0.151 (0.050)<sup>\*\*\*</sup>
-
-</td>
-
 </tr>
 
 <tr>
@@ -820,6 +821,12 @@ LOC: chance
 <td style="text-align:left">
 
 LOC: internal
+
+</td>
+
+<td>
+
+0.212 (0.048)<sup>\*\*\*</sup>
 
 </td>
 
@@ -837,19 +844,13 @@ LOC: internal
 
 <td>
 
-\-0.109 (0.064)<sup>\*</sup>
+\-0.109 (0.064)
 
 </td>
 
 <td>
 
-\-0.723 (0.282)<sup>\*\*</sup>
-
-</td>
-
-<td>
-
-0.212 (0.048)<sup>\*\*\*</sup>
+\-0.723 (0.282)<sup>\*</sup>
 
 </td>
 
@@ -865,31 +866,31 @@ LOC: powerful others
 
 <td>
 
+\-0.075 (0.047)
+
+</td>
+
+<td>
+
 0.0004 (0.048)
 
 </td>
 
 <td>
 
-0.080 (0.031)<sup>\*\*</sup>
+0.080 (0.031)<sup>\*</sup>
 
 </td>
 
 <td>
 
-0.158 (0.062)<sup>\*\*</sup>
+0.158 (0.062)<sup>\*</sup>
 
 </td>
 
 <td>
 
-0.608 (0.310)<sup>\*</sup>
-
-</td>
-
-<td>
-
-\-0.075 (0.047)
+0.608 (0.310)
 
 </td>
 
@@ -900,6 +901,10 @@ LOC: powerful others
 <td style="text-align:left">
 
 Meat market belief
+
+</td>
+
+<td>
 
 </td>
 
@@ -927,10 +932,6 @@ Meat market belief
 
 </td>
 
-<td>
-
-</td>
-
 </tr>
 
 <tr>
@@ -938,6 +939,12 @@ Meat market belief
 <td style="text-align:left">
 
 Mid-level news
+
+</td>
+
+<td>
+
+0.019 (0.017)
 
 </td>
 
@@ -965,12 +972,6 @@ Mid-level news
 
 </td>
 
-<td>
-
-0.019 (0.017)
-
-</td>
-
 </tr>
 
 <tr>
@@ -983,7 +984,13 @@ Nationalism
 
 <td>
 
-0.106 (0.035)<sup>\*\*\*</sup>
+0.141 (0.034)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+0.106 (0.035)<sup>\*\*</sup>
 
 </td>
 
@@ -1005,12 +1012,6 @@ Nationalism
 
 </td>
 
-<td>
-
-0.141 (0.034)<sup>\*\*\*</sup>
-
-</td>
-
 </tr>
 
 <tr>
@@ -1023,7 +1024,13 @@ Paranoia
 
 <td>
 
-0.087 (0.042)<sup>\*\*</sup>
+\-0.055 (0.041)
+
+</td>
+
+<td>
+
+0.087 (0.042)<sup>\*</sup>
 
 </td>
 
@@ -1035,19 +1042,13 @@ Paranoia
 
 <td>
 
-0.131 (0.053)<sup>\*\*</sup>
+0.131 (0.053)<sup>\*</sup>
 
 </td>
 
 <td>
 
-0.790 (0.253)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
-\-0.055 (0.041)
+0.790 (0.253)<sup>\*\*</sup>
 
 </td>
 
@@ -1063,7 +1064,13 @@ RWA
 
 <td>
 
-0.149 (0.053)<sup>\*\*\*</sup>
+\-0.022 (0.052)
+
+</td>
+
+<td>
+
+0.149 (0.053)<sup>\*\*</sup>
 
 </td>
 
@@ -1085,12 +1092,6 @@ RWA
 
 </td>
 
-<td>
-
-\-0.022 (0.052)
-
-</td>
-
 </tr>
 
 <tr>
@@ -1103,7 +1104,13 @@ SDO
 
 <td>
 
-0.133 (0.051)<sup>\*\*\*</sup>
+0.018 (0.051)
+
+</td>
+
+<td>
+
+0.133 (0.051)<sup>\*\*</sup>
 
 </td>
 
@@ -1125,12 +1132,6 @@ SDO
 
 </td>
 
-<td>
-
-0.018 (0.051)
-
-</td>
-
 </tr>
 
 <tr>
@@ -1143,13 +1144,19 @@ Social media
 
 <td>
 
+\-0.014 (0.028)
+
+</td>
+
+<td>
+
 0.040 (0.028)
 
 </td>
 
 <td>
 
-0.054 (0.018)<sup>\*\*\*</sup>
+0.054 (0.018)<sup>\*\*</sup>
 
 </td>
 
@@ -1165,12 +1172,6 @@ Social media
 
 </td>
 
-<td>
-
-\-0.014 (0.028)
-
-</td>
-
 </tr>
 
 <tr>
@@ -1183,7 +1184,13 @@ Tabloid news
 
 <td>
 
-0.042 (0.018)<sup>\*\*</sup>
+0.007 (0.018)
+
+</td>
+
+<td>
+
+0.042 (0.018)<sup>\*</sup>
 
 </td>
 
@@ -1205,12 +1212,6 @@ Tabloid news
 
 </td>
 
-<td>
-
-0.007 (0.018)
-
-</td>
-
 </tr>
 
 <tr>
@@ -1218,6 +1219,12 @@ Tabloid news
 <td style="text-align:left">
 
 Wuhan lab belief
+
+</td>
+
+<td>
+
+\-0.119 (0.026)<sup>\*\*\*</sup>
 
 </td>
 
@@ -1243,12 +1250,6 @@ Wuhan lab belief
 
 </td>
 
-<td>
-
-\-0.119 (0.026)<sup>\*\*\*</sup>
-
-</td>
-
 </tr>
 
 <tr>
@@ -1261,7 +1262,13 @@ Constant
 
 <td>
 
-\-0.111 (0.063)<sup>\*</sup>
+0.266 (0.062)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+\-0.111 (0.063)
 
 </td>
 
@@ -1279,13 +1286,7 @@ Constant
 
 <td>
 
-0.988 (0.368)<sup>\*\*\*</sup>
-
-</td>
-
-<td>
-
-0.266 (0.062)<sup>\*\*\*</sup>
+0.988 (0.368)<sup>\*\*</sup>
 
 </td>
 
@@ -1349,6 +1350,12 @@ R<sup>2</sup>
 
 <td>
 
+0.103
+
+</td>
+
+<td>
+
 0.303
 
 </td>
@@ -1369,12 +1376,6 @@ R<sup>2</sup>
 
 </td>
 
-<td>
-
-0.103
-
-</td>
-
 </tr>
 
 <tr>
@@ -1382,6 +1383,12 @@ R<sup>2</sup>
 <td style="text-align:left">
 
 Adjusted R<sup>2</sup>
+
+</td>
+
+<td>
+
+0.086
 
 </td>
 
@@ -1407,12 +1414,6 @@ Adjusted R<sup>2</sup>
 
 </td>
 
-<td>
-
-0.086
-
-</td>
-
 </tr>
 
 <tr>
@@ -1433,7 +1434,7 @@ Adjusted R<sup>2</sup>
 
 <td colspan="5" style="text-align:right">
 
-<sup>*</sup>p\<0.1; <sup>**</sup>p\<0.05; <sup>***</sup>p\<0.01
+<sup>*</sup>p\<0.05; <sup>**</sup>p\<0.01; <sup>***</sup>p\<0.001
 
 </td>
 
@@ -1458,6 +1459,7 @@ stargazer(full_dist, full_vax,
           single.row=TRUE,
           align = TRUE,
           report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
           type = "html")
 ```
 
@@ -1611,7 +1613,7 @@ Age
 
 <td>
 
-\-1.102 (0.388)<sup>\*\*\*</sup>
+\-1.102 (0.388)<sup>\*\*</sup>
 
 </td>
 
@@ -1639,7 +1641,7 @@ Conspiracy ideation
 
 <td>
 
-0.733 (0.378)<sup>\*</sup>
+0.733 (0.378)
 
 </td>
 
@@ -1779,7 +1781,7 @@ Distrust scientists
 
 <td>
 
-0.900 (0.299)<sup>\*\*\*</sup>
+0.900 (0.299)<sup>\*\*</sup>
 
 </td>
 
@@ -1851,7 +1853,7 @@ Family and friends
 
 <td>
 
-0.041 (0.016)<sup>\*\*</sup>
+0.041 (0.016)<sup>\*</sup>
 
 </td>
 
@@ -1919,7 +1921,7 @@ Gender
 
 <td>
 
-0.286 (0.144)<sup>\*\*</sup>
+0.286 (0.144)<sup>\*</sup>
 
 </td>
 
@@ -1963,7 +1965,7 @@ Intolerance of uncertainty
 
 <td>
 
-0.081 (0.027)<sup>\*\*\*</sup>
+0.081 (0.027)<sup>\*\*</sup>
 
 </td>
 
@@ -2075,19 +2077,19 @@ Meat market belief
 
 <td>
 
-0.047 (0.015)<sup>\*\*\*</sup>
+0.047 (0.015)<sup>\*\*</sup>
 
 </td>
 
 <td>
 
-\-0.924 (0.397)<sup>\*\*</sup>
+\-0.924 (0.397)<sup>\*</sup>
 
 </td>
 
 <td>
 
-\-0.478 (0.241)<sup>\*\*</sup>
+\-0.478 (0.241)<sup>\*</sup>
 
 </td>
 
@@ -2137,13 +2139,13 @@ Nationalism
 
 <td>
 
-\-0.856 (0.502)<sup>\*</sup>
+\-0.856 (0.502)
 
 </td>
 
 <td>
 
-\-0.698 (0.315)<sup>\*\*</sup>
+\-0.698 (0.315)<sup>\*</sup>
 
 </td>
 
@@ -2165,7 +2167,7 @@ Paranoia
 
 <td>
 
-1.034 (0.606)<sup>\*</sup>
+1.034 (0.606)
 
 </td>
 
@@ -2305,7 +2307,7 @@ Wuhan lab belief
 
 <td>
 
-0.943 (0.407)<sup>\*\*</sup>
+0.943 (0.407)<sup>\*</sup>
 
 </td>
 
@@ -2469,7 +2471,7 @@ Akaike Inf. Crit.
 
 <td colspan="3" style="text-align:right">
 
-<sup>*</sup>p\<0.1; <sup>**</sup>p\<0.05; <sup>***</sup>p\<0.01
+<sup>*</sup>p\<0.05; <sup>**</sup>p\<0.01; <sup>***</sup>p\<0.001
 
 </td>
 
