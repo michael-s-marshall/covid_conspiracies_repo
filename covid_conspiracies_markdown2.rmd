@@ -1722,15 +1722,16 @@ cbind(
   scale_y_discrete(labels = names(even_fuller_list))
 ```
 
-```{r}
+```{r, results='asis'}
 # table for correlation matrix
-pacman::p_load(stargazer)
+pacman::p_load(stargazer, knitr)
 
-lower_tri <- lower_tri %>% as_tibble()
+lower_tri <- lower_tri %>% as_tibble() %>% 
+  mutate(` ` = names(cor_df)) %>% 
+  dplyr::select(` `, everything())
 
-stargazer(lower_tri)
-
-
+kable(lower_tri,
+      caption = "Correlation Matrix")
 ```
 
 

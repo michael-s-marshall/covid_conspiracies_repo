@@ -1359,6 +1359,8 @@ car::vif(se_polpsych_lab_2)
     ##   W2_Paranoia_Total 
     ##            1.639540
 
+All VIFs now below 2.
+
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
 ``` r
@@ -1952,8 +1954,7 @@ conspiracies %>%
     ## 4 (0.8,1]        20.3    886.
 
 The tables above suggest overdispersion of the data. As a result,
-running quasipoisson models, as suggested by [Building Your Statistical
-Horizons](https://bookdown.org/roback/bookdown-bysh/ch-poissonreg.html).
+running quasipoisson models.
 
 ``` r
 full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
@@ -2598,7 +2599,7 @@ vars <- c(vars,"w2_conspiracy3_ihs","W2_Internal_Total",
           "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
           "W2_Conspiracy_Theory4","W2_Conspiracy_Theory5",
           "conspiracy4_sc","conspiracy5_sc","conspiracy1_sc",
-          "W2_PO_Total","pid")
+          "W2_PO_Total","pid","right","soc_con")
 vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
 vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
 
@@ -2613,8 +2614,7 @@ conspiracies2 <- merge(
                                  W2_SocialDistance12,
                                  W2_SocialDistance14,
                                  W2_C19_Vax_Self,
-                                 W2_C19_Vax_Child, W2_Trust_Body1,
-                                 W2_Trust_Body2,W2_Trust_Body5),
+                                 W2_C19_Vax_Child),
   by = "pid", all.x = TRUE
 )
 ```
@@ -2929,11 +2929,135 @@ var_summaries <- tibble(
 #write.csv(var_summaries,"variable_summaries.csv")
 ```
 
+## Correlation Matrix
+
+``` r
+even_fuller_list <- c(
+  fuller_list %>%
+    str_replace("W1_Education_binary1","W1_Education_binary") %>%
+    str_replace("W2_Gender_binary2","W2_Gender_binary"),
+  "soc_con","right","social_distance","W2_C19_Vax_Self")
+
+names(even_fuller_list) <- c(names(fuller_list),"Social conservatism",
+                             "Right-left scale", 
+                             "Social distancing motivation",
+                             "Vaccination attitudes")
+
+even_fuller_list <- sort(even_fuller_list)
+
+cor_df <- conspiracies2 %>% 
+  dplyr::select(one_of(even_fuller_list)) %>% 
+  na.omit()
+
+make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary","W1_Education_binary")
+
+cor_df[make_dbl] <- cor_df[make_dbl] %>% 
+  map_df(as.numeric)
+
+cor_df %>% 
+  map_chr(class)
+```
+
+    ##              age_sc      conspiracy1_sc      conspiracy2_sc      conspiracy3_sc 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##                 crt            CRT_test    distrust_science          elite_news 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##             fis_con      mid_level_news                 nat     red_top_tabloid 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##               right                 RWA                 SDO             soc_con 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##     social_distance              threat W1_Conspiracy_Total W1_Education_binary 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##      W1_Income_2019     W2_C19_Vax_Self        W2_DAI_Total    W2_Gender_binary 
+    ##           "numeric"           "numeric"           "numeric"           "numeric" 
+    ##           W2_INFO_5           W2_INFO_9        W2_IOU_Total   W2_Paranoia_Total 
+    ##           "numeric"           "numeric"           "numeric"           "numeric"
+
+``` r
+# function to get lower triangle in correlation matrix
+get_lower_tri <- function(df){
+  cormat <- cor(df)
+  cormat[upper.tri(cormat)]<- NA
+  return(cormat)
+}
+
+lower_tri <- get_lower_tri(cor_df)
+
+var_1 <- sort(names(cor_df))
+
+# plotting correlation matrix
+cbind(
+  lower_tri,
+  var_1
+) %>%
+  as_tibble() %>%
+  gather(var_2,correlation,age_sc:W2_Paranoia_Total, na.rm = T) %>%
+  mutate(correlation = parse_number(correlation)) %>%
+  arrange(var_1) %>%
+  ggplot(aes(x = var_1, y = var_2, fill = correlation)) +
+  geom_tile(colour = "white") +
+  scale_fill_gradientn(breaks = c(-0.2,0,0.2,0.5),
+                       colours = c("red","white",
+                                   "lightblue",
+                                   "dodgerblue4",
+                                   "midnightblue")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(labels = names(even_fuller_list)) +
+  scale_y_discrete(labels = names(even_fuller_list))
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
+
+``` r
+# table for correlation matrix
+pacman::p_load(stargazer, knitr)
+
+lower_tri <- lower_tri %>% as_tibble() %>% 
+  mutate(` ` = names(cor_df)) %>% 
+  dplyr::select(` `, everything())
+
+kable(lower_tri,
+      caption = "Correlation Matrix")
+```
+
+|                       |     age\_sc | conspiracy1\_sc | conspiracy2\_sc | conspiracy3\_sc |         crt |   CRT\_test | distrust\_science | elite\_news |    fis\_con | mid\_level\_news |         nat | red\_top\_tabloid |       right |         RWA |         SDO |    soc\_con | social\_distance |      threat | W1\_Conspiracy\_Total | W1\_Education\_binary | W1\_Income\_2019 | W2\_C19\_Vax\_Self | W2\_DAI\_Total | W2\_Gender\_binary | W2\_INFO\_5 | W2\_INFO\_9 | W2\_IOU\_Total | W2\_Paranoia\_Total |
+| :-------------------- | ----------: | --------------: | --------------: | --------------: | ----------: | ----------: | ----------------: | ----------: | ----------: | ---------------: | ----------: | ----------------: | ----------: | ----------: | ----------: | ----------: | ---------------: | ----------: | --------------------: | --------------------: | ---------------: | -----------------: | -------------: | -----------------: | ----------: | ----------: | -------------: | ------------------: |
+| age\_sc               |   1.0000000 |              NA |              NA |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| conspiracy1\_sc       | \-0.0554126 |       1.0000000 |              NA |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| conspiracy2\_sc       |   0.0694473 |     \-0.0966866 |       1.0000000 |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| conspiracy3\_sc       | \-0.1968411 |       0.3299842 |     \-0.0411027 |       1.0000000 |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| crt                   |   0.0144273 |     \-0.2752541 |       0.0368671 |     \-0.2581064 |   1.0000000 |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| CRT\_test             |   0.1551329 |       0.0737760 |       0.0073739 |     \-0.0201283 | \-0.2102244 |   1.0000000 |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| distrust\_science     | \-0.0757459 |       0.2220164 |     \-0.1260939 |       0.2993469 | \-0.1376387 | \-0.0498916 |         1.0000000 |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| elite\_news           | \-0.0480979 |     \-0.1116579 |       0.0351403 |     \-0.0310280 |   0.1216158 | \-0.0352366 |       \-0.0864244 |   1.0000000 |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| fis\_con              |   0.1278248 |       0.1343677 |       0.0727251 |       0.0660519 | \-0.0192903 |   0.0040636 |         0.0447913 | \-0.1041902 |   1.0000000 |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| mid\_level\_news      |   0.0478379 |       0.2502842 |       0.0381964 |       0.0984832 | \-0.1094488 |   0.0085043 |         0.0885137 | \-0.0424565 |   0.2137892 |        1.0000000 |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| nat                   |   0.1343591 |       0.2083188 |       0.1435770 |       0.1019370 | \-0.0948203 |   0.0563587 |       \-0.0325778 | \-0.1238120 |   0.3796203 |        0.1989451 |   1.0000000 |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| red\_top\_tabloid     | \-0.1203675 |       0.1763378 |       0.0051788 |       0.2088942 | \-0.1589908 | \-0.0268880 |         0.0857823 | \-0.0153704 |   0.0044685 |        0.1212012 |   0.0894869 |         1.0000000 |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| right                 |   0.1338143 |       0.1634907 |       0.0726111 |       0.0971868 | \-0.0755769 |   0.0311461 |         0.0588338 | \-0.1095518 |   0.6681856 |        0.2395652 |   0.3784391 |         0.0227170 |   1.0000000 |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| RWA                   |   0.1482799 |       0.2402447 |       0.0240614 |       0.0402643 | \-0.1955046 |   0.0972658 |         0.0673202 | \-0.2320842 |   0.3632568 |        0.2118870 |   0.3220561 |         0.0507231 |   0.3774242 |   1.0000000 |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| SDO                   | \-0.0403077 |       0.2050590 |       0.0057042 |       0.2330242 | \-0.0864831 | \-0.0331015 |         0.1762634 | \-0.1508152 |   0.4018712 |        0.1472083 |   0.2919805 |         0.0199403 |   0.4436087 |   0.3580471 |   1.0000000 |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| soc\_con              |   0.0565387 |       0.2009702 |       0.0316919 |       0.2009390 | \-0.1259297 | \-0.0025528 |         0.1973332 | \-0.1708457 |   0.5024330 |        0.1872127 |   0.2602379 |         0.0818576 |   0.4595156 |   0.4495329 |   0.3788981 |   1.0000000 |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| social\_distance      |   0.2587121 |     \-0.0908347 |       0.1674625 |     \-0.2915813 |   0.0737947 |   0.0815043 |       \-0.3066986 |   0.0521132 | \-0.0011101 |        0.0012076 |   0.0500811 |       \-0.0888182 | \-0.0145833 |   0.0750816 | \-0.2510765 | \-0.1036192 |        1.0000000 |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| threat                |   0.0556909 |       0.1356206 |       0.1327156 |       0.0390187 | \-0.1382222 |   0.1152144 |       \-0.0424669 |   0.0481917 | \-0.0177482 |        0.0629015 |   0.0570581 |         0.0640629 | \-0.0101604 |   0.0842022 | \-0.0889019 |   0.0169196 |        0.1170175 |   1.0000000 |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| W1\_Conspiracy\_Total | \-0.0484166 |       0.2340217 |     \-0.0126038 |       0.1303185 | \-0.1398630 |   0.0764112 |         0.1710566 | \-0.0680059 | \-0.0411633 |        0.0346567 |   0.0163442 |         0.0598785 | \-0.0233279 |   0.0989850 | \-0.0599814 |   0.0309310 |        0.0141793 |   0.0871699 |             1.0000000 |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| W1\_Education\_binary | \-0.0716686 |     \-0.1450994 |     \-0.0130088 |     \-0.0545354 |   0.1397975 | \-0.0544110 |       \-0.0323353 |   0.2089154 | \-0.0465112 |      \-0.0594184 | \-0.1234422 |       \-0.0963776 | \-0.0716122 | \-0.1332486 | \-0.0773208 | \-0.0510573 |        0.0349590 |   0.0118380 |           \-0.0361612 |             1.0000000 |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| W1\_Income\_2019      |   0.0075214 |     \-0.1306903 |       0.0782161 |     \-0.1120980 |   0.2133140 | \-0.0017493 |       \-0.0848267 |   0.1434613 |   0.1320566 |        0.0045211 | \-0.0182942 |       \-0.1110322 |   0.1126077 | \-0.0408217 |   0.0533128 | \-0.0343089 |        0.0711845 | \-0.0210025 |           \-0.0911093 |             0.2223156 |        1.0000000 |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| W2\_C19\_Vax\_Self    | \-0.1674974 |       0.0727313 |     \-0.1168862 |       0.0959488 | \-0.0410692 | \-0.0391686 |         0.1644502 | \-0.0683376 | \-0.0219344 |        0.0087821 | \-0.0735038 |         0.0098751 | \-0.0540847 |   0.0227439 |   0.0488148 |   0.0230165 |      \-0.1237813 | \-0.1384933 |             0.0909080 |           \-0.0038046 |      \-0.1345180 |          1.0000000 |             NA |                 NA |          NA |          NA |             NA |                  NA |
+| W2\_DAI\_Total        | \-0.2417031 |       0.2457233 |       0.0506510 |       0.3237336 | \-0.2197594 |   0.0032268 |         0.1400059 | \-0.0607726 |   0.0221237 |        0.0833219 |   0.1044279 |         0.1390110 |   0.0455219 |   0.0964260 |   0.1552350 |   0.1493645 |      \-0.1877801 |   0.2677113 |             0.0854517 |           \-0.0587154 |      \-0.0991129 |          0.0571258 |      1.0000000 |                 NA |          NA |          NA |             NA |                  NA |
+| W2\_Gender\_binary    | \-0.1457747 |       0.0617540 |     \-0.0235138 |       0.0151136 | \-0.1670305 |   0.0261718 |         0.0262593 | \-0.0587591 | \-0.0818514 |        0.0177856 | \-0.0515851 |       \-0.0576030 | \-0.0639928 |   0.0913433 | \-0.1015043 | \-0.1194574 |        0.0905687 |   0.0476996 |             0.0701525 |           \-0.0448518 |      \-0.0871241 |          0.0894715 |      0.1006359 |          1.0000000 |          NA |          NA |             NA |                  NA |
+| W2\_INFO\_5           | \-0.3936570 |       0.1695001 |     \-0.0243246 |       0.2398268 | \-0.1845741 | \-0.0726202 |         0.0407408 |   0.0402119 | \-0.0704327 |        0.0448742 |   0.0055942 |         0.1353432 | \-0.0228397 | \-0.0225222 |   0.0262917 |   0.0054521 |      \-0.1108653 |   0.1055366 |             0.1029357 |             0.0348695 |      \-0.0620442 |          0.0861778 |      0.2476942 |          0.0856987 |   1.0000000 |          NA |             NA |                  NA |
+| W2\_INFO\_9           | \-0.1909207 |       0.1909797 |       0.0064934 |       0.1853119 | \-0.1541449 | \-0.0097522 |       \-0.0041932 |   0.0740565 | \-0.0023472 |        0.1155816 |   0.0708626 |         0.1015062 | \-0.0035331 |   0.0018120 | \-0.0529470 |   0.0195715 |        0.0441123 |   0.1725282 |             0.0660756 |           \-0.0170049 |      \-0.0302430 |          0.0147415 |      0.1606231 |          0.0723318 |   0.3875101 |   1.0000000 |             NA |                  NA |
+| W2\_IOU\_Total        | \-0.2640647 |       0.1006033 |       0.0879339 |       0.1340517 | \-0.0729250 | \-0.0380873 |         0.0340551 |   0.0095418 | \-0.0051193 |        0.0461810 |   0.0415397 |         0.0852039 | \-0.0131687 |   0.0294074 |   0.0270955 |   0.0560052 |      \-0.0314238 |   0.2404121 |             0.1557813 |             0.0168118 |      \-0.1146742 |          0.0583917 |      0.4870017 |          0.0846793 |   0.2592348 |   0.1588673 |      1.0000000 |                  NA |
+| W2\_Paranoia\_Total   | \-0.3600180 |       0.2336302 |     \-0.0390273 |       0.3332412 | \-0.1775648 | \-0.0547720 |         0.2355392 | \-0.0238432 |   0.0032399 |        0.0304096 |   0.0762793 |         0.1232698 | \-0.0152521 |   0.0538306 |   0.1537561 |   0.1108835 |      \-0.2339250 |   0.1464008 |             0.1390493 |           \-0.0424952 |      \-0.2187434 |          0.1305646 |      0.4406508 |          0.0257881 |   0.2443180 |   0.1377613 |      0.4633299 |                   1 |
+
+Correlation Matrix
+
 ## Regression tables
 
 ``` r
-pacman::p_load(stargazer)
-
 # setting up variable orders
 to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
              "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
