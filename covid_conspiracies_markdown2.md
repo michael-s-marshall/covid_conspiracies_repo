@@ -2753,6 +2753,7 @@ count(conspiracies2,sum()) %>%  mutate(`%` = n / sum(n))
     ## 1     0 1399 1
 
 ``` r
+# multinomial model
 vax_full <- multinom(W2_C19_Vax_Self ~ 
                   #socio-economic variables
                   W2_Gender_binary +
@@ -2848,6 +2849,7 @@ vax_plots <- fuller_list[c("Age","Gender",
                         "Wuhan lab belief",
                         "5G belief")]
 
+# table for plot of unstandardised coefficients
 tidies <- tidy(vax_full) %>%
   filter(term %in% vax_plots) %>% 
   mutate(
@@ -2881,6 +2883,7 @@ tidies <- tidy(vax_full) %>%
     ) %>%
   rename(Level = y.level)  
 
+# plot of unstandardised coefficients 
 ggplot(data = tidies, 
        aes(y = term, 
            x = estimate, xmin = conf.low,
@@ -2915,6 +2918,91 @@ ggplot(data = tidies,
 ```
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-94-1.png)<!-- -->
+
+Below is a plot of the average marginal effects for key variables.
+
+``` r
+pacman::p_load(margins, ggstance)
+
+# average marginal effect for "No", with bootstrap for variance
+set.seed(123)
+margin_no <- margins_summary(
+  vax_full, category = "2",
+  vce = "bootstrap"
+)
+
+# average marginal effect for "Maybe", with bootstrap for variance
+set.seed(123)
+margin_maybe <- margins_summary(
+  vax_full, category = "3",
+  vce = "bootstrap"
+)
+```
+
+``` r
+# plotting average marginal effect
+rbind(
+  margin_no %>% as_tibble() %>% mutate(level = "No"),
+  margin_maybe %>% as_tibble() %>% mutate(level = "Maybe")
+) %>%
+  rename(term = factor) %>% 
+  filter(term %in% vax_plots) %>%
+  mutate(
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    group_facet = ifelse(term %in% accuracy, 
+                         "Accuracy",
+                         ifelse(term %in% motivation, "Motivation",
+                                ifelse(term %in% conspiracy, "Conspiracy",
+                                       "Demographic"))),
+    term = fct_recode(term,
+                      "Age" = "age_sc",
+                      "Gender" = "W2_Gender_binary2",
+                      "Income" = "W1_Income_2019",
+                      "COVID-19 anxiety" = "threat",
+                      "Distrust scientists" = "distrust_science",
+                      "Nationalism" = "nat",
+                      "RWA" = "RWA",
+                      "SDO" = "SDO",
+                      "Conspiracy ideation" = "W1_Conspiracy_Total",
+                      "Meat market belief" = "conspiracy2_sc",
+                      "Wuhan lab belief" = "conspiracy1_sc",
+                      "5G belief" = "conspiracy3_sc")
+  ) %>% 
+  ggplot(aes(y = term, 
+           x = AME, xmin = lower,
+           xmax = upper, colour = level)) + 
+  geom_vline(xintercept = 0, linetype = 2, size = .25) +
+  ggstance::geom_linerangeh(
+    aes(y = term, xmin = lower,
+        xmax = upper, colour = level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+  geom_point(
+    aes(y = term, 
+        x = AME, colour = level, shape = level),
+    position = ggstance::position_dodgev(height = 0.62),
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice(legend.pos = "right") +
+  scale_shape_manual(values = c(21,22)) +
+  drop_y_gridlines() +
+  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
+             strip.position = "left") +
+  theme(axis.title.y = element_blank(),
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10,
+                                   hjust = 1),
+        panel.grid.major.x = element_line(linetype = "solid"),
+        strip.text.x = element_text(size = 8),
+        legend.position = "top") +
+  labs(
+    x = "Average marginal effect: Vaccine acceptance",
+    colour = "Level",
+    shape = "Level"
+  )
+```
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
 
 ## Table summarising variables
 
@@ -3008,7 +3096,7 @@ cbind(
   scale_y_discrete(labels = names(even_fuller_list))
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-96-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-98-1.png)<!-- -->
 
 ``` r
 # table for correlation matrix
@@ -3054,6 +3142,56 @@ kable(lower_tri,
 | W2\_Paranoia\_Total   | \-0.3600180 |       0.2336302 |     \-0.0390273 |       0.3332412 | \-0.1775648 | \-0.0547720 |         0.2355392 | \-0.0238432 |   0.0032399 |        0.0304096 |   0.0762793 |         0.1232698 | \-0.0152521 |   0.0538306 |   0.1537561 |   0.1108835 |      \-0.2339250 |   0.1464008 |             0.1390493 |           \-0.0424952 |      \-0.2187434 |          0.1305646 |      0.4406508 |          0.0257881 |   0.2443180 |   0.1377613 |      0.4633299 |                   1 |
 
 Correlation Matrix
+
+## Comparison against census benchmarks
+
+``` r
+demographics <- model.matrix(full_lab)[,-1] %>% 
+  as_tibble() %>% 
+  dplyr::select(W2_Gender_binary2,W2_Education_binary1,W1_Income_2019)
+
+# gender -------------------------------------------
+demographics %>%
+  count(W2_Gender_binary2) %>% 
+  mutate(proportion = n / sum(n))
+
+# age ---------------------------------------------
+demographics$ages <- conspiracies$W2_Age_year[
+  conspiracies$pid %in% conspiracies2$pid]
+
+demographics %>% 
+  mutate(
+    age_bands = cut(
+      ages,
+      breaks = c(-Inf,24,34,44,54,64,74,Inf),
+      labels = c("18-24","25-34","35-44","45-54",
+                 "55-64","65-74","75+")
+    )
+  ) %>%
+  count(age_bands) %>%
+  mutate(proportion = n / sum(n))
+
+# education ------------------------------------------
+
+# url for for benchmark below
+# https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes/bulletins/keystatisticsandquickstatisticsforlocalauthoritiesintheunitedkingdom/2013-12-04
+demographics %>% 
+  count(W1_Education_binary1) %>%
+  mutate(proportion = n / sum(n))
+
+conspiracies %>% 
+  count(W1_Education) %>% 
+  mutate(proportion = n / sum(n))
+
+# income -------------------------------------------------
+
+income_bands <- c("0 - 15,490", "15,491 - 25,340","25,341 - 38,740",
+                  "38,741 - 57,930", "57-931 +")
+demographics %>% 
+  count(W1_Income_2019) %>%
+  mutate(proportion = n / sum(n),
+         income_bands = income_bands)
+```
 
 ## Regression tables
 
