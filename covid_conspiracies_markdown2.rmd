@@ -114,6 +114,19 @@ missing <- tibble(
 #View(missing)
 ```
 
+Due to some measurement error in original *W1_Education_binary* variable, the code below overwrites the variable, and creates a dummy for degree educated respondents (undergrad OR postgrad = 1).  
+
+```{r}
+conspiracies <- conspiracies %>% 
+  mutate(
+    W1_Education_binary = ifelse(
+      W1_Education %in% c(5,7), 1, 0
+    )
+  )
+count(conspiracies, W1_Education, W1_Education_binary)
+```
+
+
 The code below combines the two variables on the 2019 general election into a single variable that combines whether a respondent voted, and who they voted for.  It also turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everything else as *NA*.  
 
 ```{r}
@@ -323,7 +336,7 @@ cor(dai_test$scores, conspiracies$W2_DAI_Total)
 ```{r}
 factors <- c("W1_Ethnicity","W1_C19_Infected","W1_BornUK","W1_EURef",
              "W2_Gender_binary","W2_Living_alone","W2_Employment",
-             "W1_Education_binary","W1_Housing_tenure")
+             "W1_Housing_tenure")
 ```
 
 ```{r}
@@ -383,22 +396,6 @@ conspiracies$crt <- rescale01(crt_test$scores, na.rm = TRUE)
 conspiracies$crt <- c(conspiracies$crt)  # Ensure variable is numeric and not matrix class
 
 describe(conspiracies$crt)
-```
-
-
-```{r}
-# do CRT scores come from different distributions
-# dependent on whether they've seen the test
-
-conspiracies %>% 
-  group_by(CRT_test) %>% 
-  summarise(
-    mean_crt = mean(crt),
-    median_crt = median(crt),
-    std_crt = sd(crt)
-  )
-
-kruskal.test(crt ~ CRT_test, data = conspiracies)
 ```
 
 ```{r}
@@ -476,83 +473,6 @@ for(i in seq_along(plot_vars)){
 ```
 
 
-# Principal Components Analysis - PCA
-
-```{r}
-# pca on conspiracy theory variables
-pca_df <- conspiracies %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5)
-
-pca_fit <- prcomp(pca_df,scale = TRUE)
-```
-
-```{r}
-# looking at biplots for components 1:4
-biplot(pca_fit,
-       col = c("lightgrey","red"))
-
-biplot(pca_fit, choices = 3:4,
-       col = c("lightgrey","red"))
-
-pca_fit$rotation[,1:4]
-
-components <- pca_fit$x[,1:4] %>% as_tibble()
-```
-
-First four principal components are as follows:  
-1. general conspiracy ideation, with belief in 5G, 'it's no worse than flu' and vitamin C treatment highly loaded to this component, and belief in Chinese lab less so  
-2. disbelief in Chinese meat market origin, with mild positive loading for Chinese lab origin  
-3. strong conspiracy ideation (non-nationalistic), strong loading for belig 5g, 'it's no worse than flu' and vitamin C treatment, with negative loading for both Chinese lab origin and Chinese meat market  
-4. strong loading for belief in 5G conspiracy and vitamin C treatment, but strong negative loading for belief 'it's no worse than flu'  
-
-
-```{r}
-pc <- cbind(conspiracies,components)
-
-pc <- pc %>% 
-  mutate(
-    pc1_ihs = asinh(PC1)
-  )
-
-pc %>% 
-  ggplot(aes(x = pc1_ihs)) +
-  geom_density() +
-  labs(x = "Principal Component 1 (IHS)")
-
-pc %>% 
-  ggplot(aes(x = PC2)) +
-  geom_density() +
-  labs(x = "Principal Component 2")
-
-pc %>% 
-  ggplot(aes(x = PC3)) +
-  geom_density() +
-  labs(x = "Principal Component 3")
-
-pc %>% 
-  ggplot(aes(x = PC4)) +
-  geom_density()  +
-  labs(x = "Principal Component 4")
-```
-
-Principal components 1 to 3 explain most of the variation in the data.  
-
-```{r}
-# modelling principal components against general conspiracy ideation
-conspiracy_mod <- lm(W1_Conspiracy_Total ~ pc1_ihs + PC2 + PC3 + PC4,
-                     data = pc)
-
-par(mfrow = c(2,2))
-plot(conspiracy_mod)
-
-summ(conspiracy_mod, vifs = TRUE)
-
-source("diagnostic_plots.R")
-```
-
-Only principal components 1 and 3 associated with general conspiracy ideation.  
-
-
 # Modelling for belief in Chinese lab origin
 
 ## DV Chinese lab conspiracy - singular IV models
@@ -569,20 +489,6 @@ rwa_lab <- lm(conspiracy1_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_lab)
-```
-
-```{r}
-mid_news_lab <- lm(conspiracy1_sc ~ mid_level_news,
-              data = conspiracies)
-
-summ(mid_news_lab)
-```
-
-```{r}
-social_m_lab <- lm(conspiracy1_sc ~ W2_INFO_5,
-              data = conspiracies)
-
-summ(social_m_lab)
 ```
 
 ## DV Chinese lab conspiracy - socio-economic variables
@@ -685,7 +591,7 @@ tibble(cor_vec3,
 
 Right, soc_con correlated with fis_con.  
 
-Potential multicollinearity between right, soc_con and fis_con. From hereon, fis_con is included in the models, as of the three, it shows the least positive correlation between SDO and RWA.  
+Potential multicollinearity between right, soc_con and fis_con. From hereon, fis_con is included in the models, as of the three, it shows the smallest positive correlation between SDO and RWA.  
 
 ## DV Chinese lab belief - model above minus the aforementioned variables
 
@@ -721,7 +627,7 @@ AIC(se_polpsych_lab_2)
 car::vif(se_polpsych_lab_2)
 ```
 
-All VIFs now below 2.  
+All VIFs now below 2. AIC has also slightly improved for more parsimonious model.  
 
 ## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat + CRT
 
@@ -777,7 +683,7 @@ ihs_loglik <- function(theta,x){
 }     
 
 
-# alternative using shapiro-wik test
+# alternative using shapiro-wilk test
 shapiro_test_pvalue <- function(theta, x){ 
   x <- ihs(x, theta) 
   shapiro.test(x)$p.value 
@@ -822,20 +728,6 @@ rwa_5g <- lm(conspiracy3_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_5g)
-```
-
-```{r}
-mid_news_5g <- lm(conspiracy3_sc ~ mid_level_news,
-              data = conspiracies)
-
-summ(mid_news_5g)
-```
-
-```{r}
-social_m_5g <- lm(conspiracy3_sc ~ W2_INFO_5,
-              data = conspiracies)
-
-summ(social_m_5g)
 ```
 
 ## DV 5G conspiracy - socio-economic variables
@@ -939,19 +831,6 @@ rwa_5g_ihs <- lm(w2_conspiracy3_ihs ~ RWA,
 summ(rwa_5g_ihs)
 ```
 
-```{r}
-mid_news_5g_ihs <- lm(w2_conspiracy3_ihs ~ mid_level_news,
-              data = conspiracies)
-
-summ(mid_news_5g_ihs)
-```
-
-```{r}
-social_m_5g_ihs <- lm(w2_conspiracy3_ihs ~ W2_INFO_5,
-              data = conspiracies)
-
-summ(social_m_5g_ihs)
-```
 
 ## DV 5G IHS conspiracy - socio-economic variables
 
@@ -1029,10 +908,15 @@ adj_rsq(full_5g_ihs)
 AIC(full_5g_ihs)
 ```
 
+```{r}
+summ(full_5g_ihs, vifs = TRUE)
+```
+
 
 ## DV 5G conspiracy poisson regression model
 
 ```{r}
+# looking at mean and variance to check for overdispersion
 conspiracies %>% 
   mutate(
     sdo_deciles = cut_number(SDO,10)
@@ -1055,7 +939,7 @@ conspiracies %>%
 ```
 
 
-The tables above suggest overdispersion of the data.  As a result, running quasipoisson models.    
+The tables above suggest overdispersion of the data.  As a result, running quasipoisson model.    
 
 ```{r}
 full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
@@ -1114,20 +998,6 @@ rwa_meat <- lm(conspiracy2_sc ~ RWA,
               data = conspiracies)
 
 summ(rwa_meat)
-```
-
-```{r}
-mid_news_meat <- lm(conspiracy2_sc ~ mid_level_news,
-              data = conspiracies)
-
-summ(mid_news_meat)
-```
-
-```{r}
-social_m_meat <- lm(conspiracy2_sc ~ W2_INFO_5,
-              data = conspiracies)
-
-summ(social_m_meat)
 ```
 
 ## DV Chinese meat market belief - socio-economic variables
@@ -1209,7 +1079,8 @@ AIC(full_meat)
 
 ```{r}
 # setting up groups -----------------------------------------
-accuracy <- c("crt","CRT_test","W1_Education_binary1")
+#accuracy <- c("crt","CRT_test","W1_Education_binary1")
+accuracy <- c("crt","CRT_test","W1_Education_binary")
 names(accuracy) <- c("CRT","CRT pre-exposure","Education")
 
 motivation <- c("threat","W2_DAI_Total","distrust_science",
@@ -1247,10 +1118,12 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Wuhan laboratory belief") +
+  labs(x = "Estimate: Wuhan laboratory belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 0))
+        axis.text.y = element_text(hjust = 0),
+        plot.caption = element_text(hjust = 0))
 
 summ(full_lab, vifs = TRUE)
 par(mfrow = c(2,2))
@@ -1272,10 +1145,12 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief") +
+  labs(x = "Estimate: 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
 
 summ(full_5g, vifs = TRUE)
 par(mfrow = c(2,2))
@@ -1296,10 +1171,12 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (IHS)") +
+  labs(x = "Estimate: 5G belief (IHS)",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
 
 ```
 
@@ -1318,10 +1195,13 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (poisson)") +
+  labs(x = "Estimate: 5G belief (poisson with overdispersion parameter)",
+       caption = "Note: Iteratively reweighted least squares (IRLS) estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+summary(full_5g_poiss)
 ```
 
 
@@ -1339,10 +1219,12 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Meat market belief") +
+  labs(x = "Estimate: Meat market belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
 
 summ(full_meat, vifs = TRUE)
 par(mfrow = c(2,2))
@@ -1352,28 +1234,33 @@ plot(full_meat)
 ## Combined plot of models
 
 ```{r, message = FALSE, warning = FALSE}
-model_vars <- full_list[c("CRT","Education",
-                       "News: mid-level","News: tabloid",
-                       "Social media",
-                       "Family and friends",
-                       "SDO","RWA")]
+motivation_sub <- motivation[c("Death anxiety","Distrust scientists",
+                               "RWA","SDO")]
+
+model_vars <- c(motivation_sub,conspiracy)
 
 model_vars <- model_vars[sort(names(model_vars))]
 
 plot_coefs(
   full_lab,full_5g,full_meat,
   model.names = c("Wuhan lab","5G","Meat market"),
-  coefs = model_vars
+  coefs = model_vars,
+  groups = list(
+    Motivation = names(motivation_sub),
+    Conspiracy = names(conspiracy)
+    ),
+  facet.label.pos = "left" 
   ) +
   labs(
-    x = "Estimate: OLS model comparison"
+    x = "Estimate: OLS model comparison",
+    caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1"
   ) + 
   theme(legend.position = "top",
         legend.margin=margin(t = 0, b = 0, unit='cm'),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
 ```
-
 
 ## Conspiracies and social distancing
 
@@ -1395,7 +1282,7 @@ vars <- c(vars,"w2_conspiracy3_ihs","W2_Internal_Total",
           "conspiracy4_sc","conspiracy5_sc","conspiracy1_sc",
           "W2_PO_Total","pid","right","soc_con")
 vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
-vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
+#vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
 
 conspiracies2 <- conspiracies %>% 
   dplyr::select(one_of(vars)) %>% 
@@ -1429,8 +1316,10 @@ conspiracies2$social_distance <- rescale01(sd_test$scores, na.rm = TRUE)
 conspiracies2$social_distance <- c(conspiracies2$social_distance)  # Ensure variable is numeric and not matrix class
 
 describe(conspiracies2$social_distance)
-ggplot(conspiracies2, aes(x = social_distance, y = ..density..)) +
-  geom_histogram(binwidth = 0.1, colour = "black", fill = "lightblue")
+ggplot(conspiracies2, aes(x = social_distance)) +
+  geom_histogram(aes(y = ..density..),
+                 binwidth = 0.1, colour = "black", fill = "lightblue") +
+  geom_density()
 ```
 
 
@@ -1495,10 +1384,12 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Social distancing") +
+  labs(x = "Estimate: Social distancing",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 1))
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
 
 par(mfrow = c(2,2))
 plot(dist_full)
@@ -1725,11 +1616,13 @@ rbind(
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
-        legend.position = "top") +
+        legend.position = "top",
+        plot.caption = element_text(hjust = 0)) +
   labs(
-    x = "Average marginal effect: Vaccine acceptance",
+    x = "Average marginal effect - multinomial logit: Vaccine acceptance",
     colour = "Level",
-    shape = "Level"
+    shape = "Level",
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical variables scaled 0-1."
   )
 ```
 
@@ -1752,7 +1645,7 @@ var_summaries <- tibble(
 ```{r}
 even_fuller_list <- c(
   fuller_list %>%
-    str_replace("W1_Education_binary1","W1_Education_binary") %>%
+    #str_replace("W1_Education_binary1","W1_Education_binary") %>%
     str_replace("W2_Gender_binary2","W2_Gender_binary"),
   "soc_con","right","social_distance","W2_C19_Vax_Self")
 
