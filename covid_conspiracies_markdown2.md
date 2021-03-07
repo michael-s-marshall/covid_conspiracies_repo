@@ -9,7 +9,7 @@ Michael Marshall
 pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps,
                psych, corrr, cowplot, expss, haven, interplot,
                interactions, jtools,labelled, pscl, psych, 
-               sjPlot, skimr)
+               sjPlot, skimr, foreign)
 
 load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
 ```
@@ -2922,55 +2922,237 @@ kable(lower_tri,
 
 Correlation Matrix
 
-## Comparison against census benchmarks
+## Comparison against British Election Survey (BES) benchmarks
+
+Demographic characteristics are compared to BES Wave 19, conducted in
+December 2019, where n = 32,177 for BES.
+
+BES W19 data downloaded from the following
+[link](https://www.britishelectionstudy.com/data-objects/panel-study-data/).
+
+Demographics are only displayed for n=1,406 study participants who
+answered questions on conspiracy theories and are included in the
+regression analyses.
 
 ``` r
-demographics <- model.matrix(full_lab)[,-1] %>% 
-  as_tibble() %>% 
-  dplyr::select(W2_Gender_binary2,W2_Education_binary1,W1_Income_2019)
+# reading in BES data
+bes <- read_sav("BES data/BES2019_W19_v1.0-2.sav")
+```
 
-# gender -------------------------------------------
-demographics %>%
-  count(W2_Gender_binary2) %>% 
-  mutate(proportion = n / sum(n))
+Our sample has a slightly higher number of male respondents.
 
-# age ---------------------------------------------
-demographics$ages <- conspiracies$W2_Age_year[
-  conspiracies$pid %in% conspiracies2$pid]
+``` r
+gender_df <- bes %>% 
+  mutate(
+    gender = to_factor(gender)
+  ) %>% 
+  count(gender) %>% 
+  mutate(`BES W19 Proportion` = n / sum(n)) %>% 
+  rename(`BES W19 n` = n)
 
-demographics %>% 
+conspiracies %>% 
+  mutate(
+    gender = fct_recode(
+      W2_Gender_binary,
+      "Male" = "1",
+      "Female" = "2") %>% fct_explicit_na("Other/Prefer not to say")
+  ) %>%
+  count(gender) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  left_join(gender_df, by = "gender")
+```
+
+    ## # A tibble: 3 x 5
+    ##   gender                      n Proportion `BES W19 n` `BES W19 Proportion`
+    ##   <fct>                   <int>      <dbl>       <int>                <dbl>
+    ## 1 Male                      727    0.517         15049                0.468
+    ## 2 Female                    676    0.481         17128                0.532
+    ## 3 Other/Prefer not to say     3    0.00213          NA               NA
+
+Our sample has slightly more participants who identify as an ethnicity
+other than White. Note: the wording and classification of ethnicity
+given below uses the same [conventions as
+gov.uk](https://www.ethnicity-facts-figures.service.gov.uk/style-guide/writing-about-ethnicity).
+
+``` r
+ethnicity_df <- bes %>% 
+  mutate(
+    ethnicity = fct_collapse(
+      as.factor(p_ethnicity),
+      "White" = c("1","2"),
+      "ethnic minorities (excluding White minorities)" = 
+        c("3","4","5","6","7","8","9","10","11","12","13","14","15"),
+      "Prefer not to say" = "16"
+    )
+  ) %>% 
+  count(ethnicity) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+  
+conspiracies %>% 
+  mutate(
+    ethnicity = fct_collapse(
+      W1_Ethnicity,
+      "White" = c("1","2"),
+      "ethnic minorities (excluding White minorities)" = 
+        c("3","4","5","6","7","8","9","10","11")
+    )
+  ) %>% 
+  count(ethnicity) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  right_join(ethnicity_df, by = "ethnicity")
+```
+
+    ## # A tibble: 4 x 5
+    ##   ethnicity                          n Proportion `BES W19 n` `BES W19 Proporti~
+    ##   <fct>                          <int>      <dbl>       <int>              <dbl>
+    ## 1 White                           1307     0.930        30308            0.942  
+    ## 2 ethnic minorities (excluding ~    99     0.0704        1408            0.0438 
+    ## 3 Prefer not to say                 NA    NA              314            0.00976
+    ## 4 <NA>                              NA    NA              147            0.00457
+
+Our sample is a bit younger than BES, with more respondents under 34 and
+less respondents over 55.
+
+``` r
+age_df <- bes %>% 
   mutate(
     age_bands = cut(
-      ages,
-      breaks = c(-Inf,24,34,44,54,64,74,Inf),
-      labels = c("18-24","25-34","35-44","45-54",
+      age,
+      breaks = c(-Inf,17,24,34,44,54,64,74,Inf),
+      labels = c("Under 18","18-24","25-34","35-44","45-54",
                  "55-64","65-74","75+")
     )
   ) %>%
   count(age_bands) %>%
-  mutate(proportion = n / sum(n))
-
-# education ------------------------------------------
-
-# url for for benchmark below
-# https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes/bulletins/keystatisticsandquickstatisticsforlocalauthoritiesintheunitedkingdom/2013-12-04
-demographics %>% 
-  count(W1_Education_binary1) %>%
-  mutate(proportion = n / sum(n))
+  mutate(`BES W19 Proportion` = n / sum(n)) %>%
+  rename(`BES W19 n` = n)
 
 conspiracies %>% 
-  count(W1_Education) %>% 
-  mutate(proportion = n / sum(n))
-
-# income -------------------------------------------------
-
-income_bands <- c("0 - 15,490", "15,491 - 25,340","25,341 - 38,740",
-                  "38,741 - 57,930", "57-931 +")
-demographics %>% 
-  count(W1_Income_2019) %>%
-  mutate(proportion = n / sum(n),
-         income_bands = income_bands)
+  mutate(
+    age_bands = cut(
+      W2_Age_year,
+      breaks = c(-Inf,17,24,34,44,54,64,74,Inf),
+      labels = c("Under 18","18-24","25-34","35-44","45-54",
+                 "55-64","65-74","75+")
+    )
+  ) %>%
+  count(age_bands) %>%
+  mutate(Proportion = n / sum(n)) %>% 
+  left_join(age_df, by = "age_bands")
 ```
+
+    ## # A tibble: 7 x 5
+    ##   age_bands     n Proportion `BES W19 n` `BES W19 Proportion`
+    ##   <fct>     <int>      <dbl>       <int>                <dbl>
+    ## 1 18-24        78     0.0555        1364               0.0424
+    ## 2 25-34       213     0.151         2856               0.0888
+    ## 3 35-44       244     0.174         4184               0.130 
+    ## 4 45-54       307     0.218         5462               0.170 
+    ## 5 55-64       311     0.221         7420               0.231 
+    ## 6 65-74       215     0.153         8394               0.261 
+    ## 7 75+          38     0.0270        2497               0.0776
+
+Our sample has more people with a degree (undergraduate and/or
+postgraduate).
+
+``` r
+education_df <- bes %>% 
+  mutate(
+    Education = fct_collapse(
+      as.factor(p_education),
+      "Degree education" = c("16","17")) %>% 
+      fct_lump_n(1) %>% 
+      fct_recode(
+        "Other qualification or no qualifications" = "Other"
+        )
+    ) %>% 
+  count(Education) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+
+conspiracies %>% 
+  mutate(
+    Education = fct_recode(
+      as.factor(W1_Education_binary),
+      "Degree education" = "1",
+      "Other qualification or no qualifications" = "0") 
+    ) %>% 
+  count(Education) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  left_join(education_df, by = "Education")
+```
+
+    ## # A tibble: 2 x 5
+    ##   Education                          n Proportion `BES W19 n` `BES W19 Proporti~
+    ##   <fct>                          <int>      <dbl>       <int>              <dbl>
+    ## 1 Other qualification or no qua~   782      0.556       22020              0.684
+    ## 2 Degree education                 624      0.444       10157              0.316
+
+The factor levels we use for gross household are not directly comparable
+to those used in BES W19. However, the table below uses the best
+approximation for comparisons and suggests our sample has slightly more
+respondents on low incomes, but also more respondents on high incomes.
+
+``` r
+income_df <- bes %>% 
+  mutate(
+    gross_hh_income = fct_collapse(
+      as.factor(p_gross_household),
+      "愼㸳0 - 愼㸳14,999" = c("1","2","3"),
+      "愼㸳15,000 - 愼㸳24,999" = c("4","5"),
+      "愼㸳25,000 - 愼㸳39,999" = c("6","7","8"),
+      "愼㸳40,000 - 愼㸳59,999" = c("9","10","11"),
+      "愼㸳60,000 or more" = c("12","13","14","15"),
+      "Other" = c("16","17")
+    )
+  ) %>% 
+  filter(gross_hh_income != "Other") %>% 
+  count(gross_hh_income) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+income_df
+```
+
+    ## # A tibble: 5 x 3
+    ##   gross_hh_income   `BES W19 n` `BES W19 Proportion`
+    ##   <fct>                   <int>                <dbl>
+    ## 1 £0 - £14,999             4402                0.184
+    ## 2 £15,000 - £24,999        4920                0.206
+    ## 3 £25,000 - £39,999        6317                0.264
+    ## 4 £40,000 - £59,999        4456                0.186
+    ## 5 £60,000 or more          3799                0.159
+
+``` r
+conspiracies %>% 
+  mutate(
+    gross_hh_income = fct_recode(
+      as.factor(W1_Income_2019),
+      "愼㸳0 - 15,490" = "0",
+      "愼㸳15,491 - 愼㸳25,340" = "0.25",
+      "愼㸳25,341 - 愼㸳38,740" = "0.5",
+      "愼㸳38,741 - 愼㸳57,930" = "0.75",
+      "愼㸳57,931 or more" = "1"
+    )
+  ) %>% 
+  count(gross_hh_income) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  full_join(income_df, by = "gross_hh_income")
+```
+
+    ## # A tibble: 10 x 5
+    ##    gross_hh_income       n Proportion `BES W19 n` `BES W19 Proportion`
+    ##    <fct>             <int>      <dbl>       <int>                <dbl>
+    ##  1 £0 - 15,490         279      0.198          NA               NA    
+    ##  2 £15,491 - £25,340   252      0.179          NA               NA    
+    ##  3 £25,341 - £38,740   259      0.184          NA               NA    
+    ##  4 £38,741 - £57,930   311      0.221          NA               NA    
+    ##  5 £57,931 or more     305      0.217          NA               NA    
+    ##  6 £0 - £14,999         NA     NA            4402                0.184
+    ##  7 £15,000 - £24,999    NA     NA            4920                0.206
+    ##  8 £25,000 - £39,999    NA     NA            6317                0.264
+    ##  9 £40,000 - £59,999    NA     NA            4456                0.186
+    ## 10 £60,000 or more      NA     NA            3799                0.159
 
 ## Regression tables
 
