@@ -1677,6 +1677,12 @@ make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary","W1_Education_binary")
 cor_df[make_dbl] <- cor_df[make_dbl] %>% 
   map_df(as.numeric)
 
+names(cor_df) <- names(even_fuller_list)
+
+cor_df <- cor_df %>% dplyr::select(one_of(sort(names(even_fuller_list))))
+```
+
+```{r}
 # function to get lower triangle in correlation matrix
 get_lower_tri <- function(df){
   cormat <- cor(df)
@@ -1694,7 +1700,7 @@ cbind(
   var_1
 ) %>%
   as_tibble() %>%
-  gather(var_2,correlation,age_sc:W2_Paranoia_Total, na.rm = T) %>%
+  gather(var_2,correlation,`5G belief`:`Wuhan lab belief`, na.rm = T) %>%
   mutate(correlation = parse_number(correlation)) %>%
   arrange(var_1) %>%
   ggplot(aes(x = var_1, y = var_2, fill = correlation)) +
@@ -1706,9 +1712,7 @@ cbind(
                                    "midnightblue")) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = NULL, y = NULL) +
-  scale_x_discrete(labels = names(even_fuller_list)) +
-  scale_y_discrete(labels = names(even_fuller_list))
+  labs(x = NULL, y = NULL)
 ```
 
 ```{r, results='asis'}
@@ -1915,9 +1919,8 @@ kable(demographics)
 ## Regression tables
 
 ```{r}
-
 # setting up variable orders
-to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
+to_plot <- c("age_sc","W1_Education_binary","W2_Gender_binary2",
              "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
              "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
              "distrust_science","fis_con","W2_IOU_Total",
@@ -1976,4 +1979,26 @@ stargazer(dist_full, vax_full,
           type = "html")
 ```
 
+```{r}
+tab <- full_join(
+  margin_no %>% dplyr::select(factor:SE,p),
+  margin_maybe %>% dplyr::select(factor:SE,p),
+  by = "factor",
+  suffix = c("_no","_maybe")
+) %>% 
+  as_tibble()
+
+tab2 <- tibble(factor = to_plot, variable = names(to_plot))
+
+ames <- left_join(
+    tab,
+    tab2,
+    by = "factor"
+    ) %>%
+  dplyr::select(variable,everything())
+```
+
+```{r, results = 'asis'}
+kable(ames)
+```
 

@@ -2845,6 +2845,12 @@ make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary","W1_Education_binary")
 cor_df[make_dbl] <- cor_df[make_dbl] %>% 
   map_df(as.numeric)
 
+names(cor_df) <- names(even_fuller_list)
+
+cor_df <- cor_df %>% dplyr::select(one_of(sort(names(even_fuller_list))))
+```
+
+``` r
 # function to get lower triangle in correlation matrix
 get_lower_tri <- function(df){
   cormat <- cor(df)
@@ -2862,7 +2868,7 @@ cbind(
   var_1
 ) %>%
   as_tibble() %>%
-  gather(var_2,correlation,age_sc:W2_Paranoia_Total, na.rm = T) %>%
+  gather(var_2,correlation,`5G belief`:`Wuhan lab belief`, na.rm = T) %>%
   mutate(correlation = parse_number(correlation)) %>%
   arrange(var_1) %>%
   ggplot(aes(x = var_1, y = var_2, fill = correlation)) +
@@ -2874,12 +2880,10 @@ cbind(
                                    "midnightblue")) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = NULL, y = NULL) +
-  scale_x_discrete(labels = names(even_fuller_list)) +
-  scale_y_discrete(labels = names(even_fuller_list))
+  labs(x = NULL, y = NULL)
 ```
 
-![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-87-1.png)<!-- -->
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-88-1.png)<!-- -->
 
 ``` r
 # table for correlation matrix
@@ -2893,36 +2897,36 @@ kable(lower_tri,
       caption = "Correlation Matrix")
 ```
 
-|                       |     age\_sc | conspiracy1\_sc | conspiracy2\_sc | conspiracy3\_sc |         crt |   CRT\_test | distrust\_science | elite\_news |    fis\_con | mid\_level\_news |         nat | red\_top\_tabloid |       right |         RWA |         SDO |    soc\_con | social\_distance |      threat | W1\_Conspiracy\_Total | W1\_Education\_binary | W1\_Income\_2019 | W2\_C19\_Vax\_Self | W2\_DAI\_Total | W2\_Gender\_binary | W2\_INFO\_5 | W2\_INFO\_9 | W2\_IOU\_Total | W2\_Paranoia\_Total |
-| :-------------------- | ----------: | --------------: | --------------: | --------------: | ----------: | ----------: | ----------------: | ----------: | ----------: | ---------------: | ----------: | ----------------: | ----------: | ----------: | ----------: | ----------: | ---------------: | ----------: | --------------------: | --------------------: | ---------------: | -----------------: | -------------: | -----------------: | ----------: | ----------: | -------------: | ------------------: |
-| age\_sc               |   1.0000000 |              NA |              NA |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| conspiracy1\_sc       | \-0.0554126 |       1.0000000 |              NA |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| conspiracy2\_sc       |   0.0694473 |     \-0.0966866 |       1.0000000 |              NA |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| conspiracy3\_sc       | \-0.1968411 |       0.3299842 |     \-0.0411027 |       1.0000000 |          NA |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| crt                   |   0.0144273 |     \-0.2752541 |       0.0368671 |     \-0.2581064 |   1.0000000 |          NA |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| CRT\_test             |   0.1551329 |       0.0737760 |       0.0073739 |     \-0.0201283 | \-0.2102244 |   1.0000000 |                NA |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| distrust\_science     | \-0.0757459 |       0.2220164 |     \-0.1260939 |       0.2993469 | \-0.1376387 | \-0.0498916 |         1.0000000 |          NA |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| elite\_news           | \-0.0480979 |     \-0.1116579 |       0.0351403 |     \-0.0310280 |   0.1216158 | \-0.0352366 |       \-0.0864244 |   1.0000000 |          NA |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| fis\_con              |   0.1278248 |       0.1343677 |       0.0727251 |       0.0660519 | \-0.0192903 |   0.0040636 |         0.0447913 | \-0.1041902 |   1.0000000 |               NA |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| mid\_level\_news      |   0.0478379 |       0.2502842 |       0.0381964 |       0.0984832 | \-0.1094488 |   0.0085043 |         0.0885137 | \-0.0424565 |   0.2137892 |        1.0000000 |          NA |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| nat                   |   0.1343591 |       0.2083188 |       0.1435770 |       0.1019370 | \-0.0948203 |   0.0563587 |       \-0.0325778 | \-0.1238120 |   0.3796203 |        0.1989451 |   1.0000000 |                NA |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| red\_top\_tabloid     | \-0.1203675 |       0.1763378 |       0.0051788 |       0.2088942 | \-0.1589908 | \-0.0268880 |         0.0857823 | \-0.0153704 |   0.0044685 |        0.1212012 |   0.0894869 |         1.0000000 |          NA |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| right                 |   0.1338143 |       0.1634907 |       0.0726111 |       0.0971868 | \-0.0755769 |   0.0311461 |         0.0588338 | \-0.1095518 |   0.6681856 |        0.2395652 |   0.3784391 |         0.0227170 |   1.0000000 |          NA |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| RWA                   |   0.1482799 |       0.2402447 |       0.0240614 |       0.0402643 | \-0.1955046 |   0.0972658 |         0.0673202 | \-0.2320842 |   0.3632568 |        0.2118870 |   0.3220561 |         0.0507231 |   0.3774242 |   1.0000000 |          NA |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| SDO                   | \-0.0403077 |       0.2050590 |       0.0057042 |       0.2330242 | \-0.0864831 | \-0.0331015 |         0.1762634 | \-0.1508152 |   0.4018712 |        0.1472083 |   0.2919805 |         0.0199403 |   0.4436087 |   0.3580471 |   1.0000000 |          NA |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| soc\_con              |   0.0565387 |       0.2009702 |       0.0316919 |       0.2009390 | \-0.1259297 | \-0.0025528 |         0.1973332 | \-0.1708457 |   0.5024330 |        0.1872127 |   0.2602379 |         0.0818576 |   0.4595156 |   0.4495329 |   0.3788981 |   1.0000000 |               NA |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| social\_distance      |   0.2587121 |     \-0.0908347 |       0.1674625 |     \-0.2915813 |   0.0737947 |   0.0815043 |       \-0.3066986 |   0.0521132 | \-0.0011101 |        0.0012076 |   0.0500811 |       \-0.0888182 | \-0.0145833 |   0.0750816 | \-0.2510765 | \-0.1036192 |        1.0000000 |          NA |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| threat                |   0.0556909 |       0.1356206 |       0.1327156 |       0.0390187 | \-0.1382222 |   0.1152144 |       \-0.0424669 |   0.0481917 | \-0.0177482 |        0.0629015 |   0.0570581 |         0.0640629 | \-0.0101604 |   0.0842022 | \-0.0889019 |   0.0169196 |        0.1170175 |   1.0000000 |                    NA |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| W1\_Conspiracy\_Total | \-0.0484166 |       0.2340217 |     \-0.0126038 |       0.1303185 | \-0.1398630 |   0.0764112 |         0.1710566 | \-0.0680059 | \-0.0411633 |        0.0346567 |   0.0163442 |         0.0598785 | \-0.0233279 |   0.0989850 | \-0.0599814 |   0.0309310 |        0.0141793 |   0.0871699 |             1.0000000 |                    NA |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| W1\_Education\_binary | \-0.1655707 |     \-0.1834670 |     \-0.0335189 |     \-0.0744352 |   0.2081804 | \-0.0778371 |       \-0.0940102 |   0.2576219 | \-0.0969430 |      \-0.0978202 | \-0.1508601 |       \-0.1236667 | \-0.1027946 | \-0.2067672 | \-0.0724244 | \-0.1000427 |        0.0015106 | \-0.0112353 |           \-0.0865678 |             1.0000000 |               NA |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| W1\_Income\_2019      |   0.0075214 |     \-0.1306903 |       0.0782161 |     \-0.1120980 |   0.2133140 | \-0.0017493 |       \-0.0848267 |   0.1434613 |   0.1320566 |        0.0045211 | \-0.0182942 |       \-0.1110322 |   0.1126077 | \-0.0408217 |   0.0533128 | \-0.0343089 |        0.0711845 | \-0.0210025 |           \-0.0911093 |             0.2327198 |        1.0000000 |                 NA |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| W2\_C19\_Vax\_Self    | \-0.1674974 |       0.0727313 |     \-0.1168862 |       0.0959488 | \-0.0410692 | \-0.0391686 |         0.1644502 | \-0.0683376 | \-0.0219344 |        0.0087821 | \-0.0735038 |         0.0098751 | \-0.0540847 |   0.0227439 |   0.0488148 |   0.0230165 |      \-0.1237813 | \-0.1384933 |             0.0909080 |           \-0.0066770 |      \-0.1345180 |          1.0000000 |             NA |                 NA |          NA |          NA |             NA |                  NA |
-| W2\_DAI\_Total        | \-0.2417031 |       0.2457233 |       0.0506510 |       0.3237336 | \-0.2197594 |   0.0032268 |         0.1400059 | \-0.0607726 |   0.0221237 |        0.0833219 |   0.1044279 |         0.1390110 |   0.0455219 |   0.0964260 |   0.1552350 |   0.1493645 |      \-0.1877801 |   0.2677113 |             0.0854517 |           \-0.0227821 |      \-0.0991129 |          0.0571258 |      1.0000000 |                 NA |          NA |          NA |             NA |                  NA |
-| W2\_Gender\_binary    | \-0.1457747 |       0.0617540 |     \-0.0235138 |       0.0151136 | \-0.1670305 |   0.0261718 |         0.0262593 | \-0.0587591 | \-0.0818514 |        0.0177856 | \-0.0515851 |       \-0.0576030 | \-0.0639928 |   0.0913433 | \-0.1015043 | \-0.1194574 |        0.0905687 |   0.0476996 |             0.0701525 |           \-0.0129786 |      \-0.0871241 |          0.0894715 |      0.1006359 |          1.0000000 |          NA |          NA |             NA |                  NA |
-| W2\_INFO\_5           | \-0.3936570 |       0.1695001 |     \-0.0243246 |       0.2398268 | \-0.1845741 | \-0.0726202 |         0.0407408 |   0.0402119 | \-0.0704327 |        0.0448742 |   0.0055942 |         0.1353432 | \-0.0228397 | \-0.0225222 |   0.0262917 |   0.0054521 |      \-0.1108653 |   0.1055366 |             0.1029357 |             0.0507616 |      \-0.0620442 |          0.0861778 |      0.2476942 |          0.0856987 |   1.0000000 |          NA |             NA |                  NA |
-| W2\_INFO\_9           | \-0.1909207 |       0.1909797 |       0.0064934 |       0.1853119 | \-0.1541449 | \-0.0097522 |       \-0.0041932 |   0.0740565 | \-0.0023472 |        0.1155816 |   0.0708626 |         0.1015062 | \-0.0035331 |   0.0018120 | \-0.0529470 |   0.0195715 |        0.0441123 |   0.1725282 |             0.0660756 |             0.0102841 |      \-0.0302430 |          0.0147415 |      0.1606231 |          0.0723318 |   0.3875101 |   1.0000000 |             NA |                  NA |
-| W2\_IOU\_Total        | \-0.2640647 |       0.1006033 |       0.0879339 |       0.1340517 | \-0.0729250 | \-0.0380873 |         0.0340551 |   0.0095418 | \-0.0051193 |        0.0461810 |   0.0415397 |         0.0852039 | \-0.0131687 |   0.0294074 |   0.0270955 |   0.0560052 |      \-0.0314238 |   0.2404121 |             0.1557813 |             0.0361928 |      \-0.1146742 |          0.0583917 |      0.4870017 |          0.0846793 |   0.2592348 |   0.1588673 |      1.0000000 |                  NA |
-| W2\_Paranoia\_Total   | \-0.3600180 |       0.2336302 |     \-0.0390273 |       0.3332412 | \-0.1775648 | \-0.0547720 |         0.2355392 | \-0.0238432 |   0.0032399 |        0.0304096 |   0.0762793 |         0.1232698 | \-0.0152521 |   0.0538306 |   0.1537561 |   0.1108835 |      \-0.2339250 |   0.1464008 |             0.1390493 |           \-0.0344645 |      \-0.2187434 |          0.1305646 |      0.4406508 |          0.0257881 |   0.2443180 |   0.1377613 |      0.4633299 |                   1 |
+|                              |   5G belief |         Age | Conspiracy ideation | COVID-19 anxiety |         CRT | CRT pre-exposure | Death anxiety | Distrust scientists |   Education | Family and friends | Fiscal conservatism |      Gender |      Income |         IOU | Meat market belief | Nationalism | News: elite | News: mid-level | News: tabloid |    Paranoia | Right-left scale |         RWA |         SDO | Social conservatism | Social distancing motivation | Social media | Vaccination attitudes | Wuhan lab belief |
+| :--------------------------- | ----------: | ----------: | ------------------: | ---------------: | ----------: | ---------------: | ------------: | ------------------: | ----------: | -----------------: | ------------------: | ----------: | ----------: | ----------: | -----------------: | ----------: | ----------: | --------------: | ------------: | ----------: | ---------------: | ----------: | ----------: | ------------------: | ---------------------------: | -----------: | --------------------: | ---------------: |
+| 5G belief                    |   1.0000000 |          NA |                  NA |               NA |          NA |               NA |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Age                          | \-0.1968411 |   1.0000000 |                  NA |               NA |          NA |               NA |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Conspiracy ideation          |   0.1303185 | \-0.0484166 |           1.0000000 |               NA |          NA |               NA |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| COVID-19 anxiety             |   0.0390187 |   0.0556909 |           0.0871699 |        1.0000000 |          NA |               NA |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| CRT                          | \-0.2581064 |   0.0144273 |         \-0.1398630 |      \-0.1382222 |   1.0000000 |               NA |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| CRT pre-exposure             | \-0.0201283 |   0.1551329 |           0.0764112 |        0.1152144 | \-0.2102244 |        1.0000000 |            NA |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Death anxiety                |   0.3237336 | \-0.2417031 |           0.0854517 |        0.2677113 | \-0.2197594 |        0.0032268 |     1.0000000 |                  NA |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Distrust scientists          |   0.2993469 | \-0.0757459 |           0.1710566 |      \-0.0424669 | \-0.1376387 |      \-0.0498916 |     0.1400059 |           1.0000000 |          NA |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Education                    | \-0.0744352 | \-0.1655707 |         \-0.0865678 |      \-0.0112353 |   0.2081804 |      \-0.0778371 |   \-0.0227821 |         \-0.0940102 |   1.0000000 |                 NA |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Family and friends           |   0.1853119 | \-0.1909207 |           0.0660756 |        0.1725282 | \-0.1541449 |      \-0.0097522 |     0.1606231 |         \-0.0041932 |   0.0102841 |          1.0000000 |                  NA |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Fiscal conservatism          |   0.0660519 |   0.1278248 |         \-0.0411633 |      \-0.0177482 | \-0.0192903 |        0.0040636 |     0.0221237 |           0.0447913 | \-0.0969430 |        \-0.0023472 |           1.0000000 |          NA |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Gender                       |   0.0151136 | \-0.1457747 |           0.0701525 |        0.0476996 | \-0.1670305 |        0.0261718 |     0.1006359 |           0.0262593 | \-0.0129786 |          0.0723318 |         \-0.0818514 |   1.0000000 |          NA |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Income                       | \-0.1120980 |   0.0075214 |         \-0.0911093 |      \-0.0210025 |   0.2133140 |      \-0.0017493 |   \-0.0991129 |         \-0.0848267 |   0.2327198 |        \-0.0302430 |           0.1320566 | \-0.0871241 |   1.0000000 |          NA |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| IOU                          |   0.1340517 | \-0.2640647 |           0.1557813 |        0.2404121 | \-0.0729250 |      \-0.0380873 |     0.4870017 |           0.0340551 |   0.0361928 |          0.1588673 |         \-0.0051193 |   0.0846793 | \-0.1146742 |   1.0000000 |                 NA |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Meat market belief           | \-0.0411027 |   0.0694473 |         \-0.0126038 |        0.1327156 |   0.0368671 |        0.0073739 |     0.0506510 |         \-0.1260939 | \-0.0335189 |          0.0064934 |           0.0727251 | \-0.0235138 |   0.0782161 |   0.0879339 |          1.0000000 |          NA |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Nationalism                  |   0.1019370 |   0.1343591 |           0.0163442 |        0.0570581 | \-0.0948203 |        0.0563587 |     0.1044279 |         \-0.0325778 | \-0.1508601 |          0.0708626 |           0.3796203 | \-0.0515851 | \-0.0182942 |   0.0415397 |          0.1435770 |   1.0000000 |          NA |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| News: elite                  | \-0.0310280 | \-0.0480979 |         \-0.0680059 |        0.0481917 |   0.1216158 |      \-0.0352366 |   \-0.0607726 |         \-0.0864244 |   0.2576219 |          0.0740565 |         \-0.1041902 | \-0.0587591 |   0.1434613 |   0.0095418 |          0.0351403 | \-0.1238120 |   1.0000000 |              NA |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| News: mid-level              |   0.0984832 |   0.0478379 |           0.0346567 |        0.0629015 | \-0.1094488 |        0.0085043 |     0.0833219 |           0.0885137 | \-0.0978202 |          0.1155816 |           0.2137892 |   0.0177856 |   0.0045211 |   0.0461810 |          0.0381964 |   0.1989451 | \-0.0424565 |       1.0000000 |            NA |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| News: tabloid                |   0.2088942 | \-0.1203675 |           0.0598785 |        0.0640629 | \-0.1589908 |      \-0.0268880 |     0.1390110 |           0.0857823 | \-0.1236667 |          0.1015062 |           0.0044685 | \-0.0576030 | \-0.1110322 |   0.0852039 |          0.0051788 |   0.0894869 | \-0.0153704 |       0.1212012 |     1.0000000 |          NA |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Paranoia                     |   0.3332412 | \-0.3600180 |           0.1390493 |        0.1464008 | \-0.1775648 |      \-0.0547720 |     0.4406508 |           0.2355392 | \-0.0344645 |          0.1377613 |           0.0032399 |   0.0257881 | \-0.2187434 |   0.4633299 |        \-0.0390273 |   0.0762793 | \-0.0238432 |       0.0304096 |     0.1232698 |   1.0000000 |               NA |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| Right-left scale             |   0.0971868 |   0.1338143 |         \-0.0233279 |      \-0.0101604 | \-0.0755769 |        0.0311461 |     0.0455219 |           0.0588338 | \-0.1027946 |        \-0.0035331 |           0.6681856 | \-0.0639928 |   0.1126077 | \-0.0131687 |          0.0726111 |   0.3784391 | \-0.1095518 |       0.2395652 |     0.0227170 | \-0.0152521 |        1.0000000 |          NA |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| RWA                          |   0.0402643 |   0.1482799 |           0.0989850 |        0.0842022 | \-0.1955046 |        0.0972658 |     0.0964260 |           0.0673202 | \-0.2067672 |          0.0018120 |           0.3632568 |   0.0913433 | \-0.0408217 |   0.0294074 |          0.0240614 |   0.3220561 | \-0.2320842 |       0.2118870 |     0.0507231 |   0.0538306 |        0.3774242 |   1.0000000 |          NA |                  NA |                           NA |           NA |                    NA |               NA |
+| SDO                          |   0.2330242 | \-0.0403077 |         \-0.0599814 |      \-0.0889019 | \-0.0864831 |      \-0.0331015 |     0.1552350 |           0.1762634 | \-0.0724244 |        \-0.0529470 |           0.4018712 | \-0.1015043 |   0.0533128 |   0.0270955 |          0.0057042 |   0.2919805 | \-0.1508152 |       0.1472083 |     0.0199403 |   0.1537561 |        0.4436087 |   0.3580471 |   1.0000000 |                  NA |                           NA |           NA |                    NA |               NA |
+| Social conservatism          |   0.2009390 |   0.0565387 |           0.0309310 |        0.0169196 | \-0.1259297 |      \-0.0025528 |     0.1493645 |           0.1973332 | \-0.1000427 |          0.0195715 |           0.5024330 | \-0.1194574 | \-0.0343089 |   0.0560052 |          0.0316919 |   0.2602379 | \-0.1708457 |       0.1872127 |     0.0818576 |   0.1108835 |        0.4595156 |   0.4495329 |   0.3788981 |           1.0000000 |                           NA |           NA |                    NA |               NA |
+| Social distancing motivation | \-0.2915813 |   0.2587121 |           0.0141793 |        0.1170175 |   0.0737947 |        0.0815043 |   \-0.1877801 |         \-0.3066986 |   0.0015106 |          0.0441123 |         \-0.0011101 |   0.0905687 |   0.0711845 | \-0.0314238 |          0.1674625 |   0.0500811 |   0.0521132 |       0.0012076 |   \-0.0888182 | \-0.2339250 |      \-0.0145833 |   0.0750816 | \-0.2510765 |         \-0.1036192 |                    1.0000000 |           NA |                    NA |               NA |
+| Social media                 |   0.2398268 | \-0.3936570 |           0.1029357 |        0.1055366 | \-0.1845741 |      \-0.0726202 |     0.2476942 |           0.0407408 |   0.0507616 |          0.3875101 |         \-0.0704327 |   0.0856987 | \-0.0620442 |   0.2592348 |        \-0.0243246 |   0.0055942 |   0.0402119 |       0.0448742 |     0.1353432 |   0.2443180 |      \-0.0228397 | \-0.0225222 |   0.0262917 |           0.0054521 |                  \-0.1108653 |    1.0000000 |                    NA |               NA |
+| Vaccination attitudes        |   0.0959488 | \-0.1674974 |           0.0909080 |      \-0.1384933 | \-0.0410692 |      \-0.0391686 |     0.0571258 |           0.1644502 | \-0.0066770 |          0.0147415 |         \-0.0219344 |   0.0894715 | \-0.1345180 |   0.0583917 |        \-0.1168862 | \-0.0735038 | \-0.0683376 |       0.0087821 |     0.0098751 |   0.1305646 |      \-0.0540847 |   0.0227439 |   0.0488148 |           0.0230165 |                  \-0.1237813 |    0.0861778 |             1.0000000 |               NA |
+| Wuhan lab belief             |   0.3299842 | \-0.0554126 |           0.2340217 |        0.1356206 | \-0.2752541 |        0.0737760 |     0.2457233 |           0.2220164 | \-0.1834670 |          0.1909797 |           0.1343677 |   0.0617540 | \-0.1306903 |   0.1006033 |        \-0.0966866 |   0.2083188 | \-0.1116579 |       0.2502842 |     0.1763378 |   0.2336302 |        0.1634907 |   0.2402447 |   0.2050590 |           0.2009702 |                  \-0.0908347 |    0.1695001 |             0.0727313 |                1 |
 
 Correlation Matrix
 
@@ -3211,7 +3215,7 @@ kable(demographics)
 
 ``` r
 # setting up variable orders
-to_plot <- c("age_sc","W1_Education_binary1","W2_Gender_binary2",
+to_plot <- c("age_sc","W1_Education_binary","W2_Gender_binary2",
              "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
              "W2_INFO_5","red_top_tabloid","threat","W2_DAI_Total",
              "distrust_science","fis_con","W2_IOU_Total",
@@ -3697,6 +3701,46 @@ Education
 
 <td>
 
+\-0.039 (0.016)<sup>\*</sup>
+
+</td>
+
+<td>
+
+\-0.045 (0.017)<sup>\*\*</sup>
+
+</td>
+
+<td>
+
+\-0.003 (0.011)
+
+</td>
+
+<td>
+
+\-0.027 (0.083)
+
+</td>
+
+<td>
+
+\-0.048 (0.098)
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left">
+
+Elite news
+
+</td>
+
+<td>
+
 0.018 (0.016)
 
 </td>
@@ -3731,7 +3775,7 @@ Education
 
 <td style="text-align:left">
 
-Elite news
+Family and friends
 
 </td>
 
@@ -3771,7 +3815,7 @@ Elite news
 
 <td style="text-align:left">
 
-Family and friends
+Fiscal conservatism
 
 </td>
 
@@ -3811,7 +3855,7 @@ Family and friends
 
 <td style="text-align:left">
 
-Fiscal conservatism
+Gender
 
 </td>
 
@@ -3851,7 +3895,7 @@ Fiscal conservatism
 
 <td style="text-align:left">
 
-Gender
+Income
 
 </td>
 
@@ -3891,7 +3935,7 @@ Gender
 
 <td style="text-align:left">
 
-Income
+Intolerance of uncertainty
 
 </td>
 
@@ -3931,7 +3975,7 @@ Income
 
 <td style="text-align:left">
 
-Intolerance of uncertainty
+Meat market belief
 
 </td>
 
@@ -3969,7 +4013,7 @@ Intolerance of uncertainty
 
 <td style="text-align:left">
 
-Meat market belief
+Mid-level news
 
 </td>
 
@@ -4009,7 +4053,7 @@ Meat market belief
 
 <td style="text-align:left">
 
-Mid-level news
+Nationalism
 
 </td>
 
@@ -4049,7 +4093,7 @@ Mid-level news
 
 <td style="text-align:left">
 
-Nationalism
+Paranoia
 
 </td>
 
@@ -4089,7 +4133,7 @@ Nationalism
 
 <td style="text-align:left">
 
-Paranoia
+RWA
 
 </td>
 
@@ -4129,7 +4173,7 @@ Paranoia
 
 <td style="text-align:left">
 
-RWA
+SDO
 
 </td>
 
@@ -4169,7 +4213,7 @@ RWA
 
 <td style="text-align:left">
 
-SDO
+Social media
 
 </td>
 
@@ -4209,7 +4253,7 @@ SDO
 
 <td style="text-align:left">
 
-Social media
+Tabloid news
 
 </td>
 
@@ -4249,7 +4293,7 @@ Social media
 
 <td style="text-align:left">
 
-Tabloid news
+Wuhan lab belief
 
 </td>
 
@@ -4278,46 +4322,6 @@ Tabloid news
 <td>
 
 0.904 (0.163)<sup>\*\*\*</sup>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left">
-
-Wuhan lab belief
-
-</td>
-
-<td>
-
-\-0.039 (0.016)<sup>\*</sup>
-
-</td>
-
-<td>
-
-\-0.045 (0.017)<sup>\*\*</sup>
-
-</td>
-
-<td>
-
-\-0.003 (0.011)
-
-</td>
-
-<td>
-
-\-0.027 (0.083)
-
-</td>
-
-<td>
-
-\-0.048 (0.098)
 
 </td>
 
@@ -4868,6 +4872,34 @@ Education
 
 <td>
 
+0.003 (0.009)
+
+</td>
+
+<td>
+
+0.163 (0.237)
+
+</td>
+
+<td>
+
+0.086 (0.151)
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left">
+
+Elite news
+
+</td>
+
+<td>
+
 0.010 (0.009)
 
 </td>
@@ -4890,7 +4922,7 @@ Education
 
 <td style="text-align:left">
 
-Elite news
+Family and friends
 
 </td>
 
@@ -4918,7 +4950,7 @@ Elite news
 
 <td style="text-align:left">
 
-Family and friends
+Fiscal conservatism
 
 </td>
 
@@ -4946,7 +4978,7 @@ Family and friends
 
 <td style="text-align:left">
 
-Fiscal conservatism
+Gender
 
 </td>
 
@@ -4974,7 +5006,7 @@ Fiscal conservatism
 
 <td style="text-align:left">
 
-Gender
+Income
 
 </td>
 
@@ -5002,7 +5034,7 @@ Gender
 
 <td style="text-align:left">
 
-Income
+Intolerance of uncertainty
 
 </td>
 
@@ -5030,7 +5062,7 @@ Income
 
 <td style="text-align:left">
 
-Intolerance of uncertainty
+Meat market belief
 
 </td>
 
@@ -5058,7 +5090,7 @@ Intolerance of uncertainty
 
 <td style="text-align:left">
 
-Meat market belief
+Mid-level news
 
 </td>
 
@@ -5086,7 +5118,7 @@ Meat market belief
 
 <td style="text-align:left">
 
-Mid-level news
+Nationalism
 
 </td>
 
@@ -5114,7 +5146,7 @@ Mid-level news
 
 <td style="text-align:left">
 
-Nationalism
+Paranoia
 
 </td>
 
@@ -5142,7 +5174,7 @@ Nationalism
 
 <td style="text-align:left">
 
-Paranoia
+RWA
 
 </td>
 
@@ -5170,7 +5202,7 @@ Paranoia
 
 <td style="text-align:left">
 
-RWA
+SDO
 
 </td>
 
@@ -5198,7 +5230,7 @@ RWA
 
 <td style="text-align:left">
 
-SDO
+Social media
 
 </td>
 
@@ -5226,7 +5258,7 @@ SDO
 
 <td style="text-align:left">
 
-Social media
+Tabloid news
 
 </td>
 
@@ -5254,7 +5286,7 @@ Social media
 
 <td style="text-align:left">
 
-Tabloid news
+Wuhan lab belief
 
 </td>
 
@@ -5273,34 +5305,6 @@ Tabloid news
 <td>
 
 0.085 (0.242)
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left">
-
-Wuhan lab belief
-
-</td>
-
-<td>
-
-0.003 (0.009)
-
-</td>
-
-<td>
-
-0.163 (0.237)
-
-</td>
-
-<td>
-
-0.086 (0.151)
 
 </td>
 
@@ -5465,3 +5469,53 @@ Akaike Inf. Crit.
 </tr>
 
 </table>
+
+``` r
+tab <- full_join(
+  margin_no %>% dplyr::select(factor:SE,p),
+  margin_maybe %>% dplyr::select(factor:SE,p),
+  by = "factor",
+  suffix = c("_no","_maybe")
+) %>% 
+  as_tibble()
+
+tab2 <- tibble(factor = to_plot, variable = names(to_plot))
+
+ames <- left_join(
+    tab,
+    tab2,
+    by = "factor"
+    ) %>%
+  dplyr::select(variable,everything())
+```
+
+``` r
+kable(ames)
+```
+
+| variable                   | factor                |     AME\_no |    SE\_no |     p\_no |  AME\_maybe | SE\_maybe |  p\_maybe |
+| :------------------------- | :-------------------- | ----------: | --------: | --------: | ----------: | --------: | --------: |
+| Age                        | age\_sc               | \-0.1486290 | 0.0370105 | 0.0000592 | \-0.1188615 | 0.0737319 | 0.1069453 |
+| Wuhan lab belief           | conspiracy1\_sc       |   0.0589867 | 0.0280575 | 0.0355225 | \-0.0084818 | 0.0449071 | 0.8501913 |
+| Meat market belief         | conspiracy2\_sc       | \-0.0549229 | 0.0314130 | 0.0803921 | \-0.0533983 | 0.0378687 | 0.1585131 |
+| 5G belief                  | conspiracy3\_sc       |   0.1298442 | 0.0319357 | 0.0000479 | \-0.0587554 | 0.0718455 | 0.4134699 |
+| CRT                        | crt                   | \-0.0324897 | 0.0324301 | 0.3164224 |   0.0399650 | 0.0484302 | 0.4092528 |
+| CRT pre-exposure           | CRT\_test             | \-0.0001630 | 0.0171396 | 0.9924120 | \-0.0006503 | 0.0275841 | 0.9811928 |
+| Distrust scientists        | distrust\_science     |   0.1396161 | 0.0306323 | 0.0000052 |   0.0923592 | 0.0443137 | 0.0371408 |
+| Elite news                 | elite\_news           |   0.0090603 | 0.0163781 | 0.5801296 | \-0.0357733 | 0.0214344 | 0.0951239 |
+| Fiscal conservatism        | fis\_con              | \-0.0043836 | 0.0430623 | 0.9189184 |   0.0219087 | 0.0633454 | 0.7294470 |
+| Mid-level news             | mid\_level\_news      |   0.0111583 | 0.0156515 | 0.4758920 |   0.0061152 | 0.0254522 | 0.8101256 |
+| Nationalism                | nat                   | \-0.0451399 | 0.0315247 | 0.1521760 | \-0.0944634 | 0.0515206 | 0.0667273 |
+| Tabloid news               | red\_top\_tabloid     | \-0.0125939 | 0.0149492 | 0.3995376 | \-0.0140531 | 0.0247250 | 0.5697790 |
+| RWA                        | RWA                   |   0.0487089 | 0.0615038 | 0.4283801 |   0.0681089 | 0.0733615 | 0.3531998 |
+| SDO                        | SDO                   |   0.0287464 | 0.0539367 | 0.5940574 |   0.0192629 | 0.0712473 | 0.7868783 |
+| COVID-19 anxiety           | threat                | \-0.0930432 | 0.0387007 | 0.0162090 | \-0.1704736 | 0.0414377 | 0.0000389 |
+| Conspiracy ideation        | W1\_Conspiracy\_Total | \-0.0109122 | 0.0339190 | 0.7476696 |   0.1218430 | 0.0607354 | 0.0448425 |
+| Education                  | W1\_Education\_binary |   0.0086913 | 0.0173267 | 0.6159383 |   0.0103640 | 0.0225528 | 0.6458442 |
+| Income                     | W1\_Income\_2019      |   0.0023098 | 0.0279165 | 0.9340585 | \-0.1202780 | 0.0371201 | 0.0011943 |
+| Death anxiety              | W2\_DAI\_Total        | \-0.0218736 | 0.0364553 | 0.5484986 |   0.0203941 | 0.0702497 | 0.7715797 |
+| Gender                     | W2\_Gender\_binary2   |   0.0068159 | 0.0154956 | 0.6600371 |   0.0429617 | 0.0238027 | 0.0710890 |
+| Social media               | W2\_INFO\_5           |   0.0188347 | 0.0274057 | 0.4919230 |   0.0265937 | 0.0458206 | 0.5616528 |
+| Family and friends         | W2\_INFO\_9           | \-0.0225128 | 0.0327161 | 0.4913719 |   0.0054189 | 0.0467148 | 0.9076530 |
+| Intolerance of uncertainty | W2\_IOU\_Total        | \-0.0510740 | 0.0477635 | 0.2849307 |   0.0502828 | 0.0725419 | 0.4882120 |
+| Paranoia                   | W2\_Paranoia\_Total   |   0.0615575 | 0.0355916 | 0.0837107 |   0.0381427 | 0.0576434 | 0.5081623 |
