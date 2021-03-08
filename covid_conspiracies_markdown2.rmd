@@ -127,7 +127,7 @@ count(conspiracies, W1_Education, W1_Education_binary)
 ```
 
 
-The code below combines the two variables on the 2019 general election into a single variable that combines whether a respondent voted, and who they voted for.  It also turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everything else as *NA*.  
+The code below turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everything else as *NA*.  
 
 ```{r}
 
@@ -681,37 +681,49 @@ ihs_loglik <- function(theta,x){
   log_lik <- -n*log(sum((xt - mean(xt))^2))- sum(log(1+theta^2*x^2))
   return(log_lik)
 }     
-
-
-# alternative using shapiro-wilk test
-shapiro_test_pvalue <- function(theta, x){ 
-  x <- ihs(x, theta) 
-  shapiro.test(x)$p.value 
-}
 ```
 
 ```{r}
-best_theta <- optimize(shapiro_test_pvalue, 
-                       lower = 0.00001, upper = 50,
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.00001, upper = 1e+06,
                        x = conspiracies$W2_Conspiracy_Theory3, 
                        maximum = TRUE)$maximum
-best_theta
-```
+best_theta # continues to rise indefinitely
 
+# trying different starting point
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.001, upper = 1e+08,
+                       x = conspiracies$W2_Conspiracy_Theory3, 
+                       maximum = TRUE)$maximum
+best_theta # continues to rise indefinitely
+```
 
 ```{r}
+# raw data 
 conspiracies %>% 
   ggplot(aes(x = W2_Conspiracy_Theory3)) +
-  geom_histogram(colour = "darkgrey", fill = "lightblue")
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
 
-conspiracies <- conspiracies %>% 
-  mutate(w2_conspiracy3_ihs = ihs(W2_Conspiracy_Theory3, best_theta))
-
+# ihs transformation where theta = 1
 conspiracies %>% 
-  ggplot(aes(x = w2_conspiracy3_ihs)) +
-  geom_histogram(colour = "darkgrey", fill = "lightblue")
-```
+  ggplot(aes(x = asinh(W2_Conspiracy_Theory3))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
 
+# ihs transformation where theta = 1e+08
+conspiracies %>% 
+  ggplot(aes(x = ihs(W2_Conspiracy_Theory3, best_theta))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
+
+# transforming using theta = 1
+conspiracies <- conspiracies %>% 
+  mutate(w2_conspiracy3_ihs = asinh(W2_Conspiracy_Theory3))
+```
 
 ## DV 5G conspiracy - singular IV models
 
@@ -1118,11 +1130,11 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Wuhan laboratory belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Wuhan laboratory belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 0),
+        axis.text.y = element_text(hjust = 1),
         plot.caption = element_text(hjust = 0))
 
 summ(full_lab, vifs = TRUE)
@@ -1145,8 +1157,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -1171,8 +1183,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (IHS)",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate (IHS transformation): 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -1195,8 +1207,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (poisson with overdispersion parameter)",
-       caption = "Note: Iteratively reweighted least squares (IRLS) estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate (poisson): 5G belief",
+       caption = "Note: Poisson regression estimated using maximum likelihood method, with 95% confidence intervals.\nOverdispersion parameter = 28.87. Numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -1219,8 +1231,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Meat market belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Meat market belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -1252,8 +1264,8 @@ plot_coefs(
   facet.label.pos = "left" 
   ) +
   labs(
-    x = "Estimate: OLS model comparison",
-    caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1"
+    x = "Coefficient estimate: OLS model comparison",
+    caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1"
   ) + 
   theme(legend.position = "top",
         legend.margin=margin(t = 0, b = 0, unit='cm'),
@@ -1384,8 +1396,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Social distancing",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Social distancing",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -1619,10 +1631,10 @@ rbind(
         legend.position = "top",
         plot.caption = element_text(hjust = 0)) +
   labs(
-    x = "Average marginal effect - multinomial logit: Vaccine acceptance",
+    x = "Average marginal effect: Vaccine acceptance",
     colour = "Level",
     shape = "Level",
-    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical variables scaled 0-1."
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
   )
 ```
 
@@ -1664,9 +1676,6 @@ make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary","W1_Education_binary")
 
 cor_df[make_dbl] <- cor_df[make_dbl] %>% 
   map_df(as.numeric)
-
-cor_df %>% 
-  map_chr(class)
 
 # function to get lower triangle in correlation matrix
 get_lower_tri <- function(df){
@@ -1712,6 +1721,8 @@ lower_tri <- lower_tri %>% as_tibble() %>%
 
 kable(lower_tri,
       caption = "Correlation Matrix")
+
+#write.csv(lower_tri,"correlation_matrix.csv")
 ```
 
 ## Comparison against British Election Survey (BES) benchmarks
@@ -1738,7 +1749,7 @@ gender_df <- bes %>%
   mutate(`BES W19 Proportion` = n / sum(n)) %>% 
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+gender_df_full <- conspiracies %>% 
   mutate(
     gender = fct_recode(
       W2_Gender_binary,
@@ -1748,6 +1759,7 @@ conspiracies %>%
   count(gender) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   left_join(gender_df, by = "gender")
+gender_df_full
 ```
 
 Our sample has slightly more participants who identify as an ethnicity other than White. Note: the wording and classification of ethnicity given below uses the same [conventions as gov.uk](https://www.ethnicity-facts-figures.service.gov.uk/style-guide/writing-about-ethnicity).  
@@ -1767,7 +1779,7 @@ ethnicity_df <- bes %>%
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
   
-conspiracies %>% 
+ethnicity_df_full <- conspiracies %>% 
   mutate(
     ethnicity = fct_collapse(
       W1_Ethnicity,
@@ -1779,6 +1791,7 @@ conspiracies %>%
   count(ethnicity) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   right_join(ethnicity_df, by = "ethnicity")
+ethnicity_df_full
 ```
 
 Our sample is a bit younger than BES, with more respondents under 34 and less respondents over 55.  
@@ -1797,7 +1810,7 @@ age_df <- bes %>%
   mutate(`BES W19 Proportion` = n / sum(n)) %>%
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+age_df_full <- conspiracies %>% 
   mutate(
     age_bands = cut(
       W2_Age_year,
@@ -1809,6 +1822,7 @@ conspiracies %>%
   count(age_bands) %>%
   mutate(Proportion = n / sum(n)) %>% 
   left_join(age_df, by = "age_bands")
+age_df_full
 ```
 
 Our sample has more people with a degree (undergraduate and/or postgraduate).  
@@ -1828,7 +1842,7 @@ education_df <- bes %>%
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+education_df_full <- conspiracies %>% 
   mutate(
     Education = fct_recode(
       as.factor(W1_Education_binary),
@@ -1838,6 +1852,7 @@ conspiracies %>%
   count(Education) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   left_join(education_df, by = "Education")
+education_df_full
 ```
 
 The factor levels we use for gross household are not directly comparable to those used in BES W19.  However, the table below uses the best approximation for comparisons and suggests our sample has slightly more respondents on low incomes, but also more respondents on high incomes.  
@@ -1859,9 +1874,8 @@ income_df <- bes %>%
   count(gross_hh_income) %>% 
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
-income_df
 
-conspiracies %>% 
+income_df_full <- conspiracies %>% 
   mutate(
     gross_hh_income = fct_recode(
       as.factor(W1_Income_2019),
@@ -1875,8 +1889,28 @@ conspiracies %>%
   count(gross_hh_income) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   full_join(income_df, by = "gross_hh_income")
+income_df_full
 ```
 
+```{r, results = 'asis'}
+# combined table of all demographic comparisons
+demographics <- rbind(
+  age_df_full %>% rename(Category = age_bands) %>% 
+    mutate(Variable = "Age"),
+  gender_df_full %>% rename(Category = gender) %>% 
+    mutate(Variable = "Gender"), 
+  ethnicity_df_full %>% rename(Category = ethnicity) %>% 
+    mutate(Variable = "Ethnicity"),
+  education_df_full %>% rename(Category = Education) %>% 
+    mutate(Variable = "Education"),
+  income_df_full %>% rename(Category = gross_hh_income) %>% 
+    mutate(Variable = "Gross household income")
+) %>% 
+  dplyr::select(Variable,everything())
+
+kable(demographics)
+#write.csv(demographics, "demographic_table.csv")
+```
 
 ## Regression tables
 

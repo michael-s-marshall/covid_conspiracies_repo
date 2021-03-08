@@ -156,11 +156,9 @@ count(conspiracies, W1_Education, W1_Education_binary)
     ## 7 7 [Postgraduate degree]                       1   225
     ## 8 8 [Other qualifications]                      0    17
 
-The code below combines the two variables on the 2019 general election
-into a single variable that combines whether a respondent voted, and who
-they voted for. It also turns the *preferred newspaper* variables into
-dummy variables, as they were previously coded as *1=Yes* and everything
-else as *NA*.
+The code below turns the *preferred newspaper* variables into dummy
+variables, as they were previously coded as *1=Yes* and everything else
+as *NA*.
 
 ``` r
 # making preferred newspaper dummy variable (i.e. replacing NA with 0)
@@ -1231,29 +1229,36 @@ ihs_loglik <- function(theta,x){
   log_lik <- -n*log(sum((xt - mean(xt))^2))- sum(log(1+theta^2*x^2))
   return(log_lik)
 }     
-
-
-# alternative using shapiro-wilk test
-shapiro_test_pvalue <- function(theta, x){ 
-  x <- ihs(x, theta) 
-  shapiro.test(x)$p.value 
-}
 ```
 
 ``` r
-best_theta <- optimize(shapiro_test_pvalue, 
-                       lower = 0.00001, upper = 50,
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.00001, upper = 1e+06,
                        x = conspiracies$W2_Conspiracy_Theory3, 
                        maximum = TRUE)$maximum
-best_theta
+best_theta # continues to rise indefinitely
 ```
 
-    ## [1] 5.450961
+    ## [1] 1e+06
 
 ``` r
+# trying different starting point
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.001, upper = 1e+08,
+                       x = conspiracies$W2_Conspiracy_Theory3, 
+                       maximum = TRUE)$maximum
+best_theta # continues to rise indefinitely
+```
+
+    ## [1] 1e+08
+
+``` r
+# raw data 
 conspiracies %>% 
   ggplot(aes(x = W2_Conspiracy_Theory3)) +
-  geom_histogram(colour = "darkgrey", fill = "lightblue")
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -1261,17 +1266,36 @@ conspiracies %>%
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ``` r
-conspiracies <- conspiracies %>% 
-  mutate(w2_conspiracy3_ihs = ihs(W2_Conspiracy_Theory3, best_theta))
-
+# ihs transformation where theta = 1
 conspiracies %>% 
-  ggplot(aes(x = w2_conspiracy3_ihs)) +
-  geom_histogram(colour = "darkgrey", fill = "lightblue")
+  ggplot(aes(x = asinh(W2_Conspiracy_Theory3))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
+
+``` r
+# ihs transformation where theta = 1e+08
+conspiracies %>% 
+  ggplot(aes(x = ihs(W2_Conspiracy_Theory3, best_theta))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](covid_conspiracies_markdown2_files/figure-gfm/unnamed-chunk-43-3.png)<!-- -->
+
+``` r
+# transforming using theta = 1
+conspiracies <- conspiracies %>% 
+  mutate(w2_conspiracy3_ihs = asinh(W2_Conspiracy_Theory3))
+```
 
 ## DV 5G conspiracy - singular IV models
 
@@ -1458,7 +1482,7 @@ summ(sdo_5g_ihs)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(1,1404) = 104.57, p = 0.00
+    ## F(1,1404) = 107.63, p = 0.00
     ## R² = 0.07
     ## Adj. R² = 0.07 
     ## 
@@ -1466,8 +1490,8 @@ summ(sdo_5g_ihs)
     ## -----------------------------------------------
     ##                     Est.   S.E.   t val.      p
     ## ----------------- ------ ------ -------- ------
-    ## (Intercept)         0.21   0.03     8.20   0.00
-    ## SDO                 0.65   0.06    10.23   0.00
+    ## (Intercept)         0.56   0.10     5.56   0.00
+    ## SDO                 2.58   0.25    10.37   0.00
     ## -----------------------------------------------
 
 ``` r
@@ -1483,7 +1507,7 @@ summ(rwa_5g_ihs)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(1,1404) = 35.56, p = 0.00
+    ## F(1,1404) = 23.23, p = 0.00
     ## R² = 0.02
     ## Adj. R² = 0.02 
     ## 
@@ -1491,8 +1515,8 @@ summ(rwa_5g_ihs)
     ## -----------------------------------------------
     ##                     Est.   S.E.   t val.      p
     ## ----------------- ------ ------ -------- ------
-    ## (Intercept)         0.24   0.04     6.34   0.00
-    ## RWA                 0.41   0.07     5.96   0.00
+    ## (Intercept)         0.82   0.15     5.64   0.00
+    ## RWA                 1.30   0.27     4.82   0.00
     ## -----------------------------------------------
 
 ## DV 5G IHS conspiracy - socio-economic variables
@@ -1507,13 +1531,13 @@ se_5g_ihs <- lm(w2_conspiracy3_ihs ~ W2_Gender_binary +
 adj_rsq(se_5g_ihs)
 ```
 
-    ## [1] 0.04930443
+    ## [1] 0.05804877
 
 ``` r
 AIC(se_5g_ihs)
 ```
 
-    ## [1] 1631.553
+    ## [1] 5443
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media
 
@@ -1535,13 +1559,13 @@ se_pol_5g_ihs <- update(se_5g_ihs, ~ . +
 adj_rsq(se_pol_5g_ihs)
 ```
 
-    ## [1] 0.2118092
+    ## [1] 0.227997
 
 ``` r
 AIC(se_pol_5g_ihs)
 ```
 
-    ## [1] 1369.256
+    ## [1] 5152.522
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych
 
@@ -1557,13 +1581,13 @@ se_polpsych_5g_ihs <- update(se_pol_5g_ihs, ~ . +
 adj_rsq(se_polpsych_5g_ihs)
 ```
 
-    ## [1] 0.2840881
+    ## [1] 0.3062904
 
 ``` r
 AIC(se_polpsych_5g_ihs)
 ```
 
-    ## [1] 1239.639
+    ## [1] 5007.864
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
 
@@ -1579,13 +1603,13 @@ multi_5g_ihs <- update(se_polpsych_5g_ihs, ~ . +
 adj_rsq(multi_5g_ihs)
 ```
 
-    ## [1] 0.3107262
+    ## [1] 0.3301339
 
 ``` r
 AIC(multi_5g_ihs)
 ```
 
-    ## [1] 1189.549
+    ## [1] 4961.891
 
 ## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
 
@@ -1599,13 +1623,13 @@ full_5g_ihs <- update(multi_5g_ihs, ~ . +
 adj_rsq(full_5g_ihs)
 ```
 
-    ## [1] 0.3310589
+    ## [1] 0.350952
 
 ``` r
 AIC(full_5g_ihs)
 ```
 
-    ## [1] 1150.61
+    ## [1] 4920.673
 
 ``` r
 summ(full_5g_ihs, vifs = TRUE)
@@ -1617,38 +1641,38 @@ summ(full_5g_ihs, vifs = TRUE)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(23,1375) = 31.08, p = 0.00
-    ## R² = 0.34
-    ## Adj. R² = 0.33 
+    ## F(23,1375) = 33.87, p = 0.00
+    ## R² = 0.36
+    ## Adj. R² = 0.35 
     ## 
     ## Standard errors: OLS
     ## ---------------------------------------------------------------
     ##                              Est.   S.E.   t val.      p    VIF
     ## ------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  0.00   0.07     0.05   0.96       
-    ## W2_Gender_binary2            0.04   0.02     1.71   0.09   1.12
-    ## W1_Education_binary         -0.00   0.02    -0.15   0.88   1.23
-    ## W1_Income_2019              -0.03   0.03    -0.97   0.33   1.21
-    ## age_sc                       0.04   0.06     0.73   0.47   1.52
-    ## fis_con                     -0.01   0.05    -0.26   0.79   1.44
-    ## nat                          0.05   0.05     1.04   0.30   1.36
-    ## distrust_science             0.32   0.04     7.63   0.00   1.19
-    ## red_top_tabloid              0.08   0.02     3.27   0.00   1.11
-    ## mid_level_news              -0.01   0.02    -0.33   0.74   1.15
-    ## elite_news                  -0.01   0.02    -0.34   0.73   1.15
-    ## W2_INFO_5                    0.13   0.04     3.61   0.00   1.43
-    ## W2_INFO_9                    0.09   0.04     2.42   0.02   1.26
-    ## SDO                          0.36   0.07     5.52   0.00   1.49
-    ## RWA                         -0.05   0.07    -0.67   0.51   1.45
-    ## W2_DAI_Total                 0.33   0.06     5.91   0.00   1.60
-    ## W2_IOU_Total                -0.14   0.06    -2.30   0.02   1.59
-    ## W2_Paranoia_Total            0.16   0.05     3.17   0.00   1.67
-    ## threat                      -0.07   0.04    -1.68   0.09   1.23
-    ## crt                         -0.21   0.03    -6.24   0.00   1.33
-    ## CRT_test                     0.02   0.02     1.12   0.26   1.11
-    ## W1_Conspiracy_Total          0.06   0.05     1.18   0.24   1.14
-    ## conspiracy1_sc               0.21   0.03     6.15   0.00   1.41
-    ## conspiracy2_sc              -0.02   0.04    -0.64   0.52   1.09
+    ## (Intercept)                  0.00   0.28     0.00   1.00       
+    ## W2_Gender_binary2            0.08   0.08     0.96   0.34   1.12
+    ## W1_Education_binary         -0.03   0.08    -0.32   0.75   1.23
+    ## W1_Income_2019              -0.13   0.11    -1.17   0.24   1.21
+    ## age_sc                      -0.05   0.21    -0.25   0.80   1.52
+    ## fis_con                     -0.02   0.20    -0.12   0.91   1.44
+    ## nat                          0.17   0.17     0.97   0.33   1.36
+    ## distrust_science             1.33   0.16     8.18   0.00   1.19
+    ## red_top_tabloid              0.31   0.09     3.46   0.00   1.11
+    ## mid_level_news              -0.03   0.09    -0.31   0.76   1.15
+    ## elite_news                  -0.01   0.08    -0.17   0.86   1.15
+    ## W2_INFO_5                    0.53   0.14     3.81   0.00   1.43
+    ## W2_INFO_9                    0.37   0.15     2.49   0.01   1.26
+    ## SDO                          1.46   0.25     5.78   0.00   1.49
+    ## RWA                         -0.46   0.26    -1.74   0.08   1.45
+    ## W2_DAI_Total                 1.37   0.21     6.44   0.00   1.60
+    ## W2_IOU_Total                -0.67   0.24    -2.80   0.01   1.59
+    ## W2_Paranoia_Total            0.71   0.20     3.60   0.00   1.67
+    ## threat                      -0.25   0.16    -1.57   0.12   1.23
+    ## crt                         -0.79   0.13    -6.08   0.00   1.33
+    ## CRT_test                     0.07   0.08     0.82   0.41   1.11
+    ## W1_Conspiracy_Total          0.15   0.20     0.75   0.46   1.14
+    ## conspiracy1_sc               0.86   0.13     6.47   0.00   1.41
+    ## conspiracy2_sc              -0.07   0.14    -0.55   0.59   1.09
     ## ---------------------------------------------------------------
 
 ## DV 5G conspiracy poisson regression model
@@ -2002,11 +2026,11 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Wuhan laboratory belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Wuhan laboratory belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(hjust = 0),
+        axis.text.y = element_text(hjust = 1),
         plot.caption = element_text(hjust = 0))
 ```
 
@@ -2083,8 +2107,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -2158,8 +2182,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (IHS)",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate (IHS transformation): 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -2182,8 +2206,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: 5G belief (poisson with overdispersion parameter)",
-       caption = "Note: Iteratively reweighted least squares (IRLS) estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate (poisson): 5G belief",
+       caption = "Note: Poisson regression estimated using maximum likelihood method, with 95% confidence intervals.\nOverdispersion parameter = 28.87. Numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -2261,8 +2285,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Meat market belief",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Meat market belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -2343,8 +2367,8 @@ plot_coefs(
   facet.label.pos = "left" 
   ) +
   labs(
-    x = "Estimate: OLS model comparison",
-    caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1"
+    x = "Coefficient estimate: OLS model comparison",
+    caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1"
   ) + 
   theme(legend.position = "top",
         legend.margin=margin(t = 0, b = 0, unit='cm'),
@@ -2503,8 +2527,8 @@ plot_coefs(
   #facet.label.pos = "left",
   facet.cols = 2
 ) +
-  labs(x = "Estimate: Social distancing",
-       caption = "Note: OLS estimates with 95% confidence intervals, numerical variables scaled 0-1") +
+  labs(x = "Coefficient estimate: Social distancing",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
   theme(strip.text.x = element_text(size = 8),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(hjust = 1),
@@ -2774,10 +2798,10 @@ rbind(
         legend.position = "top",
         plot.caption = element_text(hjust = 0)) +
   labs(
-    x = "Average marginal effect - multinomial logit: Vaccine acceptance",
+    x = "Average marginal effect: Vaccine acceptance",
     colour = "Level",
     shape = "Level",
-    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical variables scaled 0-1."
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
   )
 ```
 
@@ -2821,26 +2845,6 @@ make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary","W1_Education_binary")
 cor_df[make_dbl] <- cor_df[make_dbl] %>% 
   map_df(as.numeric)
 
-cor_df %>% 
-  map_chr(class)
-```
-
-    ##              age_sc      conspiracy1_sc      conspiracy2_sc      conspiracy3_sc 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##                 crt            CRT_test    distrust_science          elite_news 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##             fis_con      mid_level_news                 nat     red_top_tabloid 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##               right                 RWA                 SDO             soc_con 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##     social_distance              threat W1_Conspiracy_Total W1_Education_binary 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##      W1_Income_2019     W2_C19_Vax_Self        W2_DAI_Total    W2_Gender_binary 
-    ##           "numeric"           "numeric"           "numeric"           "numeric" 
-    ##           W2_INFO_5           W2_INFO_9        W2_IOU_Total   W2_Paranoia_Total 
-    ##           "numeric"           "numeric"           "numeric"           "numeric"
-
-``` r
 # function to get lower triangle in correlation matrix
 get_lower_tri <- function(df){
   cormat <- cor(df)
@@ -2922,6 +2926,10 @@ kable(lower_tri,
 
 Correlation Matrix
 
+``` r
+#write.csv(lower_tri,"correlation_matrix.csv")
+```
+
 ## Comparison against British Election Survey (BES) benchmarks
 
 Demographic characteristics are compared to BES Wave 19, conducted in
@@ -2950,7 +2958,7 @@ gender_df <- bes %>%
   mutate(`BES W19 Proportion` = n / sum(n)) %>% 
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+gender_df_full <- conspiracies %>% 
   mutate(
     gender = fct_recode(
       W2_Gender_binary,
@@ -2960,6 +2968,7 @@ conspiracies %>%
   count(gender) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   left_join(gender_df, by = "gender")
+gender_df_full
 ```
 
     ## # A tibble: 3 x 5
@@ -2989,7 +2998,7 @@ ethnicity_df <- bes %>%
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
   
-conspiracies %>% 
+ethnicity_df_full <- conspiracies %>% 
   mutate(
     ethnicity = fct_collapse(
       W1_Ethnicity,
@@ -3001,6 +3010,7 @@ conspiracies %>%
   count(ethnicity) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   right_join(ethnicity_df, by = "ethnicity")
+ethnicity_df_full
 ```
 
     ## # A tibble: 4 x 5
@@ -3028,7 +3038,7 @@ age_df <- bes %>%
   mutate(`BES W19 Proportion` = n / sum(n)) %>%
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+age_df_full <- conspiracies %>% 
   mutate(
     age_bands = cut(
       W2_Age_year,
@@ -3040,6 +3050,7 @@ conspiracies %>%
   count(age_bands) %>%
   mutate(Proportion = n / sum(n)) %>% 
   left_join(age_df, by = "age_bands")
+age_df_full
 ```
 
     ## # A tibble: 7 x 5
@@ -3071,7 +3082,7 @@ education_df <- bes %>%
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
 
-conspiracies %>% 
+education_df_full <- conspiracies %>% 
   mutate(
     Education = fct_recode(
       as.factor(W1_Education_binary),
@@ -3081,6 +3092,7 @@ conspiracies %>%
   count(Education) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   left_join(education_df, by = "Education")
+education_df_full
 ```
 
     ## # A tibble: 2 x 5
@@ -3111,20 +3123,8 @@ income_df <- bes %>%
   count(gross_hh_income) %>% 
   mutate(`BES W19 Proportion` = n/sum(n)) %>% 
   rename(`BES W19 n` = n)
-income_df
-```
 
-    ## # A tibble: 5 x 3
-    ##   gross_hh_income   `BES W19 n` `BES W19 Proportion`
-    ##   <fct>                   <int>                <dbl>
-    ## 1 £0 - £14,999             4402                0.184
-    ## 2 £15,000 - £24,999        4920                0.206
-    ## 3 £25,000 - £39,999        6317                0.264
-    ## 4 £40,000 - £59,999        4456                0.186
-    ## 5 £60,000 or more          3799                0.159
-
-``` r
-conspiracies %>% 
+income_df_full <- conspiracies %>% 
   mutate(
     gross_hh_income = fct_recode(
       as.factor(W1_Income_2019),
@@ -3138,6 +3138,7 @@ conspiracies %>%
   count(gross_hh_income) %>% 
   mutate(Proportion = n/sum(n)) %>% 
   full_join(income_df, by = "gross_hh_income")
+income_df_full
 ```
 
     ## # A tibble: 10 x 5
@@ -3153,6 +3154,58 @@ conspiracies %>%
     ##  8 £25,000 - £39,999    NA     NA            6317                0.264
     ##  9 £40,000 - £59,999    NA     NA            4456                0.186
     ## 10 £60,000 or more      NA     NA            3799                0.159
+
+``` r
+# combined table of all demographic comparisons
+demographics <- rbind(
+  age_df_full %>% rename(Category = age_bands) %>% 
+    mutate(Variable = "Age"),
+  gender_df_full %>% rename(Category = gender) %>% 
+    mutate(Variable = "Gender"), 
+  ethnicity_df_full %>% rename(Category = ethnicity) %>% 
+    mutate(Variable = "Ethnicity"),
+  education_df_full %>% rename(Category = Education) %>% 
+    mutate(Variable = "Education"),
+  income_df_full %>% rename(Category = gross_hh_income) %>% 
+    mutate(Variable = "Gross household income")
+) %>% 
+  dplyr::select(Variable,everything())
+
+kable(demographics)
+```
+
+| Variable               | Category                                       |    n | Proportion | BES W19 n | BES W19 Proportion |
+| :--------------------- | :--------------------------------------------- | ---: | ---------: | --------: | -----------------: |
+| Age                    | 18-24                                          |   78 |  0.0554765 |      1364 |          0.0423905 |
+| Age                    | 25-34                                          |  213 |  0.1514936 |      2856 |          0.0887591 |
+| Age                    | 35-44                                          |  244 |  0.1735420 |      4184 |          0.1300308 |
+| Age                    | 45-54                                          |  307 |  0.2183499 |      5462 |          0.1697486 |
+| Age                    | 55-64                                          |  311 |  0.2211949 |      7420 |          0.2305995 |
+| Age                    | 65-74                                          |  215 |  0.1529161 |      8394 |          0.2608696 |
+| Age                    | 75+                                            |   38 |  0.0270270 |      2497 |          0.0776020 |
+| Gender                 | Male                                           |  727 |  0.5170697 |     15049 |          0.4676943 |
+| Gender                 | Female                                         |  676 |  0.4807966 |     17128 |          0.5323057 |
+| Gender                 | Other/Prefer not to say                        |    3 |  0.0021337 |        NA |                 NA |
+| Ethnicity              | White                                          | 1307 |  0.9295875 |     30308 |          0.9419150 |
+| Ethnicity              | ethnic minorities (excluding White minorities) |   99 |  0.0704125 |      1408 |          0.0437580 |
+| Ethnicity              | Prefer not to say                              |   NA |         NA |       314 |          0.0097585 |
+| Ethnicity              | NA                                             |   NA |         NA |       147 |          0.0045685 |
+| Education              | Other qualification or no qualifications       |  782 |  0.5561878 |     22020 |          0.6843397 |
+| Education              | Degree education                               |  624 |  0.4438122 |     10157 |          0.3156603 |
+| Gross household income | £0 - 15,490                                    |  279 |  0.1984353 |        NA |                 NA |
+| Gross household income | £15,491 - £25,340                              |  252 |  0.1792319 |        NA |                 NA |
+| Gross household income | £25,341 - £38,740                              |  259 |  0.1842105 |        NA |                 NA |
+| Gross household income | £38,741 - £57,930                              |  311 |  0.2211949 |        NA |                 NA |
+| Gross household income | £57,931 or more                                |  305 |  0.2169275 |        NA |                 NA |
+| Gross household income | £0 - £14,999                                   |   NA |         NA |      4402 |          0.1842304 |
+| Gross household income | £15,000 - £24,999                              |   NA |         NA |      4920 |          0.2059094 |
+| Gross household income | £25,000 - £39,999                              |   NA |         NA |      6317 |          0.2643760 |
+| Gross household income | £40,000 - £59,999                              |   NA |         NA |      4456 |          0.1864903 |
+| Gross household income | £60,000 or more                                |   NA |         NA |      3799 |          0.1589939 |
+
+``` r
+#write.csv(demographics, "demographic_table.csv")
+```
 
 ## Regression tables
 
@@ -3382,7 +3435,7 @@ Age
 
 <td>
 
-0.041 (0.056)
+\-0.054 (0.215)
 
 </td>
 
@@ -3422,7 +3475,7 @@ Conspiracy ideation
 
 <td>
 
-0.061 (0.052)
+0.150 (0.201)
 
 </td>
 
@@ -3462,7 +3515,7 @@ COVID-19 anxiety
 
 <td>
 
-\-0.070 (0.042)
+\-0.252 (0.160)
 
 </td>
 
@@ -3502,7 +3555,7 @@ CRT
 
 <td>
 
-\-0.211 (0.034)<sup>\*\*\*</sup>
+\-0.792 (0.130)<sup>\*\*\*</sup>
 
 </td>
 
@@ -3542,7 +3595,7 @@ CRT pre-exposure
 
 <td>
 
-0.024 (0.021)
+0.066 (0.081)
 
 </td>
 
@@ -3582,7 +3635,7 @@ Death anxiety
 
 <td>
 
-0.328 (0.055)<sup>\*\*\*</sup>
+1.372 (0.213)<sup>\*\*\*</sup>
 
 </td>
 
@@ -3622,7 +3675,7 @@ Distrust scientists
 
 <td>
 
-0.323 (0.042)<sup>\*\*\*</sup>
+1.333 (0.163)<sup>\*\*\*</sup>
 
 </td>
 
@@ -3662,7 +3715,7 @@ Education
 
 <td>
 
-\-0.007 (0.021)
+\-0.014 (0.082)
 
 </td>
 
@@ -3702,7 +3755,7 @@ Elite news
 
 <td>
 
-0.093 (0.038)<sup>\*</sup>
+0.367 (0.148)<sup>\*</sup>
 
 </td>
 
@@ -3742,7 +3795,7 @@ Family and friends
 
 <td>
 
-\-0.014 (0.053)
+\-0.024 (0.204)
 
 </td>
 
@@ -3782,7 +3835,7 @@ Fiscal conservatism
 
 <td>
 
-0.035 (0.020)
+0.076 (0.079)
 
 </td>
 
@@ -3822,7 +3875,7 @@ Gender
 
 <td>
 
-\-0.029 (0.030)
+\-0.133 (0.114)
 
 </td>
 
@@ -3862,7 +3915,7 @@ Income
 
 <td>
 
-\-0.142 (0.062)<sup>\*</sup>
+\-0.666 (0.238)<sup>\*\*</sup>
 
 </td>
 
@@ -3900,7 +3953,7 @@ Intolerance of uncertainty
 
 <td>
 
-\-0.023 (0.035)
+\-0.074 (0.136)
 
 </td>
 
@@ -3940,7 +3993,7 @@ Meat market belief
 
 <td>
 
-\-0.007 (0.022)
+\-0.027 (0.086)
 
 </td>
 
@@ -3980,7 +4033,7 @@ Mid-level news
 
 <td>
 
-0.047 (0.045)
+0.168 (0.174)
 
 </td>
 
@@ -4020,7 +4073,7 @@ Nationalism
 
 <td>
 
-0.163 (0.051)<sup>\*\*</sup>
+0.712 (0.198)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4060,7 +4113,7 @@ Paranoia
 
 <td>
 
-\-0.046 (0.069)
+\-0.459 (0.264)
 
 </td>
 
@@ -4100,7 +4153,7 @@ RWA
 
 <td>
 
-0.364 (0.066)<sup>\*\*\*</sup>
+1.465 (0.253)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4140,7 +4193,7 @@ SDO
 
 <td>
 
-0.131 (0.036)<sup>\*\*\*</sup>
+0.530 (0.139)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4180,7 +4233,7 @@ Social media
 
 <td>
 
-0.076 (0.023)<sup>\*\*</sup>
+0.307 (0.089)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4218,7 +4271,7 @@ Tabloid news
 
 <td>
 
-0.213 (0.035)<sup>\*\*\*</sup>
+0.860 (0.133)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4258,7 +4311,7 @@ Wuhan lab belief
 
 <td>
 
-\-0.003 (0.022)
+\-0.027 (0.083)
 
 </td>
 
@@ -4298,7 +4351,7 @@ Constant
 
 <td>
 
-0.004 (0.072)
+0.001 (0.277)
 
 </td>
 
@@ -4386,7 +4439,7 @@ R<sup>2</sup>
 
 <td>
 
-0.342
+0.362
 
 </td>
 
@@ -4424,7 +4477,7 @@ Adjusted R<sup>2</sup>
 
 <td>
 
-0.331
+0.351
 
 </td>
 
