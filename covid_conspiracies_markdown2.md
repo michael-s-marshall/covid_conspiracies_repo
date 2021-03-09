@@ -2391,12 +2391,9 @@ pacman::p_load(nnet)
 ## plus DV's for social distancing and vaccination
 
 vars <- model.matrix(full_lab)[,-1] %>% as.data.frame() %>% names()
-vars <- c(vars,"w2_conspiracy3_ihs","W2_Internal_Total",
-          "W2_Chance_Total","W2_Conspiracy_Theory1",
+vars <- c(vars,"w2_conspiracy3_ihs","W2_Conspiracy_Theory1",
           "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
-          "W2_Conspiracy_Theory4","W2_Conspiracy_Theory5",
-          "conspiracy4_sc","conspiracy5_sc","conspiracy1_sc",
-          "W2_PO_Total","pid","right","soc_con")
+          "conspiracy1_sc","pid","right","soc_con")
 vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
 #vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
 
@@ -2504,7 +2501,49 @@ dist_full <- lm(social_distance ~
                   conspiracy2_sc +
                   conspiracy3_sc,
                 data = conspiracies2)
+summ(dist_full, vifs = T)
 ```
+
+    ## MODEL INFO:
+    ## Observations: 1399
+    ## Dependent Variable: social_distance
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(24,1374) = 22.11, p = 0.00
+    ## R² = 0.28
+    ## Adj. R² = 0.27 
+    ## 
+    ## Standard errors: OLS
+    ## ---------------------------------------------------------------
+    ##                              Est.   S.E.   t val.      p    VIF
+    ## ------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  0.65   0.03    20.72   0.00       
+    ## W2_Gender_binary2            0.04   0.01     4.18   0.00   1.12
+    ## W1_Education_binary          0.00   0.01     0.34   0.73   1.23
+    ## W1_Income_2019               0.02   0.01     1.46   0.14   1.21
+    ## age_sc                       0.15   0.02     6.17   0.00   1.52
+    ## fis_con                      0.01   0.02     0.41   0.68   1.45
+    ## nat                          0.03   0.02     1.65   0.10   1.36
+    ## distrust_science            -0.14   0.02    -7.36   0.00   1.23
+    ## red_top_tabloid             -0.01   0.01    -0.67   0.50   1.13
+    ## mid_level_news               0.00   0.01     0.10   0.92   1.15
+    ## elite_news                   0.01   0.01     1.04   0.30   1.15
+    ## W2_INFO_5                   -0.01   0.02    -0.61   0.54   1.44
+    ## W2_INFO_9                    0.06   0.02     3.35   0.00   1.27
+    ## SDO                         -0.20   0.03    -6.76   0.00   1.52
+    ## RWA                          0.13   0.03     4.15   0.00   1.46
+    ## W2_DAI_Total                -0.10   0.02    -3.88   0.00   1.64
+    ## W2_IOU_Total                 0.08   0.03     2.76   0.01   1.60
+    ## W2_Paranoia_Total           -0.05   0.02    -2.03   0.04   1.69
+    ## threat                       0.04   0.02     2.31   0.02   1.23
+    ## crt                          0.01   0.01     0.91   0.36   1.34
+    ## CRT_test                     0.01   0.01     0.55   0.58   1.11
+    ## W1_Conspiracy_Total          0.04   0.02     1.77   0.08   1.15
+    ## conspiracy1_sc               0.02   0.02     1.03   0.31   1.43
+    ## conspiracy2_sc               0.07   0.02     4.38   0.00   1.09
+    ## conspiracy3_sc              -0.11   0.02    -4.84   0.00   1.45
+    ## ---------------------------------------------------------------
 
 ``` r
 # social distance model plot
@@ -5519,3 +5558,50 @@ kable(ames)
 | Family and friends         | W2\_INFO\_9           | \-0.0225128 | 0.0327161 | 0.4913719 |   0.0054189 | 0.0467148 | 0.9076530 |
 | Intolerance of uncertainty | W2\_IOU\_Total        | \-0.0510740 | 0.0477635 | 0.2849307 |   0.0502828 | 0.0725419 | 0.4882120 |
 | Paranoia                   | W2\_Paranoia\_Total   |   0.0615575 | 0.0355916 | 0.0837107 |   0.0381427 | 0.0576434 | 0.5081623 |
+
+## Missing Values
+
+There are 3 missing values from the W2\_Gender\_binary variable, 4
+missing values from the distrust\_science variable, and 9 missing values
+from the W2\_C19\_Vax\_Self variable. Missing values were removed with
+listwise deletion when the respective variable is included in a model.
+Therefore, for the conspiracy theory and the social distancing models
+n=1399. And for the vaccination model n=1390.
+
+``` r
+count_na <- function(x){
+  sum(is.na(x))
+}
+
+conspiracies3 <- conspiracies %>%
+  dplyr::select(one_of(names(conspiracies2)[-38]))
+
+conspiracies3 %>% map_int(count_na) %>% sort()
+```
+
+    ##                   pid   W1_Education_binary        W1_Income_2019 
+    ##                     0                     0                     0 
+    ##                age_sc               fis_con                   nat 
+    ##                     0                     0                     0 
+    ##       red_top_tabloid        mid_level_news            elite_news 
+    ##                     0                     0                     0 
+    ##             W2_INFO_5             W2_INFO_9                   SDO 
+    ##                     0                     0                     0 
+    ##                   RWA          W2_DAI_Total          W2_IOU_Total 
+    ##                     0                     0                     0 
+    ##     W2_Paranoia_Total                threat                   crt 
+    ##                     0                     0                     0 
+    ##              CRT_test   W1_Conspiracy_Total        conspiracy2_sc 
+    ##                     0                     0                     0 
+    ##        conspiracy3_sc    w2_conspiracy3_ihs W2_Conspiracy_Theory1 
+    ##                     0                     0                     0 
+    ## W2_Conspiracy_Theory2 W2_Conspiracy_Theory3        conspiracy1_sc 
+    ##                     0                     0                     0 
+    ##                 right               soc_con   W2_SocialDistance10 
+    ##                     0                     0                     0 
+    ##   W2_SocialDistance11   W2_SocialDistance12   W2_SocialDistance14 
+    ##                     0                     0                     0 
+    ##      W2_C19_Vax_Child      W2_Gender_binary      distrust_science 
+    ##                     0                     3                     4 
+    ##       W2_C19_Vax_Self 
+    ##                     9

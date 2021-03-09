@@ -472,7 +472,6 @@ for(i in seq_along(plot_vars)){
 }
 ```
 
-
 # Modelling for belief in Chinese lab origin
 
 ## DV Chinese lab conspiracy - singular IV models
@@ -1287,12 +1286,9 @@ pacman::p_load(nnet)
 ## plus DV's for social distancing and vaccination
 
 vars <- model.matrix(full_lab)[,-1] %>% as.data.frame() %>% names()
-vars <- c(vars,"w2_conspiracy3_ihs","W2_Internal_Total",
-          "W2_Chance_Total","W2_Conspiracy_Theory1",
+vars <- c(vars,"w2_conspiracy3_ihs","W2_Conspiracy_Theory1",
           "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
-          "W2_Conspiracy_Theory4","W2_Conspiracy_Theory5",
-          "conspiracy4_sc","conspiracy5_sc","conspiracy1_sc",
-          "W2_PO_Total","pid","right","soc_con")
+          "conspiracy1_sc","pid","right","soc_con")
 vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
 #vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
 
@@ -1373,6 +1369,7 @@ dist_full <- lm(social_distance ~
                   conspiracy2_sc +
                   conspiracy3_sc,
                 data = conspiracies2)
+summ(dist_full, vifs = T)
 ```
 
 ```{r}
@@ -2001,4 +1998,20 @@ ames <- left_join(
 ```{r, results = 'asis'}
 kable(ames)
 ```
+
+## Missing Values
+
+There are 3 missing values from the W2_Gender_binary variable, 4 missing values from the distrust_science variable, and 9 missing values from the W2_C19_Vax_Self variable.  Missing values were removed with listwise deletion when the respective variable is included in a model. Therefore, for the conspiracy theory and the social distancing models n=1399. And for the vaccination model n=1390.   
+
+```{r}
+count_na <- function(x){
+  sum(is.na(x))
+}
+
+conspiracies3 <- conspiracies %>%
+  dplyr::select(one_of(names(conspiracies2)[-38]))
+
+conspiracies3 %>% map_int(count_na) %>% sort()
+```
+
 
