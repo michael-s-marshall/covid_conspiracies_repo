@@ -1,0 +1,1811 @@
+---
+title: "covid_conspiracies_markdown2"
+author: "Michael Marshall"
+date: "14/03/2021"
+output: github_document
+---
+
+## Loading Packages and Data
+
+```{r, message = FALSE, warnings = FALSE}
+pacman::p_load(tidyverse, stringr, ggridges, forcats, labelled, leaps,
+               psych, corrr, cowplot, expss, haven, interplot,
+               interactions, jtools,labelled, pscl, psych, 
+               sjPlot, skimr)
+
+load("COVID W1_W2_W3 Cleaned 2878.RData") # needs to be in your wd
+```
+
+## Rescaling variable
+
+```{r}
+## [rescale01] Function to rescale a variable from 0 to 1
+rescale01 <- function(x, ...) {
+  (x - min(x, ...)) / ((max(x, ...)) - min(x, ...))
+}
+```
+
+## Summary and distribution of different COVID specific conspiracies
+
+```{r, message = FALSE, warning = FALSE}
+# plotting density of different covid conspiracies
+df %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  gather(conspiracy_code, belief,
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+  mutate(conspiracy_code = as.factor(conspiracy_code)) %>%
+  filter(!conspiracy_code %in% c("W2_Conspiracy_Theory4",
+                                 "W2_Conspiracy_Theory5")) %>% 
+  ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
+  geom_density_ridges(aes(rel_min_height = 0.005),
+                      stat = "density",
+                      fill = get_colors("CUD Bright",num.colors = 1)) +
+  theme_nice() +
+  scale_y_discrete(labels = c("Wuhan laboratory","Meat market","5G")) +
+  labs(y = NULL, x = "Belief scale (0-100)",
+       caption = "Distribution of origin theory belief") +
+  theme(plot.caption = element_text(hjust = 0.61,
+                                    face = "bold",
+                                    size = 10),
+        axis.title.x = element_text(size = 8,
+                                    hjust = 0.5)
+  )
+```
+
+```{r}
+#pacman::p_load(patchwork)
+df %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  gather(conspiracy_code, belief,
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+  mutate(conspiracy_code = fct_recode(
+    as.factor(conspiracy_code),
+    "Wuhan laboratory" = "W2_Conspiracy_Theory1",
+    "Meat market" = "W2_Conspiracy_Theory2",
+    "5G" = "W2_Conspiracy_Theory3",
+    "4" = "W2_Conspiracy_Theory4",
+    "5" = "W2_Conspiracy_Theory5")
+    ) %>%
+  filter(!conspiracy_code %in% c("4","5")) %>% 
+  mutate(
+    order_var = ifelse(conspiracy_code == "Meat market", 1,
+                       ifelse(conspiracy_code == "Wuhan laboratory",2,3))
+  ) %>% 
+  ggplot(aes(x = belief)) +
+  geom_density(fill = get_colors("CUD Bright",num.colors = 1),
+               alpha = 0.8) +
+  theme_nice() +
+  facet_wrap(~fct_reorder(conspiracy_code,order_var), 
+             scales = "free_y", ncol = 1) +
+  labs(y = "Density", 
+       x = "Distribution of origin theory belief")
+```
+
+
+## Cleaning dataset
+
+The following code filters down to just those observations that have completed the battery of questions relating to COVID specific conspiracies.  It also creates a tibble counting the missing observations, which can be useful to have as an object.  
+
+```{r}
+# filtering for completed dependent variable
+conspiracies <- df %>% 
+  filter(!is.na(W2_Conspiracy_Theory1) |
+           !is.na(W2_Conspiracy_Theory2) |
+           !is.na(W2_Conspiracy_Theory3) |
+           !is.na(W2_Conspiracy_Theory3) |
+           !is.na(W2_Conspiracy_Theory4) |
+           !is.na(W2_Conspiracy_Theory5)) %>% 
+  rename(W1_Housing_tenure = W1_Hosuing_tenure)
+
+# function to count NAs
+count_na <- function(x){
+  sum(is.na(x))
+}
+
+conspiracies %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  map_int(count_na)
+
+missing <- tibble(
+  variable = names(conspiracies),
+  NAs = conspiracies %>% map_int(count_na)
+)
+
+#View(missing)
+```
+
+Due to some measurement error in original *W1_Education_binary* variable, the code below overwrites the variable, and creates a dummy for degree educated respondents (undergrad OR postgrad = 1).  
+
+```{r}
+conspiracies <- conspiracies %>% 
+  mutate(
+    W1_Education_binary = ifelse(
+      W1_Education %in% c(5,7), 1, 0
+    )
+  )
+count(conspiracies, W1_Education, W1_Education_binary)
+```
+
+
+The code below turns the *preferred newspaper* variables into dummy variables, as they were previously coded as *1=Yes* and everything else as *NA*.  
+
+```{r}
+
+# making preferred newspaper dummy variable (i.e. replacing NA with 0)
+na_to_zero <- function(x){
+  x[is.na(x)] <- 0
+  x <- as.numeric(x)
+  return(x)
+} 
+
+paper_vars <- rep(str_c("W2_Newspaper_prefer",seq(1,11,1)))
+
+conspiracies[paper_vars] <- conspiracies[paper_vars] %>% 
+  map_df(na_to_zero)
+
+conspiracies <- conspiracies %>% 
+  mutate(
+    red_top_tabloid = ifelse(
+      W2_Newspaper_prefer3 == 1 | W2_Newspaper_prefer2 == 1 |
+        W2_Newspaper_prefer7 == 1 | W2_Newspaper_prefer8 == 1 |
+        W2_Newspaper_prefer9 == 1, 1, 0),
+    mid_level_news = ifelse(
+      W2_Newspaper_prefer1 == 1 | W2_Newspaper_prefer4 == 1, 1, 0),
+    elite_news = ifelse(
+      W2_Newspaper_prefer5 == 1 | W2_Newspaper_prefer6 == 1 |
+        W2_Newspaper_prefer10 == 1 | 
+        W2_Newspaper_prefer11 == 1, 1, 0)
+  )
+
+conspiracies %>% 
+  count(red_top_tabloid, mid_level_news, elite_news)
+```
+
+```{r}
+# Creating DVs
+# [ethno] ethnocentrism
+eth_keys <- list(ethno = cs(W2_Nationalism1,W2_Nationalism2))
+eth_test <- scoreItems(eth_keys, conspiracies, min = 1, max = 5)
+head(eth_test$scores)
+eth_test$alpha  # Scale alpha
+conspiracies$ethno <- rescale01(eth_test$scores, na.rm = TRUE)
+conspiracies$ethno <- c(conspiracies$ethno)  # Ensure variable is numeric and not matrix class
+describe(conspiracies$ethno)
+```
+
+```{r}
+# Right wing authoritarianism
+rwa_keys <- list(rwa = cs(W1_Authoritarianism1_R,
+                          W1_Authoritarianism2,
+                          W1_Authoritarianism3,
+                          W1_Authoritarianism4_R, 
+                          W1_Authoritarianism5_R,
+                          W1_Authoritarianism6))
+
+rwa_test <- scoreItems(rwa_keys, conspiracies, min = 1, max = 5)
+head(rwa_test$scores)
+summary(rwa_test$alpha)  # Scale alpha
+conspiracies$RWA <- rescale01(rwa_test$scores, na.rm = TRUE)
+conspiracies$RWA <- c(conspiracies$RWA)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies$RWA)
+```
+
+```{r}
+## [SDO] Social Dominance Orientation
+sdo_keys <- list(sdo = cs(W1_Social_Dominance1,
+                          W1_Social_Dominance2_R,
+                          W1_Social_Dominance3_R,
+                          W1_Social_Dominance4,
+                          W1_Social_Dominance5_R,
+                          W1_Social_Dominance6, 
+                          W1_Social_Dominance7,
+                          W1_Social_Dominance8_R))
+sdo_test <- scoreItems(sdo_keys, conspiracies, min = 1, max = 5)
+head(sdo_test$scores)
+summary(sdo_test$alpha)  # Scale alpha
+conspiracies$SDO <- rescale01(sdo_test$scores, na.rm = TRUE)
+conspiracies$SDO <- c(conspiracies$SDO)  # Ensure variable is numeric and not matrix class
+
+summary(conspiracies$SDO)
+```
+
+```{r}
+## [threat] Covid-19 related Threat
+summary(conspiracies$W2_COVID19_anxiety)
+conspiracies$threat <- rescale01(conspiracies$W2_COVID19_anxiety)
+conspiracies %>% 
+  dplyr::select(W2_COVID19_anxiety, threat) %>%
+  correlate()
+```
+
+```{r}
+## [right] Right-Wing political views
+table(conspiracies$W1_Political_Scale)
+conspiracies$right <- rescale01(conspiracies$W1_Political_Scale)
+conspiracies %>% 
+  dplyr::select(W1_Political_Scale, right) %>%
+  correlate()
+```
+
+```{r}
+## [soc.con] Social conservatism
+table(conspiracies$W1_Political_Abortion_SSM)
+conspiracies$soc_con <- rescale01(
+  conspiracies$W1_Political_Abortion_SSM)
+conspiracies %>% 
+  dplyr::select(W1_Political_Abortion_SSM, soc_con) %>%
+  correlate()
+```
+
+```{r}
+## [fis.con] Fiscal conservatism
+table(conspiracies$W1_Political_Fiscal)
+conspiracies$fis_con <- rescale01(conspiracies$W1_Political_Fiscal)
+conspiracies %>% 
+  dplyr::select(W1_Political_Fiscal, fis_con) %>%
+  correlate()
+```
+
+```{r}
+## [age.c] Age (in years)
+summary(conspiracies$W2_Age_year)
+conspiracies$age_sc <- rescale01(conspiracies$W2_Age_year)
+```
+
+```{r}
+# conspiracy ideation
+consp_keys <- list(consp = cs(W1_Conspiracy_1,
+                          W1_Conspiracy_2,
+                          W1_Conspiracy_3,
+                          W1_Conspiracy_4,
+                          W1_Conspiracy_5))
+consp_test <- scoreItems(consp_keys, conspiracies, min = 1, max = 11)
+head(consp_test$scores)
+consp_test$alpha  # Scale alpha
+
+cor(consp_test$scores, conspiracies$W1_Conspiracy_Total)
+
+mean(
+  round(rescale01(consp_test$scores, na.rm = T), 4) ==
+    round(rescale01(conspiracies$W1_Conspiracy_Total, na.rm = T), 4)
+) # scale is equal to pre-existing variable in dataset
+```
+
+```{r}
+# intolerance of uncertainty
+iou_keys <- list(iou = cs(W2_IOU1, W2_IOU2,W2_IOU3, W2_IOU4,
+                          W2_IOU5, W2_IOU5,W2_IOU6,W2_IOU7,
+                          W2_IOU7,W2_IOU8,W2_IOU9,W2_IOU10,
+                          W2_IOU11,W2_IOU12))
+iou_test <- scoreItems(iou_keys, conspiracies, min = 1, max = 5)
+head(iou_test$scores)
+iou_test$alpha  # Scale alpha
+
+cor(iou_test$scores, conspiracies$W2_IOU_Total)
+
+mean(
+  round(rescale01(iou_test$scores, na.rm = T), 4) ==
+    round(rescale01(conspiracies$W2_IOU_Total, na.rm = T), 4)
+) # scale is equal to pre-existing variable in dataset
+```
+
+
+```{r}
+factors <- c("W1_Ethnicity",
+             "W2_Gender_binary")
+```
+
+```{r}
+# turning to factors
+conspiracies[factors] <- conspiracies[factors] %>% 
+  map_df(as.factor)
+```
+
+```{r}
+# renaming trust in science
+conspiracies <- conspiracies %>% 
+  rename(distrust_science = W2_Trust_Body6)
+```
+
+
+```{r}
+# rescaling the remaing numeric variables
+numerics <- c("W1_Conspiracy_Total","W2_IOU_Total", "W2_INFO_5",
+              "W2_INFO_9","distrust_science","W1_Income_2019")
+
+conspiracies[numerics] <- conspiracies[numerics] %>% 
+  map_df(rescale01, na.rm = TRUE)
+```
+
+
+```{r}
+# creating scaled versions of each conspiracy belief
+conspiracies$conspiracy1_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory1, na.rm = TRUE
+)
+
+conspiracies$conspiracy2_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory2, na.rm = TRUE
+)
+
+conspiracies$conspiracy3_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory3, na.rm = TRUE
+)
+
+conspiracies$conspiracy4_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory4, na.rm = TRUE
+)
+
+conspiracies$conspiracy5_sc <- rescale01(
+  conspiracies$W2_Conspiracy_Theory5, na.rm = TRUE
+)
+```
+
+
+## Distribution of variables
+
+A for loop to look at distribution of potential independent variables (numeric only).  
+
+```{r}
+plot_vars <- conspiracies %>% 
+  dplyr::select(
+    one_of(numerics),ethno,RWA,SDO,threat,right,soc_con,fis_con
+    ) %>%
+  names()
+
+for(i in seq_along(plot_vars)){
+  
+  x1 <- conspiracies[plot_vars][i] %>% as_vector()
+  
+  print(
+    ggplot(data = NULL, aes(x = x1)) +
+      geom_vline(aes(xintercept = mean(x1, na.rm =TRUE)), 
+                 colour = "black",
+                 linetype = "dashed") +
+      geom_vline(aes(xintercept = median(x1, na.rm =TRUE)), 
+                 colour = "red",
+                 linetype = "dashed") +
+      geom_density(fill = "lightblue", alpha = 0.7) +
+      labs(x = plot_vars[i],
+           caption = "Black = Mean, Red = Median")  
+  )
+  
+}
+```
+
+# Modelling for belief in Chinese lab origin
+
+## DV Chinese lab conspiracy - singular IV models
+
+```{r}
+sdo_lab <- lm(conspiracy1_sc ~ SDO,
+              data = conspiracies)
+
+summ(sdo_lab)
+```
+
+```{r}
+rwa_lab <- lm(conspiracy1_sc ~ RWA,
+              data = conspiracies)
+
+summ(rwa_lab)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables
+
+```{r}
+se_lab <- lm(conspiracy1_sc ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+summary(se_lab)$adj.r.squared
+AIC(se_lab)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media
+
+```{r}
+se_pol_lab <- update(se_lab, ~ . +
+                   #political and media variables
+                   right +
+                   ethno +
+                   distrust_science + #distrust of scientists
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
+                   W2_INFO_5 + #social media
+                   W2_INFO_9 #family and friends
+                 )
+
+summary(se_pol_lab)$adj.r.squared
+AIC(se_pol_lab)
+```
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych
+
+```{r}
+se_polpsych_lab <- update(se_pol_lab, ~ . +
+                        #political-psychology variables
+                        SDO +
+                        RWA +
+                        W2_IOU_Total)
+
+summary(se_polpsych_lab)$adj.r.squared
+AIC(se_polpsych_lab)
+car::vif(se_polpsych_lab)
+```
+
+
+## DV Chinese lab conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
+
+```{r}
+multi_lab <- update(se_polpsych_lab, ~ . +
+                  #covid-anxety
+                  threat)
+
+summary(multi_lab)$adj.r.squared
+AIC(multi_lab)
+```
+
+## DV Chinese lab conspiracy - full model incl. conspiracy ideation
+
+```{r}
+full_lab <- update(multi_lab, ~ . + 
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy2_sc +
+                  conspiracy3_sc)
+
+summary(full_lab)$adj.r.squared
+AIC(full_lab)
+```
+
+```{r}
+summ(full_lab, vifs = T)
+```
+
+## DV Chinese lab conspiracy - interaction RWA and COVID-19 anxiety
+
+```{r}
+int_lab <- lm(conspiracy1_sc ~ W2_Gender_binary +
+                W1_Education_binary +
+                W1_Income_2019 +
+                age_sc +
+                right +
+                ethno +
+                distrust_science + #distrust of scientists
+                red_top_tabloid +
+                mid_level_news +
+                elite_news +
+                W2_INFO_5 + #social media
+                W2_INFO_9 + # family and friends
+                SDO +
+                W2_IOU_Total +
+                W1_Conspiracy_Total +
+                conspiracy2_sc +
+                conspiracy3_sc +
+                (RWA * threat), # interaction term
+              data = conspiracies) 
+
+summ(int_lab)
+plot_coefs(int_lab)
+```
+
+
+```{r}
+summary(full_lab)$adj.r.squared
+AIC(full_lab)
+
+summary(int_lab)$adj.r.squared
+AIC(int_lab)
+```
+
+
+
+# Modelling for belief in 5G origin conspiracy
+
+## Plots of DV, incl. inverse hyperbolic sine transformation
+
+```{r}
+# functions for IHS transformation
+ihs <- function(x, theta){  # IHS transformation
+  asinh(theta * x)/theta
+}
+
+ihs_loglik <- function(theta,x){
+  
+  ihs <- function(x, theta){  # function to IHS transform
+    asinh(theta * x)/theta
+  }
+  
+  n <- length(x)
+  xt <- ihs(x, theta)
+  
+  log_lik <- -n*log(sum((xt - mean(xt))^2))- sum(log(1+theta^2*x^2))
+  return(log_lik)
+}     
+```
+
+```{r}
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.00001, upper = 1e+06,
+                       x = conspiracies$W2_Conspiracy_Theory3, 
+                       maximum = TRUE)$maximum
+best_theta # continues to rise indefinitely
+
+# trying different starting point
+best_theta <- optimize(ihs_loglik, 
+                       lower = 0.001, upper = 1e+08,
+                       x = conspiracies$W2_Conspiracy_Theory3, 
+                       maximum = TRUE)$maximum
+best_theta # continues to rise indefinitely
+```
+
+```{r}
+# raw data 
+conspiracies %>% 
+  ggplot(aes(x = W2_Conspiracy_Theory3)) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
+
+# ihs transformation where theta = 1
+conspiracies %>% 
+  ggplot(aes(x = asinh(W2_Conspiracy_Theory3))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
+
+# ihs transformation where theta = 1e+08
+conspiracies %>% 
+  ggplot(aes(x = ihs(W2_Conspiracy_Theory3, best_theta))) +
+  geom_histogram(aes(y = ..density..),
+                 colour = "darkgrey", fill = "lightblue") +
+  geom_density()
+
+# transforming using theta = 1
+conspiracies <- conspiracies %>% 
+  mutate(w2_conspiracy3_ihs = asinh(W2_Conspiracy_Theory3))
+```
+
+## DV 5G conspiracy - singular IV models
+
+```{r}
+sdo_5g <- lm(conspiracy3_sc ~ SDO,
+              data = conspiracies)
+
+summ(sdo_5g)
+```
+
+
+```{r}
+rwa_5g <- lm(conspiracy3_sc ~ RWA,
+              data = conspiracies)
+
+summ(rwa_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables
+
+```{r}
+se_5g <- lm(conspiracy3_sc ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+#function for adj.r.squared
+adj_rsq <- function(mod){
+  out <- summary(mod)$adj.r.squared
+  return(out)
+}
+
+adj_rsq(se_5g)
+AIC(se_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media
+
+```{r}
+se_pol_5g <- update(se_5g, ~ . +
+                   #political and media variables
+                   right +
+                   ethno +
+                   distrust_science + 
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
+                   W2_INFO_5 + #social media
+                   W2_INFO_9) # family and friends
+
+adj_rsq(se_pol_5g)
+AIC(se_pol_5g)
+```
+
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych
+
+```{r}
+se_polpsych_5g <- update(se_pol_5g, ~ . +
+                        #political-psychology variables
+                        SDO +
+                        RWA +
+                        W2_IOU_Total)
+
+adj_rsq(se_polpsych_5g)
+AIC(se_polpsych_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
+
+```{r}
+multi_5g <- update(se_polpsych_5g, ~ . +
+                  #covid-anxiety
+                  threat)
+
+adj_rsq(multi_5g)
+AIC(multi_5g)
+```
+
+## DV 5G conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+
+```{r}
+full_5g <- update(multi_5g, ~ . +
+                #conspiracies
+                W1_Conspiracy_Total +
+                conspiracy1_sc +
+                conspiracy2_sc)
+
+adj_rsq(full_5g)
+AIC(full_5g)
+```
+
+```{r}
+summ(full_5g, vifs = T)
+```
+
+
+## DV 5G IHS conspiracy - singular IV models
+
+```{r}
+sdo_5g_ihs <- lm(w2_conspiracy3_ihs ~ SDO,
+              data = conspiracies)
+
+summ(sdo_5g_ihs)
+```
+
+
+```{r}
+rwa_5g_ihs <- lm(w2_conspiracy3_ihs ~ RWA,
+              data = conspiracies)
+
+summ(rwa_5g_ihs)
+```
+
+
+## DV 5G IHS conspiracy - socio-economic variables
+
+```{r}
+se_5g_ihs <- lm(w2_conspiracy3_ihs ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+adj_rsq(se_5g_ihs)
+AIC(se_5g_ihs)
+```
+
+## DV 5G IHS conspiracy - socio-economic variables + political/media
+
+```{r}
+se_pol_5g_ihs <- update(se_5g_ihs, ~ . +
+                   #political and media variables
+                   right +
+                   ethno +
+                   distrust_science + 
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
+                   W2_INFO_5 + #social media
+                   W2_INFO_9)
+
+adj_rsq(se_pol_5g_ihs)
+AIC(se_pol_5g_ihs)
+```
+
+## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych
+
+```{r}
+se_polpsych_5g_ihs <- update(se_pol_5g_ihs, ~ . +
+                        #political-psychology variables
+                        SDO +
+                        RWA +
+                        W2_IOU_Total)
+
+adj_rsq(se_polpsych_5g_ihs)
+AIC(se_polpsych_5g_ihs)
+```
+
+## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat
+
+```{r}
+multi_5g_ihs <- update(se_polpsych_5g_ihs, ~ . +
+                  #covid-anxiety
+                  threat)
+
+adj_rsq(multi_5g_ihs)
+AIC(multi_5g_ihs)
+```
+
+## DV 5G IHS conspiracy - socio-economic variables + political/media + pol-psych + covid-threat and CRT + conspiracies
+
+```{r}
+full_5g_ihs <- update(multi_5g_ihs, ~ . +
+                #conspiracies
+                W1_Conspiracy_Total +
+                conspiracy1_sc +
+                conspiracy2_sc)
+
+adj_rsq(full_5g_ihs)
+AIC(full_5g_ihs)
+```
+
+```{r}
+summ(full_5g_ihs, vifs = TRUE)
+```
+
+## DV 5G conspiracy poisson regression model
+
+```{r}
+# looking at mean and variance to check for overdispersion
+conspiracies %>% 
+  mutate(
+    sdo_deciles = cut_number(SDO,10)
+  ) %>%
+  group_by(sdo_deciles) %>% 
+  summarise(
+    mean_5g = mean(W2_Conspiracy_Theory3),
+    var_5g = sd(W2_Conspiracy_Theory3) ^ 2
+  )
+
+conspiracies %>% 
+  mutate(
+    social_media = cut_interval(W2_INFO_5,5)
+  ) %>%
+  group_by(social_media) %>% 
+  summarise(
+    mean_5g = mean(W2_Conspiracy_Theory3),
+    var_5g = sd(W2_Conspiracy_Theory3) ^ 2
+  )
+```
+
+
+The tables above suggest overdispersion of the data.  As a result, running quasipoisson model.    
+
+```{r}
+full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
+                           #socio-economic variables
+                           W2_Gender_binary +
+                           W1_Education_binary +
+                           W1_Income_2019 +
+                           age_sc +
+                           
+                           #political and media variables
+                           right +
+                           ethno +
+                           distrust_science + #distrust of scientists
+                           red_top_tabloid + 
+                           mid_level_news + 
+                           elite_news + 
+                           W2_INFO_5 + #social media
+                           W2_INFO_9 + #family and friends
+                           
+                           #political-psychology variables
+                           SDO +
+                           RWA +
+                           W2_IOU_Total +
+                           
+                           #covid-anxiety
+                           threat +
+                           
+                           #conspiracies
+                           W1_Conspiracy_Total +
+                           conspiracy1_sc +
+                           conspiracy2_sc,
+                         family = "quasipoisson", data = conspiracies)
+
+summ(full_5g_poiss)
+```
+
+# Modelling for belief in Chinese meat market origin
+
+## DV Chinese meat market - singular IV models
+
+```{r}
+sdo_meat <- lm(conspiracy2_sc ~ SDO,
+              data = conspiracies)
+
+summ(sdo_meat)
+```
+
+```{r}
+rwa_meat <- lm(conspiracy2_sc ~ RWA,
+              data = conspiracies)
+
+summ(rwa_meat)
+```
+
+## DV Chinese meat market belief - socio-economic variables
+
+```{r}
+se_meat <- lm(conspiracy2_sc ~ W2_Gender_binary +
+               W1_Education_binary +
+               W1_Income_2019 +
+               age_sc,
+              data = conspiracies)
+
+adj_rsq(se_meat)
+AIC(se_meat)
+```
+
+## DV Chinese meat market belief - socio-economic variables + political/media
+
+```{r}
+se_pol_meat <- update(se_meat, ~ . +
+                   #political and media variables
+                   right +
+                   ethno +
+                   distrust_science + 
+                   red_top_tabloid + 
+                   mid_level_news + 
+                   elite_news + 
+                   W2_INFO_5 + #social media
+                   W2_INFO_9) #family and friends
+                 
+adj_rsq(se_pol_meat)
+AIC(se_pol_meat)
+```
+
+## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych
+
+```{r}
+se_polpsych_meat <- update(se_pol_meat, ~ . +
+                        #political-psychology variables
+                        SDO +
+                        RWA +
+                        W2_IOU_Total)
+
+adj_rsq(se_polpsych_meat)
+AIC(se_polpsych_meat)
+```
+
+## DV Chinese meat market belief - socio-economic variables + political/media + pol-psych + covid-threat + CRT
+
+```{r}
+multi_meat <- update(se_polpsych_meat, ~ . +
+                  #covid-anxiety
+                  threat)
+
+adj_rsq(multi_meat)
+AIC(multi_meat)
+```
+
+
+## DV Chinese meat market belief - full model incl. conspiracy ideation
+
+```{r}
+full_meat <- update(multi_meat, ~ . +
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy3_sc)
+
+adj_rsq(full_meat)
+AIC(full_meat)
+```
+
+```{r}
+summ(full_meat, vifs = T)
+```
+
+
+# Summary of final models
+
+```{r}
+# setting up groups -----------------------------------------
+socio_econ <- c("W2_Gender_binary2","W1_Education_binary",
+                "W1_Income_2019","age_sc")
+names(socio_econ) <- c("Gender","Education","Income","Age")
+socio_econ <- socio_econ[sort(names(socio_econ))]
+
+dispositions <- c("RWA","SDO")
+names(dispositions) <- c("RWA","SDO")
+dispositions <- dispositions[sort(names(dispositions))]
+
+conspiracy <- c("W1_Conspiracy_Total","conspiracy2_sc","conspiracy1_sc",
+                "conspiracy3_sc")
+names(conspiracy) <- c("Conspiracy ideation","Meat market belief",
+                       "Wuhan lab belief","5G belief")
+conspiracy <- conspiracy[sort(names(conspiracy))]
+
+inform <- c("W2_INFO_9","elite_news","mid_level_news",
+            "red_top_tabloid","W2_INFO_5")
+names(inform) <- c("Family and friends","News: elite",
+                   "News: mid-level","News: tabloid","Social media")
+inform <- inform[sort(names(inform))]
+
+controls <- c("threat","distrust_science",
+              "W2_IOU_Total","ethno","right")
+names(controls) <- c("COVID-19 anxiety","Distrust scientists",
+                     "Uncertainty intolerance",
+                     "Ethnocentrism","Left-right scale")
+controls <- controls[sort(names(controls))]
+
+full_list <- c(socio_econ, dispositions, conspiracy, inform, controls)
+```
+
+```{r}
+# chinese lab figure 
+plot_coefs(
+  full_lab,
+  coefs = c(dispositions, conspiracy, inform, controls),
+  groups = list(
+    Dispositions = names(dispositions), 
+    Conspiracy = names(conspiracy),
+    Information = names(inform),
+    Controls = names(controls) 
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Coefficient estimate: Wuhan laboratory belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+
+par(mfrow = c(2,2))
+plot(full_lab)
+```
+
+
+```{r}
+# 5G belief - full set of variables, raw data is DV
+plot_coefs(
+  full_5g,
+  coefs = c(dispositions, conspiracy, inform, controls),
+  groups = list(
+    Dispositions = names(dispositions), 
+    Conspiracy = names(conspiracy),
+    Information = names(inform),
+    Controls = names(controls) 
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Coefficient estimate: 5G belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+
+par(mfrow = c(2,2))
+plot(full_5g)
+```
+
+```{r}
+# Chinese meat market model - full set of variables
+plot_coefs(
+  full_meat,
+  coefs = c(dispositions, conspiracy, inform, controls),
+  groups = list(
+    Dispositions = names(dispositions), 
+    Conspiracy = names(conspiracy),
+    Information = names(inform),
+    Controls = names(controls) 
+  ),
+  #facet.label.pos = "left",
+  facet.cols = 2
+) +
+  labs(x = "Coefficient estimate: Meat market belief",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+
+par(mfrow = c(2,2))
+plot(full_meat)
+```
+
+## Combined plot of models
+
+```{r, message = FALSE, warning = FALSE}
+model_vars <- c(dispositions,conspiracy)
+model_vars <- model_vars[sort(names(model_vars))]
+
+plot_coefs(
+  full_lab,full_5g,full_meat,
+  model.names = c("Wuhan lab","5G","Meat market"),
+  coefs = model_vars,
+  groups = list(
+    Dispositions = names(dispositions),
+    Conspiracy = names(conspiracy)
+    ),
+  facet.label.pos = "left" 
+  ) +
+  labs(
+    x = "Coefficient estimate: OLS model comparison",
+    caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1"
+  ) + 
+  theme(legend.position = "top",
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+```
+
+```{r}
+control_vars <- c(controls,inform)
+control_vars <- control_vars[sort(names(control_vars))]
+
+plot_coefs(
+  full_lab,full_5g,full_meat,
+  model.names = c("Wuhan lab","5G","Meat market"),
+  coefs = control_vars,
+  groups = list(
+    Information = names(inform),
+    `Pol-psych controls` = names(controls)
+    ),
+  facet.label.pos = "left" 
+  ) +
+  labs(
+    x = "Coefficient estimate: OLS model comparison",
+    caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1"
+  ) + 
+  theme(legend.position = "top",
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+```
+
+```{r}
+plot_coefs(
+  full_5g_ihs,full_5g_poiss,
+  model.names = c("5G IHS transformed","5G poisson"),
+  coefs = model_vars,
+  groups = list(
+    Conspiracy = names(conspiracy),
+    Dispositions = names(dispositions)
+    ),
+  facet.label.pos = "left" 
+  ) +
+  labs(
+    x = "Coefficient estimate",
+    caption = "Note: Comparison of supplementary models. IHS transformed model estimated using OLS.\nPoisson regression estimated using maximum likelihood method, with overdispersion parameter (=30.45).\n95% confidence intervals presented. Numerical predictors scaled 0-1."
+  ) + 
+  theme(legend.position = "top",
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+```
+
+## Conspiracies and social distancing
+
+```{r}
+# loading package for multi nom
+pacman::p_load(nnet)
+```
+
+
+```{r}
+## making a dataset of variables included in the models above
+## plus DV's for social distancing and vaccination
+
+vars <- model.matrix(full_lab)[,-1] %>% as.data.frame() %>% names()
+vars <- c(vars,"w2_conspiracy3_ihs","W2_Conspiracy_Theory1",
+          "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
+          "conspiracy1_sc","pid")
+vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
+#vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
+
+conspiracies2 <- conspiracies %>% 
+  dplyr::select(one_of(vars)) %>% 
+  na.omit()
+
+conspiracies2 <- merge(
+  conspiracies2,
+  conspiracies %>% dplyr::select(pid,W2_SocialDistance10,
+                                 W2_SocialDistance11,
+                                 W2_SocialDistance12,
+                                 W2_SocialDistance14,
+                                 W2_C19_Vax_Self,
+                                 W2_C19_Vax_Child),
+  by = "pid", all.x = TRUE
+)
+```
+
+
+```{r}
+# social distance scale
+sd_keys <- list(sd = cs(W2_SocialDistance10,
+                        W2_SocialDistance11,
+                        W2_SocialDistance12,
+                        W2_SocialDistance14))
+
+sd_test <- scoreItems(sd_keys, conspiracies2, min = 1, max = 5)
+head(sd_test$scores)
+summary(sd_test$alpha)  # Scale alpha
+conspiracies2$social_distance <- rescale01(sd_test$scores, na.rm = TRUE)
+conspiracies2$social_distance <- c(conspiracies2$social_distance)  # Ensure variable is numeric and not matrix class
+
+describe(conspiracies2$social_distance)
+ggplot(conspiracies2, aes(x = social_distance)) +
+  geom_histogram(aes(y = ..density..),
+                 binwidth = 0.1, colour = "black", fill = "lightblue") +
+  geom_density()
+```
+
+
+```{r}
+dist_full <- lm(social_distance ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  right +
+                  ethno +
+                  distrust_science + 
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  RWA +
+                  W2_IOU_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy2_sc +
+                  conspiracy3_sc,
+                data = conspiracies2)
+summ(dist_full, vifs = T)
+```
+
+```{r}
+# social distance model plot
+dist_controls <- c("age_sc","W2_Gender_binary2","distrust_science",
+                   "W2_INFO_9")
+names(dist_controls) <- c("Age","Gender","Distrust scientists",
+                          "Family and friends")
+dist_controls <- dist_controls[sort(names(dist_controls))]
+
+plot_coefs(
+  dist_full,
+  coefs = c(dist_controls,dispositions,conspiracy),
+  groups = list(
+    Controls = names(dist_controls), 
+    Dispositions = names(dispositions),
+    Conspiracy = names(conspiracy)
+  ),
+  facet.label.pos = "left"
+) +
+  labs(x = "Coefficient estimate: Social distancing",
+       caption = "Note: OLS estimates with 95% confidence intervals, numerical predictors scaled 0-1") +
+  theme(strip.text.x = element_text(size = 8),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(hjust = 1),
+        plot.caption = element_text(hjust = 0))
+
+par(mfrow = c(2,2))
+plot(dist_full)
+```
+
+
+## Multinomial model for vaccine acceptance
+
+```{r}
+count(conspiracies2,sum()) %>%  mutate(`%` = n / sum(n))
+
+# multinomial model
+vax_full <- multinom(W2_C19_Vax_Self ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  right +
+                  ethno +
+                  distrust_science + 
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  SDO +
+                  RWA +
+                  W2_IOU_Total +
+                  
+                  #covid-anxiety
+                  threat +
+                 
+                  #conspiracies
+                  W1_Conspiracy_Total +
+                  conspiracy1_sc +
+                  conspiracy2_sc +
+                  conspiracy3_sc,
+                data = conspiracies2)
+```
+
+```{r}
+# functions to inspect multinom
+z_score <- function(model){
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  return(z)
+}
+
+p_value <- function(model){
+  z <- z_score(model)
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+}
+```
+
+```{r}
+p_value(vax_full)
+```
+
+```{r}
+# table for plot of unstandardised coefficients
+vax_vars <- c("distrust_science","threat","age_sc","W1_Income_2019",
+               "RWA","SDO","W1_Conspiracy_Total","conspiracy1_sc",
+               "conspiracy2_sc","conspiracy3_sc")
+
+vax_plots <- full_list[full_list %in% vax_vars]
+vax_plots <- vax_plots[sort(names(vax_plots))]
+
+tidies <- tidy(vax_full) %>%
+  filter(term %in% vax_plots) %>% 
+  mutate(
+    odds_ratio = exp(estimate),
+    conf.low = estimate - std.error * qnorm(0.975),
+    conf.high = estimate + std.error * qnorm(0.975),
+    conf.low.exp = exp(estimate - std.error * qnorm(0.975)),
+    conf.high.exp = exp(estimate + std.error * qnorm(0.975)),
+    y.level = fct_recode(as.factor(y.level),
+                         "No" = "2",
+                         "Maybe" = "3"),
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    group_facet = ifelse(term %in% dispositions, 
+                         "Dispositions",
+                         ifelse(term %in% conspiracy, "Conspiracy",
+                                       "Controls")),
+    term = fct_recode(term,
+                      "Age" = "age_sc",
+                      "Income" = "W1_Income_2019",
+                      "COVID-19 anxiety" = "threat",
+                      "Distrust scientists" = "distrust_science",
+                      "RWA" = "RWA",
+                      "SDO" = "SDO",
+                      "Conspiracy ideation" = "W1_Conspiracy_Total",
+                      "Meat market belief" = "conspiracy2_sc",
+                      "Wuhan lab belief" = "conspiracy1_sc",
+                      "5G belief" = "conspiracy3_sc")
+  ) %>%
+  rename(Level = y.level)  
+
+# plotting beta coefficients
+ggplot(data = tidies, 
+       aes(y = term, 
+           x = estimate, xmin = conf.low,
+           xmax = conf.high, colour = Level)) + 
+  geom_vline(xintercept = 0, linetype = 2, size = .25) +
+  ggstance::geom_linerangeh(
+    aes(y = term, xmin = conf.low,
+        xmax = conf.high, colour = Level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+  geom_point(
+    aes(y = term, 
+        x = estimate, colour = Level, shape = Level),
+    position = ggstance::position_dodgev(height = 0.62),
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice(legend.pos = "right") +
+  scale_shape_manual(values = c(21,22)) +
+  drop_y_gridlines() +
+  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
+             strip.position = "left") +
+  theme(axis.title.y = element_blank(),
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10,
+                                   hjust = 1),
+        panel.grid.major.x = element_line(linetype = "solid"),
+        strip.text.x = element_text(size = 8),
+        legend.position = "top",
+        plot.caption = element_text(hjust = 0)) +
+  labs(
+    x = "Coefficient estimate: Vaccine acceptance",
+    caption = "Note: Multinomial logit estimated using maximum likelihood.\nUnstardised coefficients and 95% confidence intervals presented. Numerical predictors scaled 0-1."
+  ) 
+```
+
+Below is a plot of the average marginal effects for key variables.  
+
+```{r, results = 'hide'}
+pacman::p_load(margins, ggstance)
+
+# average marginal effect for "No", with bootstrap for variance
+set.seed(123)
+margin_no <- margins_summary(
+  vax_full, category = "2",
+  vce = "bootstrap"
+)
+
+# average marginal effect for "Maybe", with bootstrap for variance
+set.seed(123)
+margin_maybe <- margins_summary(
+  vax_full, category = "3",
+  vce = "bootstrap"
+)
+```
+
+```{r}
+# plotting average marginal effect
+rbind(
+  margin_no %>% as_tibble() %>% mutate(level = "No"),
+  margin_maybe %>% as_tibble() %>% mutate(level = "Maybe")
+) %>% 
+  rename(term = factor) %>% 
+  filter(term %in% vax_plots) %>%
+  mutate(
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    group_facet = ifelse(term %in% dispositions, 
+                         "Dispositions",
+                         ifelse(term %in% conspiracy, "Conspiracy",
+                                       "Controls")),
+    term = fct_recode(term,
+                      "Age" = "age_sc",
+                      "Income" = "W1_Income_2019",
+                      "COVID-19 anxiety" = "threat",
+                      "Distrust scientists" = "distrust_science",
+                      "RWA" = "RWA",
+                      "SDO" = "SDO",
+                      "Conspiracy ideation" = "W1_Conspiracy_Total",
+                      "Meat market belief" = "conspiracy2_sc",
+                      "Wuhan lab belief" = "conspiracy1_sc",
+                      "5G belief" = "conspiracy3_sc")
+  ) %>% 
+  ggplot(aes(y = term, 
+           x = AME, xmin = lower,
+           xmax = upper, colour = level)) + 
+  geom_vline(xintercept = 0, linetype = 2, size = .25) +
+  ggstance::geom_linerangeh(
+    aes(y = term, xmin = lower,
+        xmax = upper, colour = level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+  geom_point(
+    aes(y = term, 
+        x = AME, colour = level, shape = level),
+    position = ggstance::position_dodgev(height = 0.62),
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice(legend.pos = "right") +
+  scale_shape_manual(values = c(21,22)) +
+  drop_y_gridlines() +
+  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
+             strip.position = "left") +
+  theme(axis.title.y = element_blank(),
+        legend.margin=margin(t = 0, b = 0, unit='cm'),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10,
+                                   hjust = 1),
+        panel.grid.major.x = element_line(linetype = "solid"),
+        strip.text.x = element_text(size = 8),
+        legend.position = "top",
+        plot.caption = element_text(hjust = 0)) +
+  labs(
+    x = "Average marginal effect: Vaccine acceptance",
+    colour = "Level",
+    shape = "Level",
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
+  )
+```
+
+## Table summarising variables
+
+```{r}
+all_vars <- model.matrix(dist_full)[,-1] %>% as_tibble()
+var_summaries <- tibble(
+  variable = names(all_vars),
+  mean = all_vars %>% map_dbl(mean, na.rm = TRUE),
+  sd = all_vars %>% map_dbl(sd, na.rm = TRUE)
+)
+
+#write.csv(var_summaries,"variable_summaries_randr.csv")
+```
+
+## Correlation Matrix
+
+```{r}
+fuller_list <- c(
+  full_list %>%
+    str_replace("W2_Gender_binary2","W2_Gender_binary"),
+  "social_distance","W2_C19_Vax_Self")
+
+names(fuller_list) <- c(names(full_list),
+                        "Social distancing motivation",
+                        "Vaccination attitudes")
+
+fuller_list <- fuller_list[sort(names(fuller_list))]
+
+cor_df <- conspiracies2 %>% 
+  dplyr::select(one_of(fuller_list)) %>% 
+  na.omit()
+
+make_dbl <- c("W2_C19_Vax_Self","W2_Gender_binary")
+
+cor_df[make_dbl] <- cor_df[make_dbl] %>% 
+  map_df(as.numeric)
+
+names(cor_df) <- names(fuller_list)
+
+cor_df <- cor_df %>% dplyr::select(one_of(sort(names(fuller_list))))
+```
+
+```{r}
+# function to get lower triangle in correlation matrix
+get_lower_tri <- function(df){
+  cormat <- cor(df)
+  cormat[upper.tri(cormat)]<- NA
+  return(cormat)
+}
+
+lower_tri <- get_lower_tri(cor_df)
+
+var_1 <- sort(names(cor_df))
+
+# plotting correlation matrix
+cbind(
+  lower_tri,
+  var_1
+) %>%
+  as_tibble() %>%
+  gather(var_2,correlation,`5G belief`:`Wuhan lab belief`, na.rm = T) %>%
+  mutate(correlation = parse_number(correlation)) %>%
+  arrange(var_1) %>%
+  ggplot(aes(x = var_1, y = var_2, fill = correlation)) +
+  geom_tile(colour = "white") +
+  scale_fill_gradientn(breaks = c(-0.2,0,0.2,0.5),
+                       colours = c("red","white",
+                                   "lightblue",
+                                   "dodgerblue4",
+                                   "midnightblue")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = NULL, y = NULL)
+```
+
+```{r, results='asis'}
+# table for correlation matrix
+pacman::p_load(stargazer, knitr)
+
+lower_tri <- lower_tri %>% as_tibble() %>% 
+  mutate(` ` = names(cor_df)) %>% 
+  dplyr::select(` `, everything())
+
+kable(lower_tri,
+      caption = "Correlation Matrix")
+
+#write.csv(lower_tri,"correlation_matrix_randr.csv")
+```
+
+## Comparison against British Election Survey (BES) benchmarks
+
+Demographic characteristics are compared to BES Wave 19, conducted in December 2019, where n = 32,177 for BES.  
+
+BES W19 data downloaded from the following [link](https://www.britishelectionstudy.com/data-objects/panel-study-data/).  
+
+Demographics are only displayed for n=1,406 study participants who answered questions on conspiracy theories and are included in the regression analyses.  
+
+```{r}
+# reading in BES data
+bes <- read_sav("BES data/BES2019_W19_v1.0-2.sav")
+```
+
+Our sample has a slightly higher number of male respondents.  
+
+```{r}
+gender_df <- bes %>% 
+  mutate(
+    gender = to_factor(gender)
+  ) %>% 
+  count(gender) %>% 
+  mutate(`BES W19 Proportion` = n / sum(n)) %>% 
+  rename(`BES W19 n` = n)
+
+gender_df_full <- conspiracies %>% 
+  mutate(
+    gender = fct_recode(
+      W2_Gender_binary,
+      "Male" = "1",
+      "Female" = "2") %>% fct_explicit_na("Other/Prefer not to say")
+  ) %>%
+  count(gender) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  left_join(gender_df, by = "gender")
+gender_df_full
+```
+
+Our sample has slightly more participants who identify as an ethnicity other than White. Note: the wording and classification of ethnicity given below uses the same [conventions as gov.uk](https://www.ethnicity-facts-figures.service.gov.uk/style-guide/writing-about-ethnicity).  
+
+```{r}
+ethnicity_df <- bes %>% 
+  mutate(
+    ethnicity = fct_collapse(
+      as.factor(p_ethnicity),
+      "White" = c("1","2"),
+      "ethnic minorities (excluding White minorities)" = 
+        c("3","4","5","6","7","8","9","10","11","12","13","14","15"),
+      "Prefer not to say" = "16"
+    )
+  ) %>% 
+  count(ethnicity) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+  
+ethnicity_df_full <- conspiracies %>% 
+  mutate(
+    ethnicity = fct_collapse(
+      W1_Ethnicity,
+      "White" = c("1","2"),
+      "ethnic minorities (excluding White minorities)" = 
+        c("3","4","5","6","7","8","9","10","11")
+    )
+  ) %>% 
+  count(ethnicity) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  right_join(ethnicity_df, by = "ethnicity")
+ethnicity_df_full
+```
+
+Our sample is a bit younger than BES, with more respondents under 34 and less respondents over 55.  
+
+```{r}
+age_df <- bes %>% 
+  mutate(
+    age_bands = cut(
+      age,
+      breaks = c(-Inf,17,24,34,44,54,64,74,Inf),
+      labels = c("Under 18","18-24","25-34","35-44","45-54",
+                 "55-64","65-74","75+")
+    )
+  ) %>%
+  count(age_bands) %>%
+  mutate(`BES W19 Proportion` = n / sum(n)) %>%
+  rename(`BES W19 n` = n)
+
+age_df_full <- conspiracies %>% 
+  mutate(
+    age_bands = cut(
+      W2_Age_year,
+      breaks = c(-Inf,17,24,34,44,54,64,74,Inf),
+      labels = c("Under 18","18-24","25-34","35-44","45-54",
+                 "55-64","65-74","75+")
+    )
+  ) %>%
+  count(age_bands) %>%
+  mutate(Proportion = n / sum(n)) %>% 
+  left_join(age_df, by = "age_bands")
+age_df_full
+```
+
+Our sample has more people with a degree (undergraduate and/or postgraduate).  
+
+```{r}
+education_df <- bes %>% 
+  mutate(
+    Education = fct_collapse(
+      as.factor(p_education),
+      "Degree education" = c("16","17")) %>% 
+      fct_lump_n(1) %>% 
+      fct_recode(
+        "Other qualification or no qualifications" = "Other"
+        )
+    ) %>% 
+  count(Education) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+
+education_df_full <- conspiracies %>% 
+  mutate(
+    Education = fct_recode(
+      as.factor(W1_Education_binary),
+      "Degree education" = "1",
+      "Other qualification or no qualifications" = "0") 
+    ) %>% 
+  count(Education) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  left_join(education_df, by = "Education")
+education_df_full
+```
+
+The factor levels we use for gross household are not directly comparable to those used in BES W19.  However, the table below uses the best approximation for comparisons and suggests our sample has slightly more respondents on low incomes, but also more respondents on high incomes.  
+
+```{r}
+income_df <- bes %>% 
+  mutate(
+    gross_hh_income = fct_collapse(
+      as.factor(p_gross_household),
+      "£0 - £14,999" = c("1","2","3"),
+      "£15,000 - £24,999" = c("4","5"),
+      "£25,000 - £39,999" = c("6","7","8"),
+      "£40,000 - £59,999" = c("9","10","11"),
+      "£60,000 or more" = c("12","13","14","15"),
+      "Other" = c("16","17")
+    )
+  ) %>% 
+  filter(gross_hh_income != "Other") %>% 
+  count(gross_hh_income) %>% 
+  mutate(`BES W19 Proportion` = n/sum(n)) %>% 
+  rename(`BES W19 n` = n)
+
+income_df_full <- conspiracies %>% 
+  mutate(
+    gross_hh_income = fct_recode(
+      as.factor(W1_Income_2019),
+      "£0 - 15,490" = "0",
+      "£15,491 - £25,340" = "0.25",
+      "£25,341 - £38,740" = "0.5",
+      "£38,741 - £57,930" = "0.75",
+      "£57,931 or more" = "1"
+    )
+  ) %>% 
+  count(gross_hh_income) %>% 
+  mutate(Proportion = n/sum(n)) %>% 
+  full_join(income_df, by = "gross_hh_income")
+income_df_full
+```
+
+```{r, results = 'asis'}
+# combined table of all demographic comparisons
+demographics <- rbind(
+  age_df_full %>% rename(Category = age_bands) %>% 
+    mutate(Variable = "Age"),
+  gender_df_full %>% rename(Category = gender) %>% 
+    mutate(Variable = "Gender"), 
+  ethnicity_df_full %>% rename(Category = ethnicity) %>% 
+    mutate(Variable = "Ethnicity"),
+  education_df_full %>% rename(Category = Education) %>% 
+    mutate(Variable = "Education"),
+  income_df_full %>% rename(Category = gross_hh_income) %>% 
+    mutate(Variable = "Gross household income")
+) %>% 
+  dplyr::select(Variable,everything())
+
+kable(demographics)
+#write.csv(demographics, "demographic_table.csv")
+```
+
+## Regression tables
+
+```{r}
+# setting up variable orders
+to_plot <- c("age_sc","W1_Education_binary","W2_Gender_binary2",
+             "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
+             "W2_INFO_5","red_top_tabloid","threat","ethno","right",
+             "distrust_science","W2_IOU_Total",
+             "RWA","SDO","W1_Conspiracy_Total",
+             "conspiracy1_sc","conspiracy2_sc","conspiracy3_sc")
+names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
+              "Family and friends","Mid-level news","Social media",
+              "Tabloid news","COVID-19 anxiety","Ethnocentrism",
+              "Left-right scale","Distrust scientists",
+              "Intolerance of uncertainty","RWA",
+              "SDO","Conspiracy ideation",
+              "Wuhan lab belief","Meat market belief","5G belief")
+
+to_plot <- to_plot[sort(names(to_plot))]
+```
+
+
+```{r, results='asis'}
+stargazer(full_meat, full_lab, full_5g, full_5g_ihs, full_5g_poiss, 
+          title="Table A2: Regression Results Origin Theory Belief",
+          dep.var.labels=c("Meat market", "Wuhan lab","5G","5G","5G"),
+          column.labels = c("OLS","OLS","OLS","OLS (IHS)","Poisson"),
+          order = to_plot,
+          covariate.labels = names(to_plot),
+          #omit.stat=c("LL","ser","f","bic"),
+          keep.stat = c("n","rsq","adj.rsq"),
+          model.names = FALSE,
+          single.row=TRUE,
+          model.numbers = FALSE,
+          align = TRUE,
+          report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          type = "html")
+```
+
+
+```{r, results = "asis"}
+stargazer(dist_full, vax_full,
+          title="Table A3: Public Health Measures Model Results",
+          dep.var.labels=c("Social distancing (OLS)",
+                           "Vaccine (multi logit)",
+                           "Vaccine (multi logit)"),
+          multicolumn = TRUE,
+          column.labels = c(" ", "No", "Maybe"),
+          model.names = FALSE,
+          model.numbers = FALSE,
+          order = to_plot,
+          covariate.labels = names(to_plot),
+          #omit.stat=c("LL","ser","f","bic"),
+          keep.stat = c("n","rsq","adj.rsq","aic"),
+          single.row=TRUE,
+          align = TRUE,
+          report = "vcs*",
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          type = "html")
+```
+
+
+```{r}
+tab <- full_join(
+  margin_no %>% dplyr::select(factor:SE,p),
+  margin_maybe %>% dplyr::select(factor:SE,p),
+  by = "factor",
+  suffix = c("_no","_maybe")
+) %>% 
+  as_tibble()
+
+tab2 <- tibble(factor = to_plot, variable = names(to_plot))
+
+ames <- left_join(
+    tab,
+    tab2,
+    by = "factor"
+    ) %>%
+  dplyr::select(variable,everything())
+```
+
+```{r, results = 'asis'}
+kable(ames)
+```
+
+## Missing Values
+
+There are 3 missing values from the W2_Gender_binary variable, 4 missing values from the distrust_science variable, and 9 missing values from the W2_C19_Vax_Self variable.  Missing values were removed with listwise deletion when the respective variable is included in a model. Therefore, for the conspiracy theory and the social distancing models n=1399. And for the vaccination model n=1390.   
+
+```{r}
+select_these <- names(conspiracies2)
+
+conspiracies3 <- conspiracies %>%
+  dplyr::select(one_of(select_these[-length(select_these)]))
+
+conspiracies3 %>% map_int(count_na) %>% sort()
+count_na(conspiracies2$social_distance)
+```

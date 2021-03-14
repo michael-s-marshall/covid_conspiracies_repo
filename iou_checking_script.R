@@ -19,6 +19,8 @@ ious %>%
   ggplot(aes(x = iou_total, y = W2_IOU_Total)) +
   geom_point()
 
+ious$W2_IOU_Total <- rescale01(ious$W2_IOU_Total, na.rm = TRUE)
+
 mean(round(ious$W2_IOU_Total,3) == round(ious$iou_total,3))
 
 cor(ious$W2_IOU_Total, ious$iou_total)
