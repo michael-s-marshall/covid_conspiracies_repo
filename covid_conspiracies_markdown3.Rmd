@@ -1,5 +1,5 @@
 ---
-title: "covid_conspiracies_markdown2"
+title: "covid_conspiracies_markdown3"
 author: "Michael Marshall"
 date: "14/03/2021"
 output: github_document
@@ -1224,8 +1224,6 @@ plot(dist_full)
 ## Multinomial model for vaccine acceptance
 
 ```{r}
-count(conspiracies2,sum()) %>%  mutate(`%` = n / sum(n))
-
 # multinomial model
 vax_full <- multinom(W2_C19_Vax_Self ~ 
                   #socio-economic variables

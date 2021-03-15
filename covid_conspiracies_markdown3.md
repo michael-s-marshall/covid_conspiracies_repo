@@ -1,4 +1,4 @@
-covid\_conspiracies\_markdown2
+covid\_conspiracies\_markdown3
 ================
 Michael Marshall
 14/03/2021
@@ -2148,13 +2148,6 @@ plot(dist_full)
 ![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-74-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
-
-``` r
-count(conspiracies2,sum()) %>%  mutate(`%` = n / sum(n))
-```
-
-    ##   sum()    n %
-    ## 1     0 1399 1
 
 ``` r
 # multinomial model
