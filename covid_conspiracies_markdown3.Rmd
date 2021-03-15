@@ -376,52 +376,21 @@ for(i in seq_along(plot_vars)){
 Correlation between the origin theories below. Statistical significance tested via spearman's rank, with bonferroni correction for 3 tests.  
 
 ```{r}
-test_1 <- cor.test(
-  conspiracies$conspiracy1_sc,
-  conspiracies$conspiracy2_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_1
-test_1$p.value < (0.05 / 3)
-
-test_2 <- cor.test(
-  conspiracies$conspiracy1_sc,
-  conspiracies$conspiracy3_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_2
-test_2$p.value < (0.05 / 3)
-
-test_3 <- cor.test(
-  conspiracies$conspiracy2_sc,
-  conspiracies$conspiracy3_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_3
-test_3$p.value < (0.05 / 3)
-```
-
-
-```{r}
 pacman::p_load(knitr)
-tibble(
-  `Origin Belief` = c("Meat Market","Wuhan laboratory","5G"),
-  Mean = c(round(mean(conspiracies$conspiracy2_sc, na.rm = T),3),
-           round(mean(conspiracies$conspiracy1_sc, na.rm = T),3),
-           round(mean(conspiracies$conspiracy3_sc, na.rm = T),3)),
-  SD = c(round(sd(conspiracies$conspiracy2_sc, na.rm = T),3),
-           round(sd(conspiracies$conspiracy1_sc, na.rm = T),3),
-           round(sd(conspiracies$conspiracy3_sc, na.rm = T),3)),
-  `1.` = c(" ",round(test_1$estimate,3),round(test_3$estimate,3)),
-  `2.` = c(" "," ",round(test_2$estimate,3))
-) %>% 
+my_cor <- corr.test(
+  conspiracies %>% dplyr::select(conspiracy1_sc:conspiracy3_sc),
+  method = "kendall",
+  adjust = "bonferroni"
+)
+
+my_cor$r %>% 
+  as_tibble() %>% 
   kable()
 
+my_cor$p %>% 
+  as_tibble() %>% 
+  kable()
 ```
-
 
 # Modelling for belief in Chinese lab origin
 

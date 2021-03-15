@@ -616,104 +616,35 @@ Correlation between the origin theories below. Statistical significance
 tested via spearman’s rank, with bonferroni correction for 3 tests.
 
 ``` r
-test_1 <- cor.test(
-  conspiracies$conspiracy1_sc,
-  conspiracies$conspiracy2_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_1
-```
-
-    ## 
-    ##  Kendall's rank correlation tau
-    ## 
-    ## data:  conspiracies$conspiracy1_sc and conspiracies$conspiracy2_sc
-    ## z = -5.2025, p-value = 1.966e-07
-    ## alternative hypothesis: true tau is not equal to 0
-    ## sample estimates:
-    ##         tau 
-    ## -0.09571348
-
-``` r
-test_1$p.value < (0.05 / 3)
-```
-
-    ## [1] TRUE
-
-``` r
-test_2 <- cor.test(
-  conspiracies$conspiracy1_sc,
-  conspiracies$conspiracy3_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_2
-```
-
-    ## 
-    ##  Kendall's rank correlation tau
-    ## 
-    ## data:  conspiracies$conspiracy1_sc and conspiracies$conspiracy3_sc
-    ## z = 16.486, p-value < 2.2e-16
-    ## alternative hypothesis: true tau is not equal to 0
-    ## sample estimates:
-    ##       tau 
-    ## 0.3238067
-
-``` r
-test_2$p.value < (0.05 / 3)
-```
-
-    ## [1] TRUE
-
-``` r
-test_3 <- cor.test(
-  conspiracies$conspiracy2_sc,
-  conspiracies$conspiracy3_sc,
-  alternative = "two.sided",
-  method = "kendall"
-  )
-test_3
-```
-
-    ## 
-    ##  Kendall's rank correlation tau
-    ## 
-    ## data:  conspiracies$conspiracy2_sc and conspiracies$conspiracy3_sc
-    ## z = -3.9302, p-value = 8.489e-05
-    ## alternative hypothesis: true tau is not equal to 0
-    ## sample estimates:
-    ##         tau 
-    ## -0.07656141
-
-``` r
-test_3$p.value < (0.05 / 3)
-```
-
-    ## [1] TRUE
-
-``` r
 pacman::p_load(knitr)
-tibble(
-  `Origin Belief` = c("Meat Market","Wuhan laboratory","5G"),
-  Mean = c(round(mean(conspiracies$conspiracy2_sc, na.rm = T),3),
-           round(mean(conspiracies$conspiracy1_sc, na.rm = T),3),
-           round(mean(conspiracies$conspiracy3_sc, na.rm = T),3)),
-  SD = c(round(sd(conspiracies$conspiracy2_sc, na.rm = T),3),
-           round(sd(conspiracies$conspiracy1_sc, na.rm = T),3),
-           round(sd(conspiracies$conspiracy3_sc, na.rm = T),3)),
-  `1.` = c(" ",round(test_1$estimate,3),round(test_3$estimate,3)),
-  `2.` = c(" "," ",round(test_2$estimate,3))
-) %>% 
+my_cor <- corr.test(
+  conspiracies %>% dplyr::select(conspiracy1_sc:conspiracy3_sc),
+  method = "kendall",
+  adjust = "bonferroni"
+)
+
+my_cor$r %>% 
+  as_tibble() %>% 
   kable()
 ```
 
-| Origin Belief    |  Mean |    SD | 1\.     | 2\.   |
-| :--------------- | ----: | ----: | :------ | :---- |
-| Meat Market      | 0.640 | 0.287 |         |       |
-| Wuhan laboratory | 0.383 | 0.332 | \-0.096 |       |
-| 5G               | 0.111 | 0.219 | \-0.077 | 0.324 |
+| conspiracy1\_sc | conspiracy2\_sc | conspiracy3\_sc |
+| --------------: | --------------: | --------------: |
+|       1.0000000 |     \-0.0957135 |       0.3238067 |
+|     \-0.0957135 |       1.0000000 |     \-0.0765614 |
+|       0.3238067 |     \-0.0765614 |       1.0000000 |
+
+``` r
+my_cor$p %>% 
+  as_tibble() %>% 
+  kable()
+```
+
+| conspiracy1\_sc | conspiracy2\_sc | conspiracy3\_sc |
+| --------------: | --------------: | --------------: |
+|       0.0000000 |       0.0009769 |       0.0000000 |
+|       0.0003256 |       0.0000000 |       0.0122186 |
+|       0.0000000 |       0.0040729 |       0.0000000 |
 
 # Modelling for belief in Chinese lab origin
 
@@ -998,7 +929,7 @@ plot_coefs(int_lab)
     ##   method      from 
     ##   tidy.gamlss broom
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 No evidence for an interaction between RWA and threat.
 
@@ -1082,7 +1013,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 # ihs transformation where theta = 1
@@ -1095,7 +1026,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
 
 ``` r
 # ihs transformation where theta = 1e+08
@@ -1108,7 +1039,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-3.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-3.png)<!-- -->
 
 ``` r
 # transforming using theta = 1
@@ -1882,14 +1813,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-64-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-64-2.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables, raw data is DV
@@ -1913,14 +1844,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
@@ -1944,14 +1875,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_meat)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
 
 ## Combined plot of models
 
@@ -1980,7 +1911,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
 
 ``` r
 control_vars <- c(controls,inform)
@@ -2007,7 +1938,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
 
 ``` r
 plot_coefs(
@@ -2031,7 +1962,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -2115,7 +2046,7 @@ ggplot(conspiracies2, aes(x = social_distance)) +
   geom_density()
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-73-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -2215,14 +2146,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-74-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-75-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-74-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -2391,7 +2322,7 @@ margin_vax %>%
   )
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
 
 ``` r
 tidies <- tidy(vax_full)
@@ -2456,7 +2387,7 @@ tidies %>%
   )
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
 
 ## Table summarising variables
 
