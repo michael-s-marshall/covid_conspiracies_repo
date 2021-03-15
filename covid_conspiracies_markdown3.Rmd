@@ -380,7 +380,7 @@ test_1 <- cor.test(
   conspiracies$conspiracy1_sc,
   conspiracies$conspiracy2_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
 test_1
 test_1$p.value < (0.05 / 3)
@@ -389,7 +389,7 @@ test_2 <- cor.test(
   conspiracies$conspiracy1_sc,
   conspiracies$conspiracy3_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
 test_2
 test_2$p.value < (0.05 / 3)
@@ -398,7 +398,7 @@ test_3 <- cor.test(
   conspiracies$conspiracy2_sc,
   conspiracies$conspiracy3_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
 test_3
 test_3$p.value < (0.05 / 3)

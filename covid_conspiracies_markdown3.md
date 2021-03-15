@@ -620,26 +620,20 @@ test_1 <- cor.test(
   conspiracies$conspiracy1_sc,
   conspiracies$conspiracy2_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
-```
-
-    ## Warning in cor.test.default(conspiracies$conspiracy1_sc,
-    ## conspiracies$conspiracy2_sc, : Cannot compute exact p-value with ties
-
-``` r
 test_1
 ```
 
     ## 
-    ##  Spearman's rank correlation rho
+    ##  Kendall's rank correlation tau
     ## 
     ## data:  conspiracies$conspiracy1_sc and conspiracies$conspiracy2_sc
-    ## S = 524495576, p-value = 6.494e-07
-    ## alternative hypothesis: true rho is not equal to 0
+    ## z = -5.2025, p-value = 1.966e-07
+    ## alternative hypothesis: true tau is not equal to 0
     ## sample estimates:
-    ##       rho 
-    ## -0.132237
+    ##         tau 
+    ## -0.09571348
 
 ``` r
 test_1$p.value < (0.05 / 3)
@@ -652,26 +646,20 @@ test_2 <- cor.test(
   conspiracies$conspiracy1_sc,
   conspiracies$conspiracy3_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
-```
-
-    ## Warning in cor.test.default(conspiracies$conspiracy1_sc,
-    ## conspiracies$conspiracy3_sc, : Cannot compute exact p-value with ties
-
-``` r
 test_2
 ```
 
     ## 
-    ##  Spearman's rank correlation rho
+    ##  Kendall's rank correlation tau
     ## 
     ## data:  conspiracies$conspiracy1_sc and conspiracies$conspiracy3_sc
-    ## S = 267963509, p-value < 2.2e-16
-    ## alternative hypothesis: true rho is not equal to 0
+    ## z = 16.486, p-value < 2.2e-16
+    ## alternative hypothesis: true tau is not equal to 0
     ## sample estimates:
-    ##       rho 
-    ## 0.4215429
+    ##       tau 
+    ## 0.3238067
 
 ``` r
 test_2$p.value < (0.05 / 3)
@@ -684,26 +672,20 @@ test_3 <- cor.test(
   conspiracies$conspiracy2_sc,
   conspiracies$conspiracy3_sc,
   alternative = "two.sided",
-  method = "spearman"
+  method = "kendall"
   )
-```
-
-    ## Warning in cor.test.default(conspiracies$conspiracy2_sc,
-    ## conspiracies$conspiracy3_sc, : Cannot compute exact p-value with ties
-
-``` r
 test_3
 ```
 
     ## 
-    ##  Spearman's rank correlation rho
+    ##  Kendall's rank correlation tau
     ## 
     ## data:  conspiracies$conspiracy2_sc and conspiracies$conspiracy3_sc
-    ## S = 512290841, p-value = 6.944e-05
-    ## alternative hypothesis: true rho is not equal to 0
+    ## z = -3.9302, p-value = 8.489e-05
+    ## alternative hypothesis: true tau is not equal to 0
     ## sample estimates:
-    ##        rho 
-    ## -0.1058904
+    ##         tau 
+    ## -0.07656141
 
 ``` r
 test_3$p.value < (0.05 / 3)
@@ -730,8 +712,8 @@ tibble(
 | Origin Belief    |  Mean |    SD | 1\.     | 2\.   |
 | :--------------- | ----: | ----: | :------ | :---- |
 | Meat Market      | 0.640 | 0.287 |         |       |
-| Wuhan laboratory | 0.383 | 0.332 | \-0.132 |       |
-| 5G               | 0.111 | 0.219 | \-0.106 | 0.422 |
+| Wuhan laboratory | 0.383 | 0.332 | \-0.096 |       |
+| 5G               | 0.111 | 0.219 | \-0.077 | 0.324 |
 
 # Modelling for belief in Chinese lab origin
 
