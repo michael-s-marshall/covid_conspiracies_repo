@@ -294,9 +294,6 @@ mean(
 ```{r}
 factors <- c("W1_Ethnicity",
              "W2_Gender_binary")
-```
-
-```{r}
 # turning to factors
 conspiracies[factors] <- conspiracies[factors] %>% 
   map_df(as.factor)
@@ -310,7 +307,7 @@ conspiracies <- conspiracies %>%
 
 
 ```{r}
-# rescaling the remaing numeric variables
+# rescaling the remaining numeric variables
 numerics <- c("W1_Conspiracy_Total","W2_IOU_Total", "W2_INFO_5",
               "W2_INFO_9","distrust_science","W1_Income_2019")
 
@@ -373,6 +370,58 @@ for(i in seq_along(plot_vars)){
   
 }
 ```
+
+# Correlation between the origin theories
+
+Correlation between the origin theories below. Statistical significance tested via spearman's rank, with bonferroni correction for 3 tests.  
+
+```{r}
+test_1 <- cor.test(
+  conspiracies$conspiracy1_sc,
+  conspiracies$conspiracy2_sc,
+  alternative = "two.sided",
+  method = "spearman"
+  )
+test_1
+test_1$p.value < (0.05 / 3)
+
+test_2 <- cor.test(
+  conspiracies$conspiracy1_sc,
+  conspiracies$conspiracy3_sc,
+  alternative = "two.sided",
+  method = "spearman"
+  )
+test_2
+test_2$p.value < (0.05 / 3)
+
+test_3 <- cor.test(
+  conspiracies$conspiracy2_sc,
+  conspiracies$conspiracy3_sc,
+  alternative = "two.sided",
+  method = "spearman"
+  )
+test_3
+test_3$p.value < (0.05 / 3)
+```
+
+
+```{r}
+pacman::p_load(knitr)
+tibble(
+  `Origin Belief` = c("Meat Market","Wuhan laboratory","5G"),
+  Mean = c(round(mean(conspiracies$conspiracy2_sc, na.rm = T),3),
+           round(mean(conspiracies$conspiracy1_sc, na.rm = T),3),
+           round(mean(conspiracies$conspiracy3_sc, na.rm = T),3)),
+  SD = c(round(sd(conspiracies$conspiracy2_sc, na.rm = T),3),
+           round(sd(conspiracies$conspiracy1_sc, na.rm = T),3),
+           round(sd(conspiracies$conspiracy3_sc, na.rm = T),3)),
+  `1.` = c(" ",round(test_1$estimate,3),round(test_3$estimate,3)),
+  `2.` = c(" "," ",round(test_2$estimate,3))
+) %>% 
+  kable()
+
+```
+
 
 # Modelling for belief in Chinese lab origin
 
@@ -455,9 +504,7 @@ AIC(multi_lab)
 ```{r}
 full_lab <- update(multi_lab, ~ . + 
                   #conspiracies
-                  W1_Conspiracy_Total +
-                  conspiracy2_sc +
-                  conspiracy3_sc)
+                  W1_Conspiracy_Total)
 
 summary(full_lab)$adj.r.squared
 AIC(full_lab)
@@ -485,8 +532,6 @@ int_lab <- lm(conspiracy1_sc ~ W2_Gender_binary +
                 SDO +
                 W2_IOU_Total +
                 W1_Conspiracy_Total +
-                conspiracy2_sc +
-                conspiracy3_sc +
                 (RWA * threat), # interaction term
               data = conspiracies) 
 
@@ -494,6 +539,7 @@ summ(int_lab)
 plot_coefs(int_lab)
 ```
 
+No evidence for an interaction between RWA and threat.  
 
 ```{r}
 summary(full_lab)$adj.r.squared
@@ -502,7 +548,6 @@ AIC(full_lab)
 summary(int_lab)$adj.r.squared
 AIC(int_lab)
 ```
-
 
 
 # Modelling for belief in 5G origin conspiracy
@@ -656,9 +701,7 @@ AIC(multi_5g)
 ```{r}
 full_5g <- update(multi_5g, ~ . +
                 #conspiracies
-                W1_Conspiracy_Total +
-                conspiracy1_sc +
-                conspiracy2_sc)
+                W1_Conspiracy_Total)
 
 adj_rsq(full_5g)
 AIC(full_5g)
@@ -747,9 +790,7 @@ AIC(multi_5g_ihs)
 ```{r}
 full_5g_ihs <- update(multi_5g_ihs, ~ . +
                 #conspiracies
-                W1_Conspiracy_Total +
-                conspiracy1_sc +
-                conspiracy2_sc)
+                W1_Conspiracy_Total)
 
 adj_rsq(full_5g_ihs)
 AIC(full_5g_ihs)
@@ -814,9 +855,7 @@ full_5g_poiss <- glm(W2_Conspiracy_Theory3 ~
                            threat +
                            
                            #conspiracies
-                           W1_Conspiracy_Total +
-                           conspiracy1_sc +
-                           conspiracy2_sc,
+                           W1_Conspiracy_Total,
                          family = "quasipoisson", data = conspiracies)
 
 summ(full_5g_poiss)
@@ -901,9 +940,7 @@ AIC(multi_meat)
 ```{r}
 full_meat <- update(multi_meat, ~ . +
                   #conspiracies
-                  W1_Conspiracy_Total +
-                  conspiracy1_sc +
-                  conspiracy3_sc)
+                  W1_Conspiracy_Total)
 
 adj_rsq(full_meat)
 AIC(full_meat)
@@ -927,11 +964,8 @@ dispositions <- c("RWA","SDO")
 names(dispositions) <- c("RWA","SDO")
 dispositions <- dispositions[sort(names(dispositions))]
 
-conspiracy <- c("W1_Conspiracy_Total","conspiracy2_sc","conspiracy1_sc",
-                "conspiracy3_sc")
-names(conspiracy) <- c("Conspiracy ideation","Meat market belief",
-                       "Wuhan lab belief","5G belief")
-conspiracy <- conspiracy[sort(names(conspiracy))]
+conspiracy <- c("W1_Conspiracy_Total")
+names(conspiracy) <- c("Conspiracy ideation")
 
 inform <- c("W2_INFO_9","elite_news","mid_level_news",
             "red_top_tabloid","W2_INFO_5")
@@ -1034,12 +1068,12 @@ model_vars <- model_vars[sort(names(model_vars))]
 plot_coefs(
   full_lab,full_5g,full_meat,
   model.names = c("Wuhan lab","5G","Meat market"),
-  coefs = model_vars,
-  groups = list(
-    Dispositions = names(dispositions),
-    Conspiracy = names(conspiracy)
-    ),
-  facet.label.pos = "left" 
+  coefs = model_vars#,
+  #groups = list(
+  #  Dispositions = names(dispositions),
+  #  Conspiracy = names(conspiracy)
+  #  ),
+  #facet.label.pos = "left" 
   ) +
   labs(
     x = "Coefficient estimate: OLS model comparison",
@@ -1081,16 +1115,16 @@ plot_coefs(
 plot_coefs(
   full_5g_ihs,full_5g_poiss,
   model.names = c("5G IHS transformed","5G poisson"),
-  coefs = model_vars,
-  groups = list(
-    Conspiracy = names(conspiracy),
-    Dispositions = names(dispositions)
-    ),
-  facet.label.pos = "left" 
+  coefs = model_vars#,
+  #groups = list(
+  #  Conspiracy = names(conspiracy),
+  #  Dispositions = names(dispositions)
+  #  ),
+  #facet.label.pos = "left" 
   ) +
   labs(
     x = "Coefficient estimate",
-    caption = "Note: Comparison of supplementary models. IHS transformed model estimated using OLS.\nPoisson regression estimated using maximum likelihood method, with overdispersion parameter (=30.45).\n95% confidence intervals presented. Numerical predictors scaled 0-1."
+    caption = "Note: Comparison of supplementary models. IHS transformed model estimated using OLS.\nPoisson regression estimated using maximum likelihood method, with overdispersion parameter (=31.86).\n95% confidence intervals presented. Numerical predictors scaled 0-1."
   ) + 
   theme(legend.position = "top",
         legend.margin=margin(t = 0, b = 0, unit='cm'),
@@ -1114,7 +1148,7 @@ pacman::p_load(nnet)
 vars <- model.matrix(full_lab)[,-1] %>% as.data.frame() %>% names()
 vars <- c(vars,"w2_conspiracy3_ihs","W2_Conspiracy_Theory1",
           "W2_Conspiracy_Theory2","W2_Conspiracy_Theory3",
-          "conspiracy1_sc","pid")
+          "conspiracy1_sc","conspiracy2_sc","conspiracy3_sc","pid")
 vars[1] <- str_sub(vars[1],1,str_length(vars[1])-1)
 #vars[2] <- str_sub(vars[2],1,str_length(vars[2])-1)
 
@@ -1224,8 +1258,14 @@ plot(dist_full)
 ## Multinomial model for vaccine acceptance
 
 ```{r}
+# making binary for vaccine reluctance
+conspiracies2 <- conspiracies2 %>% 
+  mutate(
+    vax_reluctance = ifelse(W2_C19_Vax_Self == 1, 0, 1)
+  )
+
 # multinomial model
-vax_full <- multinom(W2_C19_Vax_Self ~ 
+vax_full <- glm(vax_reluctance ~ 
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -1255,100 +1295,12 @@ vax_full <- multinom(W2_C19_Vax_Self ~
                   conspiracy1_sc +
                   conspiracy2_sc +
                   conspiracy3_sc,
-                data = conspiracies2)
+                data = conspiracies2, family = "binomial")
 ```
 
 ```{r}
-# functions to inspect multinom
-z_score <- function(model){
-  z <- summary(model)$coefficients/summary(model)$standard.errors
-  return(z)
-}
-
-p_value <- function(model){
-  z <- z_score(model)
-  p <- (1 - pnorm(abs(z), 0, 1)) * 2
-  return(p)
-}
-```
-
-```{r}
-p_value(vax_full)
-```
-
-```{r}
-# table for plot of unstandardised coefficients
-vax_vars <- c("distrust_science","threat","age_sc","W1_Income_2019",
-               "RWA","SDO","W1_Conspiracy_Total","conspiracy1_sc",
-               "conspiracy2_sc","conspiracy3_sc")
-
-vax_plots <- full_list[full_list %in% vax_vars]
-vax_plots <- vax_plots[sort(names(vax_plots))]
-
-tidies <- tidy(vax_full) %>%
-  filter(term %in% vax_plots) %>% 
-  mutate(
-    odds_ratio = exp(estimate),
-    conf.low = estimate - std.error * qnorm(0.975),
-    conf.high = estimate + std.error * qnorm(0.975),
-    conf.low.exp = exp(estimate - std.error * qnorm(0.975)),
-    conf.high.exp = exp(estimate + std.error * qnorm(0.975)),
-    y.level = fct_recode(as.factor(y.level),
-                         "No" = "2",
-                         "Maybe" = "3"),
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
-    group_facet = ifelse(term %in% dispositions, 
-                         "Dispositions",
-                         ifelse(term %in% conspiracy, "Conspiracy",
-                                       "Controls")),
-    term = fct_recode(term,
-                      "Age" = "age_sc",
-                      "Income" = "W1_Income_2019",
-                      "COVID-19 anxiety" = "threat",
-                      "Distrust scientists" = "distrust_science",
-                      "RWA" = "RWA",
-                      "SDO" = "SDO",
-                      "Conspiracy ideation" = "W1_Conspiracy_Total",
-                      "Meat market belief" = "conspiracy2_sc",
-                      "Wuhan lab belief" = "conspiracy1_sc",
-                      "5G belief" = "conspiracy3_sc")
-  ) %>%
-  rename(Level = y.level)  
-
-# plotting beta coefficients
-ggplot(data = tidies, 
-       aes(y = term, 
-           x = estimate, xmin = conf.low,
-           xmax = conf.high, colour = Level)) + 
-  geom_vline(xintercept = 0, linetype = 2, size = .25) +
-  ggstance::geom_linerangeh(
-    aes(y = term, xmin = conf.low,
-        xmax = conf.high, colour = Level),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
-  geom_point(
-    aes(y = term, 
-        x = estimate, colour = Level, shape = Level),
-    position = ggstance::position_dodgev(height = 0.62),
-    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
-  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
-  theme_nice(legend.pos = "right") +
-  scale_shape_manual(values = c(21,22)) +
-  drop_y_gridlines() +
-  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
-             strip.position = "left") +
-  theme(axis.title.y = element_blank(),
-        legend.margin=margin(t = 0, b = 0, unit='cm'),
-        axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10,
-                                   hjust = 1),
-        panel.grid.major.x = element_line(linetype = "solid"),
-        strip.text.x = element_text(size = 8),
-        legend.position = "top",
-        plot.caption = element_text(hjust = 0)) +
-  labs(
-    x = "Coefficient estimate: Vaccine acceptance",
-    caption = "Note: Multinomial logit estimated using maximum likelihood.\nUnstardised coefficients and 95% confidence intervals presented. Numerical predictors scaled 0-1."
-  ) 
+# summary of vaccine model
+summ(vax_full)
 ```
 
 Below is a plot of the average marginal effects for key variables.  
@@ -1356,40 +1308,41 @@ Below is a plot of the average marginal effects for key variables.
 ```{r, results = 'hide'}
 pacman::p_load(margins, ggstance)
 
-# average marginal effect for "No", with bootstrap for variance
+# average marginal effect for vaccine model
 set.seed(123)
-margin_no <- margins_summary(
-  vax_full, category = "2",
+margin_vax <- margins_summary(
+  vax_full,
+  type = "response",
   vce = "bootstrap"
 )
-
-# average marginal effect for "Maybe", with bootstrap for variance
-set.seed(123)
-margin_maybe <- margins_summary(
-  vax_full, category = "3",
-  vce = "bootstrap"
-)
+margin_vax
 ```
+
 
 ```{r}
 # plotting average marginal effect
-rbind(
-  margin_no %>% as_tibble() %>% mutate(level = "No"),
-  margin_maybe %>% as_tibble() %>% mutate(level = "Maybe")
-) %>% 
+vax_plots <- c("W1_Income_2019","age_sc","ethno","distrust_science",
+               "threat","W1_Conspiracy_Total","conspiracy1_sc",
+               "conspiracy2_sc","conspiracy3_sc","RWA","SDO")
+
+conspiracy2 <- c(conspiracy,"conspiracy1_sc","conspiracy2_sc",
+                 "conspiracy3_sc")
+
+margin_vax %>% 
   rename(term = factor) %>% 
   filter(term %in% vax_plots) %>%
   mutate(
     term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
     group_facet = ifelse(term %in% dispositions, 
                          "Dispositions",
-                         ifelse(term %in% conspiracy, "Conspiracy",
+                         ifelse(term %in% conspiracy2, "Conspiracy",
                                        "Controls")),
     term = fct_recode(term,
                       "Age" = "age_sc",
                       "Income" = "W1_Income_2019",
                       "COVID-19 anxiety" = "threat",
                       "Distrust scientists" = "distrust_science",
+                      "Ethnocentrism" = "ethno",
                       "RWA" = "RWA",
                       "SDO" = "SDO",
                       "Conspiracy ideation" = "W1_Conspiracy_Total",
@@ -1399,39 +1352,101 @@ rbind(
   ) %>% 
   ggplot(aes(y = term, 
            x = AME, xmin = lower,
-           xmax = upper, colour = level)) + 
+           xmax = upper)) + 
   geom_vline(xintercept = 0, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
     aes(y = term, xmin = lower,
-        xmax = upper, colour = level),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
+        xmax = upper),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
+    colour = get_colors("CUD Bright",num.colors = 1)) +
   geom_point(
     aes(y = term, 
-        x = AME, colour = level, shape = level),
+        x = AME),
     position = ggstance::position_dodgev(height = 0.62),
-    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
-  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
-  theme_nice(legend.pos = "right") +
-  scale_shape_manual(values = c(21,22)) +
+    colour = get_colors("CUD Bright",num.colors = 1),
+    fill = "white", size = 3, stroke = 1, shape = 21) +
+  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice() +
   drop_y_gridlines() +
   facet_wrap(~group_facet, ncol = 1, scales = "free_y",
              strip.position = "left") +
   theme(axis.title.y = element_blank(),
-        legend.margin=margin(t = 0, b = 0, unit='cm'),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 10,
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
-        legend.position = "top",
         plot.caption = element_text(hjust = 0)) +
   labs(
-    x = "Average marginal effect: Vaccine acceptance",
-    colour = "Level",
-    shape = "Level",
-    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
+    x = "Average marginal effect: Vaccine reluctance",
+    caption = "Note: Binomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
   )
 ```
+
+```{r}
+tidies <- tidy(vax_full)
+
+#presenting odds ratios for vaccine reluctance
+tidies %>% 
+  mutate(
+    odds_ratio = exp(estimate),
+    or_lower = exp(estimate - qnorm(0.975) * std.error),
+    or_upper = exp(estimate + qnorm(0.975) * std.error)
+  ) %>% 
+  filter(term %in% vax_plots) %>%
+  mutate(
+    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    group_facet = ifelse(term %in% dispositions, 
+                         "Dispositions",
+                         ifelse(term %in% conspiracy2, "Conspiracy",
+                                       "Controls")),
+    term = fct_recode(term,
+                      "Age" = "age_sc",
+                      "Income" = "W1_Income_2019",
+                      "COVID-19 anxiety" = "threat",
+                      "Distrust scientists" = "distrust_science",
+                      "Ethnocentrism" = "ethno",
+                      "RWA" = "RWA",
+                      "SDO" = "SDO",
+                      "Conspiracy ideation" = "W1_Conspiracy_Total",
+                      "Meat market belief" = "conspiracy2_sc",
+                      "Wuhan lab belief" = "conspiracy1_sc",
+                      "5G belief" = "conspiracy3_sc")
+  ) %>% 
+  ggplot(aes(y = term, 
+           x = odds_ratio, xmin = or_lower,
+           xmax = or_upper)) + 
+  geom_vline(xintercept = 1, linetype = 2, size = .25) +
+  ggstance::geom_linerangeh(
+    aes(y = term, xmin = or_lower,
+        xmax = or_upper),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
+    colour = get_colors("CUD Bright",num.colors = 1)) +
+  geom_point(
+    aes(y = term, 
+        x = odds_ratio),
+    position = ggstance::position_dodgev(height = 0.62),
+    colour = get_colors("CUD Bright",num.colors = 1),
+    fill = "white", size = 3, stroke = 1, shape = 21) +
+  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+  theme_nice() +
+  drop_y_gridlines() +
+  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
+             strip.position = "left") +
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10,
+                                   hjust = 1),
+        panel.grid.major.x = element_line(linetype = "solid"),
+        strip.text.x = element_text(size = 8),
+        plot.caption = element_text(hjust = 0)) +
+  labs(
+    x = "Odds ratios: Vaccine reluctance",
+    caption = "Note: Binomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1."
+  )
+
+```
+
 
 ## Table summarising variables
 
@@ -1452,11 +1467,13 @@ var_summaries <- tibble(
 fuller_list <- c(
   full_list %>%
     str_replace("W2_Gender_binary2","W2_Gender_binary"),
-  "social_distance","W2_C19_Vax_Self")
+  "social_distance","W2_C19_Vax_Self","conspiracy1_sc","conspiracy2_sc",
+  "conspiracy3_sc")
 
 names(fuller_list) <- c(names(full_list),
                         "Social distancing motivation",
-                        "Vaccination attitudes")
+                        "Vaccination attitudes",
+                        "Meat market","Wuhan laboratory","5G")
 
 fuller_list <- fuller_list[sort(names(fuller_list))]
 
@@ -1483,33 +1500,12 @@ get_lower_tri <- function(df){
 }
 
 lower_tri <- get_lower_tri(cor_df)
-
-var_1 <- sort(names(cor_df))
-
-# plotting correlation matrix
-cbind(
-  lower_tri,
-  var_1
-) %>%
-  as_tibble() %>%
-  gather(var_2,correlation,`5G belief`:`Wuhan lab belief`, na.rm = T) %>%
-  mutate(correlation = parse_number(correlation)) %>%
-  arrange(var_1) %>%
-  ggplot(aes(x = var_1, y = var_2, fill = correlation)) +
-  geom_tile(colour = "white") +
-  scale_fill_gradientn(breaks = c(-0.2,0,0.2,0.5),
-                       colours = c("red","white",
-                                   "lightblue",
-                                   "dodgerblue4",
-                                   "midnightblue")) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = NULL, y = NULL)
 ```
+
 
 ```{r, results='asis'}
 # table for correlation matrix
-pacman::p_load(stargazer, knitr)
+pacman::p_load(stargazer)
 
 lower_tri <- lower_tri %>% as_tibble() %>% 
   mutate(` ` = names(cor_df)) %>% 
@@ -1716,15 +1712,13 @@ to_plot <- c("age_sc","W1_Education_binary","W2_Gender_binary2",
              "W1_Income_2019","elite_news","W2_INFO_9","mid_level_news",
              "W2_INFO_5","red_top_tabloid","threat","ethno","right",
              "distrust_science","W2_IOU_Total",
-             "RWA","SDO","W1_Conspiracy_Total",
-             "conspiracy1_sc","conspiracy2_sc","conspiracy3_sc")
+             "RWA","SDO","W1_Conspiracy_Total")
 names(to_plot) <- c("Age","Education","Gender","Income","Elite news",
               "Family and friends","Mid-level news","Social media",
               "Tabloid news","COVID-19 anxiety","Ethnocentrism",
               "Left-right scale","Distrust scientists",
               "Intolerance of uncertainty","RWA",
-              "SDO","Conspiracy ideation",
-              "Wuhan lab belief","Meat market belief","5G belief")
+              "SDO","Conspiracy ideation")
 
 to_plot <- to_plot[sort(names(to_plot))]
 ```
@@ -1750,6 +1744,11 @@ stargazer(full_meat, full_lab, full_5g, full_5g_ihs, full_5g_poiss,
 
 
 ```{r, results = "asis"}
+to_plot2 <- c(to_plot,"conspiracy1_sc","conspiracy2_sc","conspiracy3_sc")
+names(to_plot2) <- c(names(to_plot),
+                     "Wuhan lab belief", "Meat market belief", "5G belief")
+to_plot2 <- to_plot2[sort(names(to_plot2))]
+
 stargazer(dist_full, vax_full,
           title="Table A3: Public Health Measures Model Results",
           dep.var.labels=c("Social distancing (OLS)",
@@ -1759,8 +1758,8 @@ stargazer(dist_full, vax_full,
           column.labels = c(" ", "No", "Maybe"),
           model.names = FALSE,
           model.numbers = FALSE,
-          order = to_plot,
-          covariate.labels = names(to_plot),
+          order = to_plot2,
+          covariate.labels = names(to_plot2),
           #omit.stat=c("LL","ser","f","bic"),
           keep.stat = c("n","rsq","adj.rsq","aic"),
           single.row=TRUE,
@@ -1772,15 +1771,10 @@ stargazer(dist_full, vax_full,
 
 
 ```{r}
-tab <- full_join(
-  margin_no %>% dplyr::select(factor:SE,p),
-  margin_maybe %>% dplyr::select(factor:SE,p),
-  by = "factor",
-  suffix = c("_no","_maybe")
-) %>% 
+tab <- margin_vax %>% 
   as_tibble()
 
-tab2 <- tibble(factor = to_plot, variable = names(to_plot))
+tab2 <- tibble(factor = to_plot2, variable = names(to_plot2))
 
 ames <- left_join(
     tab,
