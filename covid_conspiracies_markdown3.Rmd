@@ -1202,13 +1202,19 @@ names(dist_controls) <- c("Age","Gender","Distrust scientists",
                           "Family and friends")
 dist_controls <- dist_controls[sort(names(dist_controls))]
 
+conspiracy2 <- c(conspiracy,"conspiracy1_sc","conspiracy2_sc",
+                 "conspiracy3_sc")
+names(conspiracy2) <- c(names(conspiracy),"Meat market belief",
+                        "Wuhan lab belief", "5G belief")
+conspiracy2 <- conspiracy2[sort(names(conspiracy2))]
+
 plot_coefs(
   dist_full,
-  coefs = c(dist_controls,dispositions,conspiracy),
+  coefs = c(dist_controls,dispositions,conspiracy2),
   groups = list(
     Controls = names(dist_controls), 
     Dispositions = names(dispositions),
-    Conspiracy = names(conspiracy)
+    Conspiracy = names(conspiracy2)
   ),
   facet.label.pos = "left"
 ) +
@@ -1293,9 +1299,6 @@ margin_vax
 vax_plots <- c("W1_Income_2019","age_sc","ethno","distrust_science",
                "threat","W1_Conspiracy_Total","conspiracy1_sc",
                "conspiracy2_sc","conspiracy3_sc","RWA","SDO")
-
-conspiracy2 <- c(conspiracy,"conspiracy1_sc","conspiracy2_sc",
-                 "conspiracy3_sc")
 
 margin_vax %>% 
   rename(term = factor) %>% 
