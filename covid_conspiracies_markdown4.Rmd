@@ -394,7 +394,7 @@ Principal components are as follows:
 
 * PC1 = belief in Wuhan lab and 5G conspiracies  
 * PC2 = disbelief in all three origin theories, but especially strong disbelief in meat market theory  
-* PC3 = belief in meat market but not 5G  
+* PC3 = belief in Wuhan lab but not 5G  
 
 ```{r}
 pc <- cbind(conspiracies,components)
