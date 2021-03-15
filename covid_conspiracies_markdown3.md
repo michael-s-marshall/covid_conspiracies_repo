@@ -2130,8 +2130,8 @@ dist_controls <- dist_controls[sort(names(dist_controls))]
 
 conspiracy2 <- c(conspiracy,"conspiracy1_sc","conspiracy2_sc",
                  "conspiracy3_sc")
-names(conspiracy2) <- c(names(conspiracy),"Meat market belief",
-                        "Wuhan lab belief", "5G belief")
+names(conspiracy2) <- c(names(conspiracy),"Wuhan lab belief", 
+                        "Meat market belief","5G belief")
 conspiracy2 <- conspiracy2[sort(names(conspiracy2))]
 
 plot_coefs(
