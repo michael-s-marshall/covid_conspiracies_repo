@@ -2378,7 +2378,7 @@ tidies %>%
         plot.caption = element_text(hjust = 0),
         panel.spacing = unit(0,"cm")) +
   labs(
-    x = "Odds ratios: Vaccine acceptance",
+    x = "Relative risk ratios: Vaccine acceptance",
     caption = "Note: Multinomial logit estimated using maximum likelihood method.\nRelative risk ratios, relative to 'Yes' with 95% confidence intervals. Numerical predictors scaled 0-1.\nDistrust of scientists not displayed to make x-axis scale readable, but has the following ratios: 13.2('No'), 2.6('Maybe')."
   )
 ```
