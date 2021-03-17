@@ -28,12 +28,10 @@ rescale01 <- function(x, ...) {
 ``` r
 # plotting density of different covid conspiracies
 df %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   gather(conspiracy_code, belief,
-         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>%
   mutate(conspiracy_code = as.factor(conspiracy_code)) %>%
-  filter(!conspiracy_code %in% c("W2_Conspiracy_Theory4",
-                                 "W2_Conspiracy_Theory5")) %>% 
   ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
   geom_density_ridges(aes(rel_min_height = 0.005),
                       stat = "density",
@@ -55,18 +53,15 @@ df %>%
 ``` r
 #pacman::p_load(patchwork)
 df %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   gather(conspiracy_code, belief,
-         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>%
   mutate(conspiracy_code = fct_recode(
     as.factor(conspiracy_code),
     "Wuhan laboratory" = "W2_Conspiracy_Theory1",
     "Meat market" = "W2_Conspiracy_Theory2",
-    "5G" = "W2_Conspiracy_Theory3",
-    "4" = "W2_Conspiracy_Theory4",
-    "5" = "W2_Conspiracy_Theory5")
+    "5G" = "W2_Conspiracy_Theory3")
     ) %>%
-  filter(!conspiracy_code %in% c("4","5")) %>% 
   mutate(
     order_var = ifelse(conspiracy_code == "Meat market", 1,
                        ifelse(conspiracy_code == "Wuhan laboratory",2,3))
@@ -101,25 +96,27 @@ conspiracies <- df %>%
   filter(!is.na(W2_Conspiracy_Theory1) |
            !is.na(W2_Conspiracy_Theory2) |
            !is.na(W2_Conspiracy_Theory3) |
-           !is.na(W2_Conspiracy_Theory3) |
-           !is.na(W2_Conspiracy_Theory4) |
-           !is.na(W2_Conspiracy_Theory5)) %>% 
+           !is.na(W2_Conspiracy_Theory3)) %>% 
   rename(W1_Housing_tenure = W1_Hosuing_tenure)
 
+nrow(conspiracies) #1406 observations
+```
+
+    ## [1] 1406
+
+``` r
 # function to count NAs
 count_na <- function(x){
   sum(is.na(x))
 }
 
 conspiracies %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   map_int(count_na)
 ```
 
     ## W2_Conspiracy_Theory1 W2_Conspiracy_Theory2 W2_Conspiracy_Theory3 
-    ##                     0                     0                     0 
-    ## W2_Conspiracy_Theory4 W2_Conspiracy_Theory5 
-    ##                     0                     0
+    ##                     0                     0                     0
 
 ``` r
 missing <- tibble(
@@ -604,11 +601,11 @@ for(i in seq_along(plot_vars)){
 }
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-4.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-3.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-4.png)<!-- -->
 
     ## Warning: Removed 4 rows containing non-finite values (stat_density).
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-5.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-6.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-7.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-8.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-9.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-10.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-11.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-12.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-22-13.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-5.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-6.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-7.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-8.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-9.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-10.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-11.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-12.png)<!-- -->![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-23-13.png)<!-- -->
 
 # Correlation between the origin theories
 
@@ -929,7 +926,7 @@ plot_coefs(int_lab)
     ##   method      from 
     ##   tidy.gamlss broom
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 No evidence for an interaction between RWA and threat.
 
@@ -1013,7 +1010,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 # ihs transformation where theta = 1
@@ -1026,7 +1023,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
 
 ``` r
 # ihs transformation where theta = 1e+08
@@ -1039,7 +1036,7 @@ conspiracies %>%
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-36-3.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-37-3.png)<!-- -->
 
 ``` r
 # transforming using theta = 1
@@ -1797,7 +1794,7 @@ plot_coefs(
   full_lab,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -1813,14 +1810,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-64-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_lab)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-64-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
 
 ``` r
 # 5G belief - full set of variables, raw data is DV
@@ -1828,7 +1825,7 @@ plot_coefs(
   full_5g,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -1844,14 +1841,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_5g)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
 
 ``` r
 # Chinese meat market model - full set of variables
@@ -1859,7 +1856,7 @@ plot_coefs(
   full_meat,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -1875,14 +1872,14 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(full_meat)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-2.png)<!-- -->
 
 ## Combined plot of models
 
@@ -1911,7 +1908,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-67-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
 
 ``` r
 control_vars <- c(controls,inform)
@@ -1938,7 +1935,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 ``` r
 plot_coefs(
@@ -1962,7 +1959,7 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
 
 ## Conspiracies and social distancing
 
@@ -2046,7 +2043,7 @@ ggplot(conspiracies2, aes(x = social_distance)) +
   geom_density()
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-72-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-73-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -2139,7 +2136,7 @@ plot_coefs(
   coefs = c(dist_controls,dispositions,conspiracy2),
   groups = list(
     Controls = names(dist_controls), 
-    Dispositions = names(dispositions),
+    Disposition = names(dispositions),
     Conspiracy = names(conspiracy2)
   ),
   facet.label.pos = "left"
@@ -2152,26 +2149,34 @@ plot_coefs(
         plot.caption = element_text(hjust = 0))
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-74-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
 
 ``` r
 par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-74-2.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-75-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
 ``` r
-# making binary for vaccine reluctance
-conspiracies2 <- conspiracies2 %>% 
-  mutate(
-    vax_reluctance = ifelse(W2_C19_Vax_Self == 1, 0, 1)
-  )
+# functions to inspect multinom
+z_score <- function(model){
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  return(z)
+}
 
+p_value <- function(model){
+  z <- z_score(model)
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+}
+```
+
+``` r
 # multinomial model
-vax_full <- glm(vax_reluctance ~ 
+vax_full <- multinom(W2_C19_Vax_Self ~ 
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -2201,114 +2206,107 @@ vax_full <- glm(vax_reluctance ~
                   conspiracy1_sc +
                   conspiracy2_sc +
                   conspiracy3_sc,
-                data = conspiracies2, family = "binomial")
+                data = conspiracies2)
 ```
+
+    ## # weights:  66 (42 variable)
+    ## initial  value 1527.071081 
+    ## iter  10 value 998.446091
+    ## iter  20 value 985.751324
+    ## iter  30 value 985.330108
+    ## final  value 985.328575 
+    ## converged
 
 ``` r
-# summary of vaccine model
-summ(vax_full)
+t(p_value(vax_full))
 ```
 
-    ## MODEL INFO:
-    ## Observations: 1390 (9 missing obs. deleted)
-    ## Dependent Variable: vax_reluctance
-    ## Type: Generalized linear model
-    ##   Family: binomial 
-    ##   Link function: logit 
-    ## 
-    ## MODEL FIT:
-    ## <U+03C7>²(20) = 218.33, p = 0.00
-    ## Pseudo-R² (Cragg-Uhler) = 0.20
-    ## Pseudo-R² (McFadden) = 0.12
-    ## AIC = 1575.58, BIC = 1685.56 
-    ## 
-    ## Standard errors: MLE
-    ## --------------------------------------------------------
-    ##                              Est.   S.E.   z val.      p
-    ## ------------------------- ------- ------ -------- ------
-    ## (Intercept)                  0.24   0.43     0.55   0.58
-    ## W2_Gender_binary2            0.24   0.13     1.84   0.07
-    ## W1_Education_binary          0.11   0.14     0.78   0.44
-    ## W1_Income_2019              -0.66   0.19    -3.55   0.00
-    ## age_sc                      -1.57   0.34    -4.55   0.00
-    ## right                       -0.49   0.37    -1.34   0.18
-    ## ethno                       -0.63   0.29    -2.19   0.03
-    ## distrust_science             1.35   0.27     5.04   0.00
-    ## red_top_tabloid             -0.16   0.15    -1.08   0.28
-    ## mid_level_news               0.12   0.14     0.84   0.40
-    ## elite_news                  -0.12   0.14    -0.89   0.37
-    ## W2_INFO_5                    0.21   0.23     0.92   0.36
-    ## W2_INFO_9                   -0.08   0.25    -0.33   0.74
-    ## SDO                          0.46   0.43     1.07   0.29
-    ## RWA                          0.72   0.45     1.62   0.11
-    ## W2_IOU_Total                 0.21   0.35     0.60   0.55
-    ## threat                      -1.40   0.26    -5.42   0.00
-    ## W1_Conspiracy_Total          0.61   0.34     1.77   0.08
-    ## conspiracy1_sc               0.27   0.22     1.21   0.23
-    ## conspiracy2_sc              -0.57   0.22    -2.60   0.01
-    ## conspiracy3_sc               0.79   0.31     2.52   0.01
-    ## --------------------------------------------------------
-
-Below is a plot of the average marginal effects for key variables.
+    ##                                2            3
+    ## (Intercept)         1.141417e-01 8.325006e-01
+    ## W2_Gender_binary2   3.414436e-01 7.229696e-02
+    ## W1_Education_binary 5.272841e-01 5.372921e-01
+    ## W1_Income_2019      2.273038e-01 3.227875e-04
+    ## age_sc              3.414586e-06 1.722345e-03
+    ## right               7.964977e-01 1.139373e-01
+    ## ethno               9.957509e-02 7.268913e-02
+    ## distrust_science    4.405816e-09 1.214443e-03
+    ## red_top_tabloid     3.502299e-01 4.188975e-01
+    ## mid_level_news      4.410809e-01 5.659722e-01
+    ## elite_news          7.776279e-01 1.735154e-01
+    ## W2_INFO_5           3.498732e-01 4.261363e-01
+    ## W2_INFO_9           4.836841e-01 8.848474e-01
+    ## SDO                 4.539986e-01 3.215399e-01
+    ## RWA                 1.881196e-01 1.577487e-01
+    ## W2_IOU_Total        4.729139e-01 2.856241e-01
+    ## threat              5.451681e-05 3.290162e-06
+    ## W1_Conspiracy_Total 7.707732e-01 5.695333e-02
+    ## conspiracy1_sc      1.285167e-02 6.887922e-01
+    ## conspiracy2_sc      9.089015e-03 4.915276e-02
+    ## conspiracy3_sc      8.064897e-07 9.721378e-01
 
 ``` r
 pacman::p_load(margins, ggstance)
 
-# average marginal effect for vaccine model
+# average marginal effect for "No", with bootstrap for variance
 set.seed(123)
-margin_vax <- margins_summary(
-  vax_full,
-  type = "response",
+margin_no <- margins_summary(
+  vax_full, category = "2",
   vce = "bootstrap"
 )
-margin_vax
+
+# average marginal effect for "Maybe", with bootstrap for variance
+set.seed(123)
+margin_maybe <- margins_summary(
+  vax_full, category = "3",
+  vce = "bootstrap"
+)
 ```
+
+Below is a plot of the average marginal effects for key variables.
 
 ``` r
 # plotting average marginal effect
-vax_plots <- c("W1_Income_2019","age_sc","ethno","distrust_science",
+vax_plots <- c("W1_Income_2019","age_sc","distrust_science",
                "threat","W1_Conspiracy_Total","conspiracy1_sc",
                "conspiracy2_sc","conspiracy3_sc","RWA","SDO")
+names(vax_plots) <- c("Income","Age","Distrust scientists",
+                      "COVID-19 anxiety","Conspiracy ideation",
+                      "Wuhan lab belief", "Meat market belief",
+                      "5G belief", "RWA", "SDO")
+vax_plots <- vax_plots[sort(names(vax_plots))]
+vax_plots_df <- tibble(
+  term = vax_plots,
+  name = names(vax_plots)
+)
 
-margin_vax %>% 
+rbind(
+  margin_no %>% as_tibble() %>% mutate(level = "No"),
+  margin_maybe %>% as_tibble() %>% mutate(level = "Maybe")
+) %>% 
   rename(term = factor) %>% 
-  filter(term %in% vax_plots) %>%
+  right_join(vax_plots_df, by = "term") %>% 
   mutate(
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    name = fct_rev(fct_drop(fct_relevel(name, names(vax_plots)))),
     group_facet = ifelse(term %in% dispositions, 
-                         "Dispositions",
+                         "Disposition",
                          ifelse(term %in% conspiracy2, "Conspiracy",
-                                       "Controls")),
-    term = fct_recode(term,
-                      "Age" = "age_sc",
-                      "Income" = "W1_Income_2019",
-                      "COVID-19 anxiety" = "threat",
-                      "Distrust scientists" = "distrust_science",
-                      "Ethnocentrism" = "ethno",
-                      "RWA" = "RWA",
-                      "SDO" = "SDO",
-                      "Conspiracy ideation" = "W1_Conspiracy_Total",
-                      "Meat market belief" = "conspiracy2_sc",
-                      "Wuhan lab belief" = "conspiracy1_sc",
-                      "5G belief" = "conspiracy3_sc")
-  ) %>% 
-  ggplot(aes(y = term, 
+                                       "Controls"))) %>% 
+  ggplot(aes(y = name, 
            x = AME, xmin = lower,
-           xmax = upper)) + 
+           xmax = upper, colour = level)) + 
   geom_vline(xintercept = 0, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
-    aes(y = term, xmin = lower,
-        xmax = upper),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
-    colour = get_colors("CUD Bright",num.colors = 1)) +
+    aes(y = name, xmin = lower,
+        xmax = upper, colour = level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
   geom_point(
-    aes(y = term, 
-        x = AME),
+    aes(y = name, 
+        x = AME, colour = level, shape = level),
     position = ggstance::position_dodgev(height = 0.62),
-    colour = get_colors("CUD Bright",num.colors = 1),
-    fill = "white", size = 3, stroke = 1, shape = 21) +
-  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
   theme_nice() +
+  scale_shape_manual(values = c(21,22)) +
   drop_y_gridlines() +
   facet_wrap(~group_facet, ncol = 1, scales = "free_y",
              strip.position = "left") +
@@ -2318,14 +2316,15 @@ margin_vax %>%
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
+        legend.position = "top",
         plot.caption = element_text(hjust = 0)) +
   labs(
     x = "Average marginal effect: Vaccine reluctance",
-    caption = "Note: Binomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
   )
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
 
 ``` r
 tidies <- tidy(vax_full)
@@ -2335,62 +2334,62 @@ tidies %>%
   mutate(
     odds_ratio = exp(estimate),
     or_lower = exp(estimate - qnorm(0.975) * std.error),
-    or_upper = exp(estimate + qnorm(0.975) * std.error)
+    or_upper = exp(estimate + qnorm(0.975) * std.error),
+    y.level = fct_recode(as.factor(y.level),
+                         "No" = "2",
+                         "Maybe" = "3")
   ) %>% 
-  filter(term %in% vax_plots) %>%
+  rename(Level = y.level) %>% 
+  right_join(vax_plots_df, by = "term") %>% 
+  filter(term != "distrust_science") %>% 
   mutate(
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    name = fct_rev(fct_drop(fct_relevel(name, names(vax_plots)))),
     group_facet = ifelse(term %in% dispositions, 
-                         "Dispositions",
+                         "Disposition",
                          ifelse(term %in% conspiracy2, "Conspiracy",
-                                       "Controls")),
-    term = fct_recode(term,
-                      "Age" = "age_sc",
-                      "Income" = "W1_Income_2019",
-                      "COVID-19 anxiety" = "threat",
-                      "Distrust scientists" = "distrust_science",
-                      "Ethnocentrism" = "ethno",
-                      "RWA" = "RWA",
-                      "SDO" = "SDO",
-                      "Conspiracy ideation" = "W1_Conspiracy_Total",
-                      "Meat market belief" = "conspiracy2_sc",
-                      "Wuhan lab belief" = "conspiracy1_sc",
-                      "5G belief" = "conspiracy3_sc")
-  ) %>% 
-  ggplot(aes(y = term, 
+                                       "Controls"))) %>% 
+  ggplot(aes(y = name, 
            x = odds_ratio, xmin = or_lower,
-           xmax = or_upper)) + 
+           xmax = or_upper)) +
   geom_vline(xintercept = 1, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
-    aes(y = term, xmin = or_lower,
+    aes(y = name, xmin = or_lower,
         xmax = or_upper),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
-    colour = get_colors("CUD Bright",num.colors = 1)) +
+    colour = get_colors("CUD Bright"), 
+    size = 0.8) +
   geom_point(
-    aes(y = term, 
+    aes(y = name, 
         x = odds_ratio),
-    position = ggstance::position_dodgev(height = 0.62),
-    colour = get_colors("CUD Bright",num.colors = 1),
-    fill = "white", size = 3, stroke = 1, shape = 21) +
-  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+    fill = "white", size = 3, stroke = 1, shape = 21,
+    colour = get_colors("CUD Bright")) +
   theme_nice() +
   drop_y_gridlines() +
-  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
-             strip.position = "left") +
+  facet_grid(group_facet ~ Level, 
+             #ncol = 2, 
+             scales = "free",
+             switch = "y"
+             ) +
   theme(axis.title.y = element_blank(),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 10,
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
-        plot.caption = element_text(hjust = 0)) +
+        plot.caption = element_text(hjust = 0),
+        panel.spacing = unit(0,"cm")) +
   labs(
-    x = "Odds ratios: Vaccine reluctance",
-    caption = "Note: Binomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1."
+    x = "Odds ratios: Vaccine acceptance",
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1.\nDistrust of scientists not displayed to make x-axis scale readable, but has the following odds ratios: 13.2('No'), 2.6('Maybe')."
   )
 ```
 
-![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+    ## Warning: Problem with `mutate()` input `name`.
+    ## i Unknown levels in `f`: Distrust scientists
+    ## i Input `name` is `fct_rev(fct_drop(fct_relevel(name, names(vax_plots))))`.
+
+    ## Warning: Unknown levels in `f`: Distrust scientists
+
+![](covid_conspiracies_markdown3_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
 
 ## Table summarising variables
 
@@ -2437,56 +2436,76 @@ cor_df <- cor_df %>% dplyr::select(one_of(sort(names(fuller_list))))
 
 ``` r
 # function to get lower triangle in correlation matrix
-get_lower_tri <- function(df){
-  cormat <- cor(df)
-  cormat[upper.tri(cormat)]<- NA
-  return(cormat)
-}
-
-lower_tri <- get_lower_tri(cor_df)
+cor_mat <- corr.test(
+  cor_df,
+  adjust = "bonferroni"
+)
 ```
 
 ``` r
 # table for correlation matrix
 pacman::p_load(stargazer)
 
-lower_tri <- lower_tri %>% as_tibble() %>% 
-  mutate(` ` = names(cor_df)) %>% 
-  dplyr::select(` `, everything())
-
-kable(lower_tri,
-      caption = "Correlation Matrix")
+kable(cor_mat$r)
 ```
 
 |                              |          5G |         Age | Conspiracy ideation | COVID-19 anxiety | Distrust scientists |   Education | Ethnocentrism | Family and friends |      Gender |      Income | Left-right scale | Meat market | News: elite | News: mid-level | News: tabloid |         RWA |         SDO | Social distancing motivation | Social media | Uncertainty intolerance | Vaccination attitudes | Wuhan laboratory |
 | :--------------------------- | ----------: | ----------: | ------------------: | ---------------: | ------------------: | ----------: | ------------: | -----------------: | ----------: | ----------: | ---------------: | ----------: | ----------: | --------------: | ------------: | ----------: | ----------: | ---------------------------: | -----------: | ----------------------: | --------------------: | ---------------: |
-| 5G                           |   1.0000000 |          NA |                  NA |               NA |                  NA |          NA |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Age                          | \-0.1968411 |   1.0000000 |                  NA |               NA |                  NA |          NA |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Conspiracy ideation          |   0.1303185 | \-0.0484166 |           1.0000000 |               NA |                  NA |          NA |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| COVID-19 anxiety             |   0.0390187 |   0.0556909 |           0.0871699 |        1.0000000 |                  NA |          NA |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Distrust scientists          |   0.2993469 | \-0.0757459 |           0.1710566 |      \-0.0424669 |           1.0000000 |          NA |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Education                    | \-0.0744352 | \-0.1655707 |         \-0.0865678 |      \-0.0112353 |         \-0.0940102 |   1.0000000 |            NA |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Ethnocentrism                |   0.1019370 |   0.1343591 |           0.0163442 |        0.0570581 |         \-0.0325778 | \-0.1508601 |     1.0000000 |                 NA |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Family and friends           |   0.1853119 | \-0.1909207 |           0.0660756 |        0.1725282 |         \-0.0041932 |   0.0102841 |     0.0708626 |          1.0000000 |          NA |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Gender                       |   0.0151136 | \-0.1457747 |           0.0701525 |        0.0476996 |           0.0262593 | \-0.0129786 |   \-0.0515851 |          0.0723318 |   1.0000000 |          NA |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Income                       | \-0.1120980 |   0.0075214 |         \-0.0911093 |      \-0.0210025 |         \-0.0848267 |   0.2327198 |   \-0.0182942 |        \-0.0302430 | \-0.0871241 |   1.0000000 |               NA |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Left-right scale             |   0.0971868 |   0.1338143 |         \-0.0233279 |      \-0.0101604 |           0.0588338 | \-0.1027946 |     0.3784391 |        \-0.0035331 | \-0.0639928 |   0.1126077 |        1.0000000 |          NA |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| Meat market                  |   0.3299842 | \-0.0554126 |           0.2340217 |        0.1356206 |           0.2220164 | \-0.1834670 |     0.2083188 |          0.1909797 |   0.0617540 | \-0.1306903 |        0.1634907 |   1.0000000 |          NA |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| News: elite                  | \-0.0310280 | \-0.0480979 |         \-0.0680059 |        0.0481917 |         \-0.0864244 |   0.2576219 |   \-0.1238120 |          0.0740565 | \-0.0587591 |   0.1434613 |      \-0.1095518 | \-0.1116579 |   1.0000000 |              NA |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| News: mid-level              |   0.0984832 |   0.0478379 |           0.0346567 |        0.0629015 |           0.0885137 | \-0.0978202 |     0.1989451 |          0.1155816 |   0.0177856 |   0.0045211 |        0.2395652 |   0.2502842 | \-0.0424565 |       1.0000000 |            NA |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| News: tabloid                |   0.2088942 | \-0.1203675 |           0.0598785 |        0.0640629 |           0.0857823 | \-0.1236667 |     0.0894869 |          0.1015062 | \-0.0576030 | \-0.1110322 |        0.0227170 |   0.1763378 | \-0.0153704 |       0.1212012 |     1.0000000 |          NA |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| RWA                          |   0.0402643 |   0.1482799 |           0.0989850 |        0.0842022 |           0.0673202 | \-0.2067672 |     0.3220561 |          0.0018120 |   0.0913433 | \-0.0408217 |        0.3774242 |   0.2402447 | \-0.2320842 |       0.2118870 |     0.0507231 |   1.0000000 |          NA |                           NA |           NA |                      NA |                    NA |               NA |
-| SDO                          |   0.2330242 | \-0.0403077 |         \-0.0599814 |      \-0.0889019 |           0.1762634 | \-0.0724244 |     0.2919805 |        \-0.0529470 | \-0.1015043 |   0.0533128 |        0.4436087 |   0.2050590 | \-0.1508152 |       0.1472083 |     0.0199403 |   0.3580471 |   1.0000000 |                           NA |           NA |                      NA |                    NA |               NA |
-| Social distancing motivation | \-0.2915813 |   0.2587121 |           0.0141793 |        0.1170175 |         \-0.3066986 |   0.0015106 |     0.0500811 |          0.0441123 |   0.0905687 |   0.0711845 |      \-0.0145833 | \-0.0908347 |   0.0521132 |       0.0012076 |   \-0.0888182 |   0.0750816 | \-0.2510765 |                    1.0000000 |           NA |                      NA |                    NA |               NA |
-| Social media                 |   0.2398268 | \-0.3936570 |           0.1029357 |        0.1055366 |           0.0407408 |   0.0507616 |     0.0055942 |          0.3875101 |   0.0856987 | \-0.0620442 |      \-0.0228397 |   0.1695001 |   0.0402119 |       0.0448742 |     0.1353432 | \-0.0225222 |   0.0262917 |                  \-0.1108653 |    1.0000000 |                      NA |                    NA |               NA |
-| Uncertainty intolerance      |   0.1340517 | \-0.2640647 |           0.1557813 |        0.2404121 |           0.0340551 |   0.0361928 |     0.0415397 |          0.1588673 |   0.0846793 | \-0.1146742 |      \-0.0131687 |   0.1006033 |   0.0095418 |       0.0461810 |     0.0852039 |   0.0294074 |   0.0270955 |                  \-0.0314238 |    0.2592348 |               1.0000000 |                    NA |               NA |
-| Vaccination attitudes        |   0.0959488 | \-0.1674974 |           0.0909080 |      \-0.1384933 |           0.1644502 | \-0.0066770 |   \-0.0735038 |          0.0147415 |   0.0894715 | \-0.1345180 |      \-0.0540847 |   0.0727313 | \-0.0683376 |       0.0087821 |     0.0098751 |   0.0227439 |   0.0488148 |                  \-0.1237813 |    0.0861778 |               0.0583917 |             1.0000000 |               NA |
-| Wuhan laboratory             | \-0.0411027 |   0.0694473 |         \-0.0126038 |        0.1327156 |         \-0.1260939 | \-0.0335189 |     0.1435770 |          0.0064934 | \-0.0235138 |   0.0782161 |        0.0726111 | \-0.0966866 |   0.0351403 |       0.0381964 |     0.0051788 |   0.0240614 |   0.0057042 |                    0.1674625 |  \-0.0243246 |               0.0879339 |           \-0.1168862 |                1 |
-
-Correlation Matrix
+| 5G                           |   1.0000000 | \-0.1968411 |           0.1303185 |        0.0390187 |           0.2993469 | \-0.0744352 |     0.1019370 |          0.1853119 |   0.0151136 | \-0.1120980 |        0.0971868 |   0.3299842 | \-0.0310280 |       0.0984832 |     0.2088942 |   0.0402643 |   0.2330242 |                  \-0.2915813 |    0.2398268 |               0.1340517 |             0.0959488 |      \-0.0411027 |
+| Age                          | \-0.1968411 |   1.0000000 |         \-0.0484166 |        0.0556909 |         \-0.0757459 | \-0.1655707 |     0.1343591 |        \-0.1909207 | \-0.1457747 |   0.0075214 |        0.1338143 | \-0.0554126 | \-0.0480979 |       0.0478379 |   \-0.1203675 |   0.1482799 | \-0.0403077 |                    0.2587121 |  \-0.3936570 |             \-0.2640647 |           \-0.1674974 |        0.0694473 |
+| Conspiracy ideation          |   0.1303185 | \-0.0484166 |           1.0000000 |        0.0871699 |           0.1710566 | \-0.0865678 |     0.0163442 |          0.0660756 |   0.0701525 | \-0.0911093 |      \-0.0233279 |   0.2340217 | \-0.0680059 |       0.0346567 |     0.0598785 |   0.0989850 | \-0.0599814 |                    0.0141793 |    0.1029357 |               0.1557813 |             0.0909080 |      \-0.0126038 |
+| COVID-19 anxiety             |   0.0390187 |   0.0556909 |           0.0871699 |        1.0000000 |         \-0.0424669 | \-0.0112353 |     0.0570581 |          0.1725282 |   0.0476996 | \-0.0210025 |      \-0.0101604 |   0.1356206 |   0.0481917 |       0.0629015 |     0.0640629 |   0.0842022 | \-0.0889019 |                    0.1170175 |    0.1055366 |               0.2404121 |           \-0.1384933 |        0.1327156 |
+| Distrust scientists          |   0.2993469 | \-0.0757459 |           0.1710566 |      \-0.0424669 |           1.0000000 | \-0.0940102 |   \-0.0325778 |        \-0.0041932 |   0.0262593 | \-0.0848267 |        0.0588338 |   0.2220164 | \-0.0864244 |       0.0885137 |     0.0857823 |   0.0673202 |   0.1762634 |                  \-0.3066986 |    0.0407408 |               0.0340551 |             0.1644502 |      \-0.1260939 |
+| Education                    | \-0.0744352 | \-0.1655707 |         \-0.0865678 |      \-0.0112353 |         \-0.0940102 |   1.0000000 |   \-0.1508601 |          0.0102841 | \-0.0129786 |   0.2327198 |      \-0.1027946 | \-0.1834670 |   0.2576219 |     \-0.0978202 |   \-0.1236667 | \-0.2067672 | \-0.0724244 |                    0.0015106 |    0.0507616 |               0.0361928 |           \-0.0066770 |      \-0.0335189 |
+| Ethnocentrism                |   0.1019370 |   0.1343591 |           0.0163442 |        0.0570581 |         \-0.0325778 | \-0.1508601 |     1.0000000 |          0.0708626 | \-0.0515851 | \-0.0182942 |        0.3784391 |   0.2083188 | \-0.1238120 |       0.1989451 |     0.0894869 |   0.3220561 |   0.2919805 |                    0.0500811 |    0.0055942 |               0.0415397 |           \-0.0735038 |        0.1435770 |
+| Family and friends           |   0.1853119 | \-0.1909207 |           0.0660756 |        0.1725282 |         \-0.0041932 |   0.0102841 |     0.0708626 |          1.0000000 |   0.0723318 | \-0.0302430 |      \-0.0035331 |   0.1909797 |   0.0740565 |       0.1155816 |     0.1015062 |   0.0018120 | \-0.0529470 |                    0.0441123 |    0.3875101 |               0.1588673 |             0.0147415 |        0.0064934 |
+| Gender                       |   0.0151136 | \-0.1457747 |           0.0701525 |        0.0476996 |           0.0262593 | \-0.0129786 |   \-0.0515851 |          0.0723318 |   1.0000000 | \-0.0871241 |      \-0.0639928 |   0.0617540 | \-0.0587591 |       0.0177856 |   \-0.0576030 |   0.0913433 | \-0.1015043 |                    0.0905687 |    0.0856987 |               0.0846793 |             0.0894715 |      \-0.0235138 |
+| Income                       | \-0.1120980 |   0.0075214 |         \-0.0911093 |      \-0.0210025 |         \-0.0848267 |   0.2327198 |   \-0.0182942 |        \-0.0302430 | \-0.0871241 |   1.0000000 |        0.1126077 | \-0.1306903 |   0.1434613 |       0.0045211 |   \-0.1110322 | \-0.0408217 |   0.0533128 |                    0.0711845 |  \-0.0620442 |             \-0.1146742 |           \-0.1345180 |        0.0782161 |
+| Left-right scale             |   0.0971868 |   0.1338143 |         \-0.0233279 |      \-0.0101604 |           0.0588338 | \-0.1027946 |     0.3784391 |        \-0.0035331 | \-0.0639928 |   0.1126077 |        1.0000000 |   0.1634907 | \-0.1095518 |       0.2395652 |     0.0227170 |   0.3774242 |   0.4436087 |                  \-0.0145833 |  \-0.0228397 |             \-0.0131687 |           \-0.0540847 |        0.0726111 |
+| Meat market                  |   0.3299842 | \-0.0554126 |           0.2340217 |        0.1356206 |           0.2220164 | \-0.1834670 |     0.2083188 |          0.1909797 |   0.0617540 | \-0.1306903 |        0.1634907 |   1.0000000 | \-0.1116579 |       0.2502842 |     0.1763378 |   0.2402447 |   0.2050590 |                  \-0.0908347 |    0.1695001 |               0.1006033 |             0.0727313 |      \-0.0966866 |
+| News: elite                  | \-0.0310280 | \-0.0480979 |         \-0.0680059 |        0.0481917 |         \-0.0864244 |   0.2576219 |   \-0.1238120 |          0.0740565 | \-0.0587591 |   0.1434613 |      \-0.1095518 | \-0.1116579 |   1.0000000 |     \-0.0424565 |   \-0.0153704 | \-0.2320842 | \-0.1508152 |                    0.0521132 |    0.0402119 |               0.0095418 |           \-0.0683376 |        0.0351403 |
+| News: mid-level              |   0.0984832 |   0.0478379 |           0.0346567 |        0.0629015 |           0.0885137 | \-0.0978202 |     0.1989451 |          0.1155816 |   0.0177856 |   0.0045211 |        0.2395652 |   0.2502842 | \-0.0424565 |       1.0000000 |     0.1212012 |   0.2118870 |   0.1472083 |                    0.0012076 |    0.0448742 |               0.0461810 |             0.0087821 |        0.0381964 |
+| News: tabloid                |   0.2088942 | \-0.1203675 |           0.0598785 |        0.0640629 |           0.0857823 | \-0.1236667 |     0.0894869 |          0.1015062 | \-0.0576030 | \-0.1110322 |        0.0227170 |   0.1763378 | \-0.0153704 |       0.1212012 |     1.0000000 |   0.0507231 |   0.0199403 |                  \-0.0888182 |    0.1353432 |               0.0852039 |             0.0098751 |        0.0051788 |
+| RWA                          |   0.0402643 |   0.1482799 |           0.0989850 |        0.0842022 |           0.0673202 | \-0.2067672 |     0.3220561 |          0.0018120 |   0.0913433 | \-0.0408217 |        0.3774242 |   0.2402447 | \-0.2320842 |       0.2118870 |     0.0507231 |   1.0000000 |   0.3580471 |                    0.0750816 |  \-0.0225222 |               0.0294074 |             0.0227439 |        0.0240614 |
+| SDO                          |   0.2330242 | \-0.0403077 |         \-0.0599814 |      \-0.0889019 |           0.1762634 | \-0.0724244 |     0.2919805 |        \-0.0529470 | \-0.1015043 |   0.0533128 |        0.4436087 |   0.2050590 | \-0.1508152 |       0.1472083 |     0.0199403 |   0.3580471 |   1.0000000 |                  \-0.2510765 |    0.0262917 |               0.0270955 |             0.0488148 |        0.0057042 |
+| Social distancing motivation | \-0.2915813 |   0.2587121 |           0.0141793 |        0.1170175 |         \-0.3066986 |   0.0015106 |     0.0500811 |          0.0441123 |   0.0905687 |   0.0711845 |      \-0.0145833 | \-0.0908347 |   0.0521132 |       0.0012076 |   \-0.0888182 |   0.0750816 | \-0.2510765 |                    1.0000000 |  \-0.1108653 |             \-0.0314238 |           \-0.1237813 |        0.1674625 |
+| Social media                 |   0.2398268 | \-0.3936570 |           0.1029357 |        0.1055366 |           0.0407408 |   0.0507616 |     0.0055942 |          0.3875101 |   0.0856987 | \-0.0620442 |      \-0.0228397 |   0.1695001 |   0.0402119 |       0.0448742 |     0.1353432 | \-0.0225222 |   0.0262917 |                  \-0.1108653 |    1.0000000 |               0.2592348 |             0.0861778 |      \-0.0243246 |
+| Uncertainty intolerance      |   0.1340517 | \-0.2640647 |           0.1557813 |        0.2404121 |           0.0340551 |   0.0361928 |     0.0415397 |          0.1588673 |   0.0846793 | \-0.1146742 |      \-0.0131687 |   0.1006033 |   0.0095418 |       0.0461810 |     0.0852039 |   0.0294074 |   0.0270955 |                  \-0.0314238 |    0.2592348 |               1.0000000 |             0.0583917 |        0.0879339 |
+| Vaccination attitudes        |   0.0959488 | \-0.1674974 |           0.0909080 |      \-0.1384933 |           0.1644502 | \-0.0066770 |   \-0.0735038 |          0.0147415 |   0.0894715 | \-0.1345180 |      \-0.0540847 |   0.0727313 | \-0.0683376 |       0.0087821 |     0.0098751 |   0.0227439 |   0.0488148 |                  \-0.1237813 |    0.0861778 |               0.0583917 |             1.0000000 |      \-0.1168862 |
+| Wuhan laboratory             | \-0.0411027 |   0.0694473 |         \-0.0126038 |        0.1327156 |         \-0.1260939 | \-0.0335189 |     0.1435770 |          0.0064934 | \-0.0235138 |   0.0782161 |        0.0726111 | \-0.0966866 |   0.0351403 |       0.0381964 |     0.0051788 |   0.0240614 |   0.0057042 |                    0.1674625 |  \-0.0243246 |               0.0879339 |           \-0.1168862 |        1.0000000 |
 
 ``` r
-#write.csv(lower_tri,"correlation_matrix_randr.csv")
+kable(cor_mat$p)
+```
+
+|                              |        5G |       Age | Conspiracy ideation | COVID-19 anxiety | Distrust scientists | Education | Ethnocentrism | Family and friends |    Gender |    Income | Left-right scale | Meat market | News: elite | News: mid-level | News: tabloid |       RWA |       SDO | Social distancing motivation | Social media | Uncertainty intolerance | Vaccination attitudes | Wuhan laboratory |
+| :--------------------------- | --------: | --------: | ------------------: | ---------------: | ------------------: | --------: | ------------: | -----------------: | --------: | --------: | ---------------: | ----------: | ----------: | --------------: | ------------: | --------: | --------: | ---------------------------: | -----------: | ----------------------: | --------------------: | ---------------: |
+| 5G                           | 0.0000000 | 0.0000000 |           0.0002513 |        1.0000000 |           0.0000000 | 1.0000000 |     0.0324946 |          0.0000000 | 1.0000000 | 0.0064790 |        0.0657956 |   0.0000000 |   1.0000000 |       0.0544377 |     0.0000000 | 1.0000000 | 0.0000000 |                    0.0000000 |    0.0000000 |               0.0001219 |             0.0786804 |        1.0000000 |
+| Age                          | 0.0000000 | 0.0000000 |           1.0000000 |        1.0000000 |           1.0000000 | 0.0000001 |     0.0001147 |          0.0000000 | 0.0000111 | 1.0000000 |        0.0001277 |   1.0000000 |   1.0000000 |       1.0000000 |     0.0015700 | 0.0000064 | 1.0000000 |                    0.0000000 |    0.0000000 |               0.0000000 |             0.0000001 |        1.0000000 |
+| Conspiracy ideation          | 0.0000011 | 0.0711476 |           0.0000000 |        0.2636029 |           0.0000000 | 0.2853110 |     1.0000000 |          1.0000000 | 1.0000000 | 0.1551960 |        1.0000000 |   0.0000000 |   1.0000000 |       1.0000000 |     1.0000000 | 0.0505569 | 1.0000000 |                    1.0000000 |    0.0279060 |               0.0000012 |             0.1595340 |        1.0000000 |
+| COVID-19 anxiety             | 0.1459555 | 0.0378894 |           0.0011411 |        0.0000000 |           1.0000000 | 1.0000000 |     1.0000000 |          0.0000000 | 1.0000000 | 1.0000000 |        1.0000000 |   0.0000894 |   1.0000000 |       1.0000000 |     1.0000000 | 0.3875585 | 0.2093641 |                    0.0028201 |    0.0186533 |               0.0000000 |             0.0000502 |        0.0001583 |
+| Distrust scientists          | 0.0000000 | 0.0047202 |           0.0000000 |        0.1135198 |           0.0000000 | 0.1036783 |     1.0000000 |          1.0000000 | 1.0000000 | 0.3577130 |        1.0000000 |   0.0000000 |   0.2907200 |       0.2205342 |     0.3161172 | 1.0000000 | 0.0000000 |                    0.0000000 |    1.0000000 |               1.0000000 |             0.0000002 |        0.0005564 |
+| Education                    | 0.0054947 | 0.0000000 |           0.0012351 |        0.6755691 |           0.0004488 | 0.0000000 |     0.0000037 |          1.0000000 | 1.0000000 | 0.0000000 |        0.0285150 |   0.0000000 |   0.0000000 |       0.0599948 |     0.0008685 | 0.0000000 | 1.0000000 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| Ethnocentrism                | 0.0001407 | 0.0000005 |           0.5426256 |        0.0334120 |           0.2248170 | 0.0000000 |     0.0000000 |          1.0000000 | 1.0000000 | 1.0000000 |        0.0000000 |   0.0000000 |   0.0008458 |       0.0000000 |     0.1935180 | 0.0000000 | 0.0000000 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        0.0000176 |
+| Family and friends           | 0.0000000 | 0.0000000 |           0.0137414 |        0.0000000 |           0.8758803 | 0.7016562 |     0.0082200 |          0.0000000 | 1.0000000 | 1.0000000 |        1.0000000 |   0.0000000 |   1.0000000 |       0.0036075 |     0.0346856 | 1.0000000 | 1.0000000 |                    1.0000000 |    0.0000000 |               0.0000006 |             1.0000000 |        1.0000000 |
+| Gender                       | 0.5734331 | 0.0000000 |           0.0088876 |        0.0754395 |           0.3279232 | 0.6287673 |     0.0545075 |          0.0069793 | 0.0000000 | 0.2651961 |        1.0000000 |   1.0000000 |   1.0000000 |       1.0000000 |     1.0000000 | 0.1502897 | 0.0346956 |                    0.1671038 |    0.3195672 |               0.3645597 |             0.1939215 |        1.0000000 |
+| Income                       | 0.0000280 | 0.7793486 |           0.0006718 |        0.4339717 |           0.0015485 | 0.0000000 |     0.4955542 |          0.2598336 | 0.0011480 | 0.0000000 |        0.0059533 |   0.0002340 |   0.0000180 |       1.0000000 |     0.0077243 | 1.0000000 | 1.0000000 |                    1.0000000 |    1.0000000 |               0.0042087 |             0.0001112 |        0.8138888 |
+| Left-right scale             | 0.0002848 | 0.0000006 |           0.3848122 |        0.7050780 |           0.0282779 | 0.0001234 |     0.0000000 |          0.8952959 | 0.0170270 | 0.0000258 |        0.0000000 |   0.0000002 |   0.0098350 |       0.0000000 |     1.0000000 | 0.0000000 | 0.0000000 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| Meat market                  | 0.0000000 | 0.0388606 |           0.0000000 |        0.0000004 |           0.0000000 | 0.0000000 |     0.0000000 |          0.0000000 | 0.0213079 | 0.0000010 |        0.0000000 |   0.0000000 |   0.0069681 |       0.0000000 |     0.0000000 | 0.0000000 | 0.0000000 |                    0.1611419 |    0.0000000 |               0.0397354 |             1.0000000 |        0.0707441 |
+| News: elite                  | 0.2476627 | 0.0730297 |           0.0112095 |        0.0724718 |           0.0012585 | 0.0000000 |     0.0000037 |          0.0057389 | 0.0284792 | 0.0000001 |        0.0000426 |   0.0000302 |   0.0000000 |       1.0000000 |     1.0000000 | 0.0000000 | 0.0000037 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| News: mid-level              | 0.0002357 | 0.0745959 |           0.1965924 |        0.0190093 |           0.0009547 | 0.0002597 |     0.0000000 |          0.0000156 | 0.5076186 | 0.8662612 |        0.0000000 |   0.0000000 |   0.1136078 |       0.0000000 |     0.0013538 | 0.0000000 | 0.0000081 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| News: tabloid                | 0.0000000 | 0.0000068 |           0.0255869 |        0.0169062 |           0.0013685 | 0.0000038 |     0.0008377 |          0.0001502 | 0.0317578 | 0.0000334 |        0.3973858 |   0.0000000 |   0.5669379 |       0.0000059 |     0.0000000 | 1.0000000 | 1.0000000 |                    0.2117274 |    0.0000945 |               0.3407260 |             1.0000000 |        1.0000000 |
+| RWA                          | 0.1335056 | 0.0000000 |           0.0002189 |        0.0016777 |           0.0120570 | 0.0000000 |     0.0000000 |          0.9461879 | 0.0006506 | 0.1282077 |        0.0000000 |   0.0000000 |   0.0000000 |       0.0000000 |     0.0586762 | 0.0000000 | 0.0000000 |                    1.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| SDO                          | 0.0000000 | 0.1330876 |           0.0253340 |        0.0009063 |           0.0000000 | 0.0069070 |     0.0000000 |          0.0484253 | 0.0001502 | 0.0468926 |        0.0000000 |   0.0000000 |   0.0000000 |       0.0000000 |     0.4575827 | 0.0000000 | 0.0000000 |                    0.0000000 |    1.0000000 |               1.0000000 |             1.0000000 |        1.0000000 |
+| Social distancing motivation | 0.0000000 | 0.0000000 |           0.5973653 |        0.0000122 |           0.0000000 | 0.9551276 |     0.0619506 |          0.1001874 | 0.0007234 | 0.0079325 |        0.5869608 |   0.0006976 |   0.0520776 |       0.9641223 |     0.0009166 | 0.0050995 | 0.0000000 |                    0.0000000 |    0.0079387 |               1.0000000 |             0.0008506 |        0.0000001 |
+| Social media                 | 0.0000000 | 0.0000000 |           0.0001208 |        0.0000808 |           0.1289662 | 0.0584848 |     0.8349319 |          0.0000000 | 0.0013834 | 0.0207049 |        0.3948406 |   0.0000000 |   0.1340127 |       0.0944515 |     0.0000004 | 0.4014479 | 0.3273257 |                    0.0000344 |    0.0000000 |               0.0000000 |             0.3002425 |        1.0000000 |
+| Uncertainty intolerance      | 0.0000005 | 0.0000000 |           0.0000000 |        0.0000000 |           0.2044793 | 0.1774674 |     0.1216254 |          0.0000000 | 0.0015782 | 0.0000182 |        0.6237476 |   0.0001720 |   0.7222654 |       0.0852286 |     0.0014750 | 0.2732372 | 0.3127497 |                    0.2416793 |    0.0000000 |               0.0000000 |             1.0000000 |        0.2382502 |
+| Vaccination attitudes        | 0.0003406 | 0.0000000 |           0.0006906 |        0.0000002 |           0.0000000 | 0.8035798 |     0.0061129 |          0.5829106 | 0.0008395 | 0.0000005 |        0.0437909 |   0.0066723 |   0.0108188 |       0.7435670 |     0.7129857 | 0.3968268 | 0.0688512 |                    0.0000037 |    0.0012998 |               0.0294880 |             0.0000000 |        0.0028846 |
+| Wuhan laboratory             | 0.1255992 | 0.0095981 |           0.6387115 |        0.0000007 |           0.0000024 | 0.2117006 |     0.0000001 |          0.8088762 | 0.3810346 | 0.0035233 |        0.0067634 |   0.0003063 |   0.1904148 |       0.1546479 |     0.8470327 | 0.3700407 | 0.8317342 |                    0.0000000 |    0.3648279 |               0.0010314 |             0.0000125 |        0.0000000 |
+
+``` r
+#write.csv(cor_mat$r,"correlation_matrix_randr.csv")
+#write.csv(cor_mat$p,"correlation_matrix_randr_pvalues.csv")
 ```
 
 ## Comparison against British Election Survey (BES) benchmarks
@@ -3835,7 +3854,7 @@ stargazer(dist_full, vax_full,
 
 <tr>
 
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 
 </td>
 
@@ -3847,7 +3866,7 @@ stargazer(dist_full, vax_full,
 
 </td>
 
-<td colspan="2">
+<td colspan="3">
 
 <em>Dependent variable:</em>
 
@@ -3861,7 +3880,7 @@ stargazer(dist_full, vax_full,
 
 </td>
 
-<td colspan="2" style="border-bottom: 1px solid black">
+<td colspan="3" style="border-bottom: 1px solid black">
 
 </td>
 
@@ -3876,6 +3895,12 @@ stargazer(dist_full, vax_full,
 <td>
 
 Social distancing (OLS)
+
+</td>
+
+<td>
+
+Vaccine (multi logit)
 
 </td>
 
@@ -3903,11 +3928,17 @@ No
 
 </td>
 
+<td>
+
+Maybe
+
+</td>
+
 </tr>
 
 <tr>
 
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 
 </td>
 
@@ -3929,7 +3960,13 @@ No
 
 <td>
 
-0.787 (0.313)<sup>\*</sup>
+2.147 (0.435)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+\-0.013 (0.375)
 
 </td>
 
@@ -3951,7 +3988,13 @@ Age
 
 <td>
 
-\-1.567 (0.345)<sup>\*\*\*</sup>
+\-2.867 (0.617)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+\-1.166 (0.372)<sup>\*\*</sup>
 
 </td>
 
@@ -3973,7 +4016,13 @@ Conspiracy ideation
 
 <td>
 
-0.605 (0.342)
+0.173 (0.595)
+
+</td>
+
+<td>
+
+0.704 (0.370)
 
 </td>
 
@@ -3995,7 +4044,13 @@ COVID-19 anxiety
 
 <td>
 
-\-1.396 (0.258)<sup>\*\*\*</sup>
+\-1.816 (0.450)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+\-1.282 (0.276)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4017,7 +4072,13 @@ Distrust scientists
 
 <td>
 
-1.353 (0.268)<sup>\*\*\*</sup>
+2.581 (0.440)<sup>\*\*\*</sup>
+
+</td>
+
+<td>
+
+0.954 (0.295)<sup>\*\*</sup>
 
 </td>
 
@@ -4039,7 +4100,13 @@ Education
 
 <td>
 
-0.107 (0.138)
+0.149 (0.236)
+
+</td>
+
+<td>
+
+0.093 (0.150)
 
 </td>
 
@@ -4061,7 +4128,13 @@ Elite news
 
 <td>
 
-\-0.124 (0.139)
+0.066 (0.234)
+
+</td>
+
+<td>
+
+\-0.207 (0.152)
 
 </td>
 
@@ -4083,7 +4156,13 @@ Ethnocentrism
 
 <td>
 
-\-0.629 (0.287)<sup>\*</sup>
+\-0.801 (0.487)
+
+</td>
+
+<td>
+
+\-0.557 (0.310)
 
 </td>
 
@@ -4105,7 +4184,13 @@ Family and friends
 
 <td>
 
-\-0.082 (0.250)
+\-0.310 (0.443)
+
+</td>
+
+<td>
+
+\-0.039 (0.269)
 
 </td>
 
@@ -4127,7 +4212,13 @@ Gender
 
 <td>
 
-0.239 (0.130)
+0.214 (0.225)
+
+</td>
+
+<td>
+
+0.253 (0.141)
 
 </td>
 
@@ -4149,7 +4240,13 @@ Income
 
 <td>
 
-\-0.659 (0.186)<sup>\*\*\*</sup>
+\-0.397 (0.329)
+
+</td>
+
+<td>
+
+\-0.720 (0.200)<sup>\*\*\*</sup>
 
 </td>
 
@@ -4171,7 +4268,13 @@ Intolerance of uncertainty
 
 <td>
 
-0.209 (0.348)
+\-0.426 (0.594)
+
+</td>
+
+<td>
+
+0.401 (0.376)
 
 </td>
 
@@ -4193,7 +4296,13 @@ Left-right scale
 
 <td>
 
-\-0.493 (0.369)
+\-0.156 (0.603)
+
+</td>
+
+<td>
+
+\-0.640 (0.405)
 
 </td>
 
@@ -4215,7 +4324,13 @@ Meat market belief
 
 <td>
 
-\-0.575 (0.221)<sup>\*\*</sup>
+\-1.019 (0.391)<sup>\*\*</sup>
+
+</td>
+
+<td>
+
+\-0.468 (0.238)<sup>\*</sup>
 
 </td>
 
@@ -4237,7 +4352,13 @@ Mid-level news
 
 <td>
 
-0.119 (0.143)
+0.183 (0.238)
+
+</td>
+
+<td>
+
+0.090 (0.156)
 
 </td>
 
@@ -4259,7 +4380,13 @@ RWA
 
 <td>
 
-0.721 (0.446)
+1.012 (0.769)
+
+</td>
+
+<td>
+
+0.676 (0.479)
 
 </td>
 
@@ -4281,7 +4408,13 @@ SDO
 
 <td>
 
-0.463 (0.434)
+0.579 (0.774)
+
+</td>
+
+<td>
+
+0.463 (0.467)
 
 </td>
 
@@ -4303,7 +4436,13 @@ Social media
 
 <td>
 
-0.210 (0.230)
+0.379 (0.405)
+
+</td>
+
+<td>
+
+0.197 (0.247)
 
 </td>
 
@@ -4325,7 +4464,13 @@ Tabloid news
 
 <td>
 
-\-0.161 (0.149)
+\-0.229 (0.245)
+
+</td>
+
+<td>
+
+\-0.131 (0.162)
 
 </td>
 
@@ -4347,7 +4492,13 @@ Wuhan lab belief
 
 <td>
 
-0.269 (0.222)
+0.996 (0.400)<sup>\*</sup>
+
+</td>
+
+<td>
+
+0.096 (0.240)
 
 </td>
 
@@ -4369,7 +4520,13 @@ Constant
 
 <td>
 
-0.236 (0.429)
+\-1.210 (0.766)
+
+</td>
+
+<td>
+
+\-0.098 (0.463)
 
 </td>
 
@@ -4377,7 +4534,7 @@ Constant
 
 <tr>
 
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 
 </td>
 
@@ -4399,7 +4556,9 @@ Observations
 
 <td>
 
-1,390
+</td>
+
+<td>
 
 </td>
 
@@ -4416,6 +4575,10 @@ R<sup>2</sup>
 <td>
 
 0.266
+
+</td>
+
+<td>
 
 </td>
 
@@ -4443,6 +4606,10 @@ Adjusted R<sup>2</sup>
 
 </td>
 
+<td>
+
+</td>
+
 </tr>
 
 <tr>
@@ -4459,7 +4626,13 @@ Akaike Inf. Crit.
 
 <td>
 
-1,575.584
+2,054.657
+
+</td>
+
+<td>
+
+2,054.657
 
 </td>
 
@@ -4467,7 +4640,7 @@ Akaike Inf. Crit.
 
 <tr>
 
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 
 </td>
 
@@ -4481,7 +4654,7 @@ Akaike Inf. Crit.
 
 </td>
 
-<td colspan="2" style="text-align:right">
+<td colspan="3" style="text-align:right">
 
 <sup>*</sup>p\<0.05; <sup>**</sup>p\<0.01; <sup>***</sup>p\<0.001
 
@@ -4492,7 +4665,12 @@ Akaike Inf. Crit.
 </table>
 
 ``` r
-tab <- margin_vax %>% 
+tab <- full_join(
+  margin_no %>% dplyr::select(factor:SE,p),
+  margin_maybe %>% dplyr::select(factor:SE,p),
+  by = "factor",
+  suffix = c("_no","_maybe")
+) %>% 
   as_tibble()
 
 tab2 <- tibble(factor = to_plot2, variable = names(to_plot2))
@@ -4501,36 +4679,101 @@ ames <- left_join(
     tab,
     tab2,
     by = "factor"
-    ) %>%
-  dplyr::select(variable,everything())
+    ) %>% 
+  dplyr::select(variable,everything()) %>%
+  arrange(variable)
+
+ors <- tidies %>% 
+  rename(factor = term) %>% 
+  mutate(odds_ratios = exp(estimate),
+         y.level = fct_recode(
+           as.factor(y.level),
+           "No" = "2",
+           "Maybe" = "3"
+           )
+         )
 ```
 
 ``` r
 kable(ames)
 ```
 
-| variable                   | factor                |         AME |        SE |           z |         p |       lower |       upper |
-| :------------------------- | :-------------------- | ----------: | --------: | ----------: | --------: | ----------: | ----------: |
-| Age                        | age\_sc               | \-0.2907836 | 0.0594590 | \-4.8904881 | 0.0000010 | \-0.4073212 | \-0.1742461 |
-| Wuhan lab belief           | conspiracy1\_sc       |   0.0498416 | 0.0417081 |   1.1950093 | 0.2320834 | \-0.0319048 |   0.1315880 |
-| Meat market belief         | conspiracy2\_sc       | \-0.1067233 | 0.0373903 | \-2.8543012 | 0.0043132 | \-0.1800070 | \-0.0334396 |
-| 5G belief                  | conspiracy3\_sc       |   0.1460884 | 0.0546744 |   2.6719719 | 0.0075407 |   0.0389286 |   0.2532483 |
-| Distrust scientists        | distrust\_science     |   0.2512008 | 0.0488373 |   5.1436277 | 0.0000003 |   0.1554815 |   0.3469201 |
-| Elite news                 | elite\_news           | \-0.0230339 | 0.0208487 | \-1.1048142 | 0.2692401 | \-0.0638966 |   0.0178287 |
-| Ethnocentrism              | ethno                 | \-0.1167466 | 0.0550446 | \-2.1209458 | 0.0339264 | \-0.2246321 | \-0.0088612 |
-| Mid-level news             | mid\_level\_news      |   0.0221711 | 0.0262931 |   0.8432278 | 0.3991010 | \-0.0293625 |   0.0737047 |
-| Tabloid news               | red\_top\_tabloid     | \-0.0298840 | 0.0272256 | \-1.0976431 | 0.2723604 | \-0.0832452 |   0.0234772 |
-| Left-right scale           | right                 | \-0.0915025 | 0.0718118 | \-1.2741984 | 0.2025931 | \-0.2322511 |   0.0492461 |
-| RWA                        | RWA                   |   0.1337664 | 0.0747922 |   1.7885067 | 0.0736943 | \-0.0128237 |   0.2803565 |
-| SDO                        | SDO                   |   0.0859249 | 0.0801025 |   1.0726857 | 0.2834122 | \-0.0710733 |   0.2429230 |
-| COVID-19 anxiety           | threat                | \-0.2591414 | 0.0485674 | \-5.3357094 | 0.0000001 | \-0.3543317 | \-0.1639511 |
-| Conspiracy ideation        | W1\_Conspiracy\_Total |   0.1123754 | 0.0626658 |   1.7932508 | 0.0729328 | \-0.0104472 |   0.2351981 |
-| Education                  | W1\_Education\_binary |   0.0199485 | 0.0257786 |   0.7738394 | 0.4390258 | \-0.0305766 |   0.0704736 |
-| Income                     | W1\_Income\_2019      | \-0.1224070 | 0.0336256 | \-3.6402885 | 0.0002723 | \-0.1883120 | \-0.0565020 |
-| Gender                     | W2\_Gender\_binary2   |   0.0445809 | 0.0243419 |   1.8314475 | 0.0670338 | \-0.0031283 |   0.0922901 |
-| Social media               | W2\_INFO\_5           |   0.0390443 | 0.0528541 |   0.7387178 | 0.4600784 | \-0.0645479 |   0.1426364 |
-| Family and friends         | W2\_INFO\_9           | \-0.0151959 | 0.0466927 | \-0.3254450 | 0.7448443 | \-0.1067118 |   0.0763200 |
-| Intolerance of uncertainty | W2\_IOU\_Total        |   0.0388067 | 0.0655845 |   0.5917051 | 0.5540481 | \-0.0897365 |   0.1673499 |
+| variable                   | factor                |     AME\_no |    SE\_no |     p\_no |  AME\_maybe | SE\_maybe |  p\_maybe |
+| :------------------------- | :-------------------- | ----------: | --------: | --------: | ----------: | --------: | --------: |
+| 5G belief                  | conspiracy3\_sc       |   0.1427990 | 0.0270727 | 0.0000001 | \-0.0550133 | 0.0618257 | 0.3735667 |
+| Age                        | age\_sc               | \-0.1615372 | 0.0378285 | 0.0000195 | \-0.1252339 | 0.0700101 | 0.0736474 |
+| Conspiracy ideation        | W1\_Conspiracy\_Total | \-0.0058160 | 0.0325771 | 0.8583072 |   0.1139518 | 0.0602896 | 0.0587481 |
+| COVID-19 anxiety           | threat                | \-0.0889479 | 0.0367432 | 0.0154865 | \-0.1705003 | 0.0405062 | 0.0000256 |
+| Distrust scientists        | distrust\_science     |   0.1477947 | 0.0306252 | 0.0000014 |   0.0967139 | 0.0448466 | 0.0310409 |
+| Education                  | W1\_Education\_binary |   0.0076020 | 0.0166450 | 0.6478762 |   0.0118811 | 0.0219310 | 0.5879913 |
+| Elite news                 | elite\_news           |   0.0094896 | 0.0162488 | 0.5592087 | \-0.0364152 | 0.0210080 | 0.0830253 |
+| Ethnocentrism              | ethno                 | \-0.0394840 | 0.0333169 | 0.2359752 | \-0.0737707 | 0.0509726 | 0.1478233 |
+| Family and friends         | W2\_INFO\_9           | \-0.0196362 | 0.0326718 | 0.5478312 |   0.0011001 | 0.0459693 | 0.9809075 |
+| Gender                     | W2\_Gender\_binary2   |   0.0080295 | 0.0153910 | 0.6018807 |   0.0372956 | 0.0236473 | 0.1147584 |
+| Income                     | W1\_Income\_2019      | \-0.0086331 | 0.0279366 | 0.7573017 | \-0.1110991 | 0.0356810 | 0.0018477 |
+| Intolerance of uncertainty | W2\_IOU\_Total        | \-0.0381565 | 0.0443563 | 0.3896640 |   0.0778272 | 0.0631957 | 0.2181255 |
+| Left-right scale           | right                 |   0.0054075 | 0.0491898 | 0.9124631 | \-0.1035326 | 0.0574798 | 0.0716714 |
+| Meat market belief         | conspiracy2\_sc       | \-0.0561299 | 0.0323444 | 0.0826735 | \-0.0534145 | 0.0370903 | 0.1498331 |
+| Mid-level news             | mid\_level\_news      |   0.0099706 | 0.0162411 | 0.5392719 |   0.0105213 | 0.0256511 | 0.6816812 |
+| RWA                        | RWA                   |   0.0505452 | 0.0602685 | 0.4016559 |   0.0885985 | 0.0728023 | 0.2236143 |
+| SDO                        | SDO                   |   0.0270746 | 0.0545978 | 0.6199705 |   0.0633904 | 0.0751473 | 0.3989215 |
+| Social media               | W2\_INFO\_5           |   0.0203137 | 0.0275113 | 0.4602861 |   0.0236931 | 0.0461687 | 0.6078218 |
+| Tabloid news               | red\_top\_tabloid     | \-0.0119851 | 0.0149767 | 0.4235657 | \-0.0163570 | 0.0257439 | 0.5251840 |
+| Wuhan lab belief           | conspiracy1\_sc       |   0.0637148 | 0.0277392 | 0.0216233 | \-0.0083908 | 0.0436422 | 0.8475365 |
+
+``` r
+kable(ors)
+```
+
+| y.level | factor                |    estimate | std.error |   statistic |   p.value | odds\_ratios |
+| :------ | :-------------------- | ----------: | --------: | ----------: | --------: | -----------: |
+| No      | (Intercept)           | \-1.2095008 | 0.7655804 | \-1.5798481 | 0.1141417 |    0.2983462 |
+| No      | W2\_Gender\_binary2   |   0.2139102 | 0.2248569 |   0.9513167 | 0.3414436 |    1.2385114 |
+| No      | W1\_Education\_binary |   0.1488869 | 0.2355220 |   0.6321572 | 0.5272841 |    1.1605417 |
+| No      | W1\_Income\_2019      | \-0.3969938 | 0.3288187 | \-1.2073335 | 0.2273038 |    0.6723382 |
+| No      | age\_sc               | \-2.8666442 | 0.6172575 | \-4.6441626 | 0.0000034 |    0.0568895 |
+| No      | right                 | \-0.1555769 | 0.6032863 | \-0.2578824 | 0.7964977 |    0.8559212 |
+| No      | ethno                 | \-0.8014645 | 0.4866453 | \-1.6469171 | 0.0995751 |    0.4486714 |
+| No      | distrust\_science     |   2.5810516 | 0.4398379 |   5.8681887 | 0.0000000 |   13.2110240 |
+| No      | red\_top\_tabloid     | \-0.2291857 | 0.2453431 | \-0.9341435 | 0.3502299 |    0.7951809 |
+| No      | mid\_level\_news      |   0.1834572 | 0.2381420 |   0.7703692 | 0.4410809 |    1.2013636 |
+| No      | elite\_news           |   0.0661935 | 0.2343867 |   0.2824116 | 0.7776279 |    1.0684335 |
+| No      | W2\_INFO\_5           |   0.3790378 | 0.4054595 |   0.9348352 | 0.3498732 |    1.4608783 |
+| No      | W2\_INFO\_9           | \-0.3103487 | 0.4431087 | \-0.7003895 | 0.4836841 |    0.7331913 |
+| No      | SDO                   |   0.5794723 | 0.7739036 |   0.7487654 | 0.4539986 |    1.7850961 |
+| No      | RWA                   |   1.0123560 | 0.7691728 |   1.3161621 | 0.1881196 |    2.7520774 |
+| No      | W2\_IOU\_Total        | \-0.4263257 | 0.5939786 | \-0.7177460 | 0.4729139 |    0.6529036 |
+| No      | threat                | \-1.8155737 | 0.4499153 | \-4.0353679 | 0.0000545 |    0.1627445 |
+| No      | W1\_Conspiracy\_Total |   0.1733971 | 0.5951227 |   0.2913636 | 0.7707732 |    1.1893383 |
+| No      | conspiracy1\_sc       |   0.9957517 | 0.4002454 |   2.4878533 | 0.0128517 |    2.7067583 |
+| No      | conspiracy2\_sc       | \-1.0191970 | 0.3906934 | \-2.6086877 | 0.0090890 |    0.3608846 |
+| No      | conspiracy3\_sc       |   2.1471559 | 0.4351940 |   4.9337904 | 0.0000008 |    8.5604770 |
+| Maybe   | (Intercept)           | \-0.0979194 | 0.4629854 | \-0.2114956 | 0.8325006 |    0.9067220 |
+| Maybe   | W2\_Gender\_binary2   |   0.2525133 | 0.1405003 |   1.7972436 | 0.0722970 |    1.2872566 |
+| Maybe   | W1\_Education\_binary |   0.0925927 | 0.1500904 |   0.6169130 | 0.5372921 |    1.0970148 |
+| Maybe   | W1\_Income\_2019      | \-0.7199971 | 0.2002055 | \-3.5962904 | 0.0003228 |    0.4867537 |
+| Maybe   | age\_sc               | \-1.1660691 | 0.3720288 | \-3.1343513 | 0.0017223 |    0.3115894 |
+| Maybe   | right                 | \-0.6395489 | 0.4045881 | \-1.5807407 | 0.1139373 |    0.5275303 |
+| Maybe   | ethno                 | \-0.5568943 | 0.3102860 | \-1.7947777 | 0.0726891 |    0.5729858 |
+| Maybe   | distrust\_science     |   0.9543260 | 0.2949578 |   3.2354662 | 0.0012144 |    2.5969195 |
+| Maybe   | red\_top\_tabloid     | \-0.1310221 | 0.1620888 | \-0.8083354 | 0.4188975 |    0.8771984 |
+| Maybe   | mid\_level\_news      |   0.0895577 | 0.1560256 |   0.5739935 | 0.5659722 |    1.0936905 |
+| Maybe   | elite\_news           | \-0.2072296 | 0.1522633 | \-1.3609946 | 0.1735154 |    0.8128330 |
+| Maybe   | W2\_INFO\_5           |   0.1966810 | 0.2471424 |   0.7958207 | 0.4261363 |    1.2173556 |
+| Maybe   | W2\_INFO\_9           | \-0.0389210 | 0.2687410 | \-0.1448270 | 0.8848474 |    0.9618267 |
+| Maybe   | SDO                   |   0.4625303 | 0.4665904 |   0.9912983 | 0.3215399 |    1.5880873 |
+| Maybe   | RWA                   |   0.6761260 | 0.4786110 |   1.4126837 | 0.1577487 |    1.9662457 |
+| Maybe   | W2\_IOU\_Total        |   0.4011553 | 0.3756944 |   1.0677704 | 0.2856241 |    1.4935492 |
+| Maybe   | threat                | \-1.2817146 | 0.2755296 | \-4.6518213 | 0.0000033 |    0.2775610 |
+| Maybe   | W1\_Conspiracy\_Total |   0.7042277 | 0.3699318 |   1.9036689 | 0.0569533 |    2.0222843 |
+| Maybe   | conspiracy1\_sc       |   0.0959196 | 0.2395028 |   0.4004947 | 0.6887922 |    1.1006706 |
+| Maybe   | conspiracy2\_sc       | \-0.4675341 | 0.2376570 | \-1.9672642 | 0.0491528 |    0.6265454 |
+| Maybe   | conspiracy3\_sc       | \-0.0131034 | 0.3751634 | \-0.0349272 | 0.9721378 |    0.9869821 |
+
+``` r
+#write.csv(ames, "multinom_ames.csv")
+#write.csv(ors, "multinom_odds_ratios.csv")
+```
 
 ## Missing Values
 
@@ -4546,11 +4789,7 @@ select_these <- names(conspiracies2)
 
 conspiracies3 <- conspiracies %>%
   dplyr::select(one_of(select_these[-length(select_these)]))
-```
 
-    ## Warning: Unknown columns: `social_distance`
-
-``` r
 conspiracies3 %>% map_int(count_na) %>% sort()
 ```
 

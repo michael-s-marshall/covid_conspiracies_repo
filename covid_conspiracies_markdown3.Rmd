@@ -30,12 +30,10 @@ rescale01 <- function(x, ...) {
 ```{r, message = FALSE, warning = FALSE}
 # plotting density of different covid conspiracies
 df %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   gather(conspiracy_code, belief,
-         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>%
   mutate(conspiracy_code = as.factor(conspiracy_code)) %>%
-  filter(!conspiracy_code %in% c("W2_Conspiracy_Theory4",
-                                 "W2_Conspiracy_Theory5")) %>% 
   ggplot(aes(x = belief, y = conspiracy_code, height = ..density..)) +
   geom_density_ridges(aes(rel_min_height = 0.005),
                       stat = "density",
@@ -55,18 +53,15 @@ df %>%
 ```{r}
 #pacman::p_load(patchwork)
 df %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   gather(conspiracy_code, belief,
-         W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>%
+         W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>%
   mutate(conspiracy_code = fct_recode(
     as.factor(conspiracy_code),
     "Wuhan laboratory" = "W2_Conspiracy_Theory1",
     "Meat market" = "W2_Conspiracy_Theory2",
-    "5G" = "W2_Conspiracy_Theory3",
-    "4" = "W2_Conspiracy_Theory4",
-    "5" = "W2_Conspiracy_Theory5")
+    "5G" = "W2_Conspiracy_Theory3")
     ) %>%
-  filter(!conspiracy_code %in% c("4","5")) %>% 
   mutate(
     order_var = ifelse(conspiracy_code == "Meat market", 1,
                        ifelse(conspiracy_code == "Wuhan laboratory",2,3))
@@ -92,18 +87,20 @@ conspiracies <- df %>%
   filter(!is.na(W2_Conspiracy_Theory1) |
            !is.na(W2_Conspiracy_Theory2) |
            !is.na(W2_Conspiracy_Theory3) |
-           !is.na(W2_Conspiracy_Theory3) |
-           !is.na(W2_Conspiracy_Theory4) |
-           !is.na(W2_Conspiracy_Theory5)) %>% 
+           !is.na(W2_Conspiracy_Theory3)) %>% 
   rename(W1_Housing_tenure = W1_Hosuing_tenure)
 
+nrow(conspiracies) #1406 observations
+```
+
+```{r}
 # function to count NAs
 count_na <- function(x){
   sum(is.na(x))
 }
 
 conspiracies %>% 
-  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory5) %>% 
+  dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3) %>% 
   map_int(count_na)
 
 missing <- tibble(
@@ -958,7 +955,7 @@ plot_coefs(
   full_lab,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -984,7 +981,7 @@ plot_coefs(
   full_5g,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -1009,7 +1006,7 @@ plot_coefs(
   full_meat,
   coefs = c(dispositions, conspiracy, inform, controls),
   groups = list(
-    Dispositions = names(dispositions), 
+    Disposition = names(dispositions), 
     Conspiracy = names(conspiracy),
     Information = names(inform),
     Controls = names(controls) 
@@ -1213,7 +1210,7 @@ plot_coefs(
   coefs = c(dist_controls,dispositions,conspiracy2),
   groups = list(
     Controls = names(dist_controls), 
-    Dispositions = names(dispositions),
+    Disposition = names(dispositions),
     Conspiracy = names(conspiracy2)
   ),
   facet.label.pos = "left"
@@ -1233,14 +1230,23 @@ plot(dist_full)
 ## Multinomial model for vaccine acceptance
 
 ```{r}
-# making binary for vaccine reluctance
-conspiracies2 <- conspiracies2 %>% 
-  mutate(
-    vax_reluctance = ifelse(W2_C19_Vax_Self == 1, 0, 1)
-  )
+# functions to inspect multinom
+z_score <- function(model){
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  return(z)
+}
 
+p_value <- function(model){
+  z <- z_score(model)
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+}
+```
+
+
+```{r}
 # multinomial model
-vax_full <- glm(vax_reluctance ~ 
+vax_full <- multinom(W2_C19_Vax_Self ~ 
                   #socio-economic variables
                   W2_Gender_binary +
                   W1_Education_binary +
@@ -1270,75 +1276,76 @@ vax_full <- glm(vax_reluctance ~
                   conspiracy1_sc +
                   conspiracy2_sc +
                   conspiracy3_sc,
-                data = conspiracies2, family = "binomial")
+                data = conspiracies2)
 ```
 
 ```{r}
-# summary of vaccine model
-summ(vax_full)
+t(p_value(vax_full))
 ```
-
-Below is a plot of the average marginal effects for key variables.  
 
 ```{r, results = 'hide'}
 pacman::p_load(margins, ggstance)
 
-# average marginal effect for vaccine model
+# average marginal effect for "No", with bootstrap for variance
 set.seed(123)
-margin_vax <- margins_summary(
-  vax_full,
-  type = "response",
+margin_no <- margins_summary(
+  vax_full, category = "2",
   vce = "bootstrap"
 )
-margin_vax
+
+# average marginal effect for "Maybe", with bootstrap for variance
+set.seed(123)
+margin_maybe <- margins_summary(
+  vax_full, category = "3",
+  vce = "bootstrap"
+)
 ```
 
+Below is a plot of the average marginal effects for key variables.  
 
 ```{r}
 # plotting average marginal effect
-vax_plots <- c("W1_Income_2019","age_sc","ethno","distrust_science",
+vax_plots <- c("W1_Income_2019","age_sc","distrust_science",
                "threat","W1_Conspiracy_Total","conspiracy1_sc",
                "conspiracy2_sc","conspiracy3_sc","RWA","SDO")
+names(vax_plots) <- c("Income","Age","Distrust scientists",
+                      "COVID-19 anxiety","Conspiracy ideation",
+                      "Wuhan lab belief", "Meat market belief",
+                      "5G belief", "RWA", "SDO")
+vax_plots <- vax_plots[sort(names(vax_plots))]
+vax_plots_df <- tibble(
+  term = vax_plots,
+  name = names(vax_plots)
+)
 
-margin_vax %>% 
+rbind(
+  margin_no %>% as_tibble() %>% mutate(level = "No"),
+  margin_maybe %>% as_tibble() %>% mutate(level = "Maybe")
+) %>% 
   rename(term = factor) %>% 
-  filter(term %in% vax_plots) %>%
+  right_join(vax_plots_df, by = "term") %>% 
   mutate(
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    name = fct_rev(fct_drop(fct_relevel(name, names(vax_plots)))),
     group_facet = ifelse(term %in% dispositions, 
-                         "Dispositions",
+                         "Disposition",
                          ifelse(term %in% conspiracy2, "Conspiracy",
-                                       "Controls")),
-    term = fct_recode(term,
-                      "Age" = "age_sc",
-                      "Income" = "W1_Income_2019",
-                      "COVID-19 anxiety" = "threat",
-                      "Distrust scientists" = "distrust_science",
-                      "Ethnocentrism" = "ethno",
-                      "RWA" = "RWA",
-                      "SDO" = "SDO",
-                      "Conspiracy ideation" = "W1_Conspiracy_Total",
-                      "Meat market belief" = "conspiracy2_sc",
-                      "Wuhan lab belief" = "conspiracy1_sc",
-                      "5G belief" = "conspiracy3_sc")
-  ) %>% 
-  ggplot(aes(y = term, 
+                                       "Controls"))) %>% 
+  ggplot(aes(y = name, 
            x = AME, xmin = lower,
-           xmax = upper)) + 
+           xmax = upper, colour = level)) + 
   geom_vline(xintercept = 0, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
-    aes(y = term, xmin = lower,
-        xmax = upper),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
-    colour = get_colors("CUD Bright",num.colors = 1)) +
+    aes(y = name, xmin = lower,
+        xmax = upper, colour = level),
+    position = ggstance::position_dodgev(height = 0.62), size = 0.8) +
   geom_point(
-    aes(y = term, 
-        x = AME),
+    aes(y = name, 
+        x = AME, colour = level, shape = level),
     position = ggstance::position_dodgev(height = 0.62),
-    colour = get_colors("CUD Bright",num.colors = 1),
-    fill = "white", size = 3, stroke = 1, shape = 21) +
-  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+    fill = "white", size = 3, stroke = 1, show.legend = TRUE) +
+  scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
   theme_nice() +
+  scale_shape_manual(values = c(21,22)) +
   drop_y_gridlines() +
   facet_wrap(~group_facet, ncol = 1, scales = "free_y",
              strip.position = "left") +
@@ -1348,12 +1355,14 @@ margin_vax %>%
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
+        legend.position = "top",
         plot.caption = element_text(hjust = 0)) +
   labs(
     x = "Average marginal effect: Vaccine reluctance",
-    caption = "Note: Binomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Bootstrapped 95% confidence intervals.\nNumerical predictors scaled 0-1."
   )
 ```
+
 
 ```{r}
 tidies <- tidy(vax_full)
@@ -1363,62 +1372,54 @@ tidies %>%
   mutate(
     odds_ratio = exp(estimate),
     or_lower = exp(estimate - qnorm(0.975) * std.error),
-    or_upper = exp(estimate + qnorm(0.975) * std.error)
+    or_upper = exp(estimate + qnorm(0.975) * std.error),
+    y.level = fct_recode(as.factor(y.level),
+                         "No" = "2",
+                         "Maybe" = "3")
   ) %>% 
-  filter(term %in% vax_plots) %>%
+  rename(Level = y.level) %>% 
+  right_join(vax_plots_df, by = "term") %>% 
+  filter(term != "distrust_science") %>% 
   mutate(
-    term = fct_rev(fct_drop(fct_relevel(term, vax_plots))),
+    name = fct_rev(fct_drop(fct_relevel(name, names(vax_plots)))),
     group_facet = ifelse(term %in% dispositions, 
-                         "Dispositions",
+                         "Disposition",
                          ifelse(term %in% conspiracy2, "Conspiracy",
-                                       "Controls")),
-    term = fct_recode(term,
-                      "Age" = "age_sc",
-                      "Income" = "W1_Income_2019",
-                      "COVID-19 anxiety" = "threat",
-                      "Distrust scientists" = "distrust_science",
-                      "Ethnocentrism" = "ethno",
-                      "RWA" = "RWA",
-                      "SDO" = "SDO",
-                      "Conspiracy ideation" = "W1_Conspiracy_Total",
-                      "Meat market belief" = "conspiracy2_sc",
-                      "Wuhan lab belief" = "conspiracy1_sc",
-                      "5G belief" = "conspiracy3_sc")
-  ) %>% 
-  ggplot(aes(y = term, 
+                                       "Controls"))) %>% 
+  ggplot(aes(y = name, 
            x = odds_ratio, xmin = or_lower,
-           xmax = or_upper)) + 
+           xmax = or_upper)) +
   geom_vline(xintercept = 1, linetype = 2, size = .25) +
   ggstance::geom_linerangeh(
-    aes(y = term, xmin = or_lower,
+    aes(y = name, xmin = or_lower,
         xmax = or_upper),
-    position = ggstance::position_dodgev(height = 0.62), size = 0.8,
-    colour = get_colors("CUD Bright",num.colors = 1)) +
+    colour = get_colors("CUD Bright"), 
+    size = 0.8) +
   geom_point(
-    aes(y = term, 
+    aes(y = name, 
         x = odds_ratio),
-    position = ggstance::position_dodgev(height = 0.62),
-    colour = get_colors("CUD Bright",num.colors = 1),
-    fill = "white", size = 3, stroke = 1, shape = 21) +
-  #scale_colour_manual(values = get_colors("CUD Bright",num.colors = 2)) +
+    fill = "white", size = 3, stroke = 1, shape = 21,
+    colour = get_colors("CUD Bright")) +
   theme_nice() +
   drop_y_gridlines() +
-  facet_wrap(~group_facet, ncol = 1, scales = "free_y",
-             strip.position = "left") +
+  facet_grid(group_facet ~ Level, 
+             #ncol = 2, 
+             scales = "free",
+             switch = "y"
+             ) +
   theme(axis.title.y = element_blank(),
         axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 10,
                                    hjust = 1),
         panel.grid.major.x = element_line(linetype = "solid"),
         strip.text.x = element_text(size = 8),
-        plot.caption = element_text(hjust = 0)) +
+        plot.caption = element_text(hjust = 0),
+        panel.spacing = unit(0,"cm")) +
   labs(
-    x = "Odds ratios: Vaccine reluctance",
-    caption = "Note: Binomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1."
+    x = "Odds ratios: Vaccine acceptance",
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1.\nDistrust of scientists not displayed to make x-axis scale readable, but has the following odds ratios: 13.2('No'), 2.6('Maybe')."
   )
-
 ```
-
 
 ## Table summarising variables
 
@@ -1465,28 +1466,22 @@ cor_df <- cor_df %>% dplyr::select(one_of(sort(names(fuller_list))))
 
 ```{r}
 # function to get lower triangle in correlation matrix
-get_lower_tri <- function(df){
-  cormat <- cor(df)
-  cormat[upper.tri(cormat)]<- NA
-  return(cormat)
-}
-
-lower_tri <- get_lower_tri(cor_df)
+cor_mat <- corr.test(
+  cor_df,
+  adjust = "bonferroni"
+)
 ```
 
-
-```{r, results='asis'}
+```{r}
 # table for correlation matrix
 pacman::p_load(stargazer)
 
-lower_tri <- lower_tri %>% as_tibble() %>% 
-  mutate(` ` = names(cor_df)) %>% 
-  dplyr::select(` `, everything())
+kable(cor_mat$r)
 
-kable(lower_tri,
-      caption = "Correlation Matrix")
+kable(cor_mat$p)
 
-#write.csv(lower_tri,"correlation_matrix_randr.csv")
+#write.csv(cor_mat$r,"correlation_matrix_randr.csv")
+#write.csv(cor_mat$p,"correlation_matrix_randr_pvalues.csv")
 ```
 
 ## Comparison against British Election Survey (BES) benchmarks
@@ -1743,7 +1738,12 @@ stargazer(dist_full, vax_full,
 
 
 ```{r}
-tab <- margin_vax %>% 
+tab <- full_join(
+  margin_no %>% dplyr::select(factor:SE,p),
+  margin_maybe %>% dplyr::select(factor:SE,p),
+  by = "factor",
+  suffix = c("_no","_maybe")
+) %>% 
   as_tibble()
 
 tab2 <- tibble(factor = to_plot2, variable = names(to_plot2))
@@ -1752,12 +1752,27 @@ ames <- left_join(
     tab,
     tab2,
     by = "factor"
-    ) %>%
-  dplyr::select(variable,everything())
+    ) %>% 
+  dplyr::select(variable,everything()) %>%
+  arrange(variable)
+
+ors <- tidies %>% 
+  rename(factor = term) %>% 
+  mutate(odds_ratios = exp(estimate),
+         y.level = fct_recode(
+           as.factor(y.level),
+           "No" = "2",
+           "Maybe" = "3"
+           )
+         )
 ```
 
 ```{r, results = 'asis'}
 kable(ames)
+kable(ors)
+
+#write.csv(ames, "multinom_ames.csv")
+#write.csv(ors, "multinom_odds_ratios.csv")
 ```
 
 ## Missing Values
