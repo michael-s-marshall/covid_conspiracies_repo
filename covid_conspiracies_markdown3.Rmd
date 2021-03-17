@@ -1446,7 +1446,7 @@ fuller_list <- c(
 names(fuller_list) <- c(names(full_list),
                         "Social distancing motivation",
                         "Vaccination attitudes",
-                        "Meat market","Wuhan laboratory","5G")
+                        "Wuhan laboratory","Meat market","5G")
 
 fuller_list <- fuller_list[sort(names(fuller_list))]
 
