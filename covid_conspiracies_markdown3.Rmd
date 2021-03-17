@@ -1367,7 +1367,7 @@ rbind(
 ```{r}
 tidies <- tidy(vax_full)
 
-#presenting odds ratios for vaccine reluctance
+#presenting relative risk ratios for vaccine reluctance
 tidies %>% 
   mutate(
     odds_ratio = exp(estimate),
@@ -1417,7 +1417,7 @@ tidies %>%
         panel.spacing = unit(0,"cm")) +
   labs(
     x = "Odds ratios: Vaccine acceptance",
-    caption = "Note: Multinomial logit estimated using maximum likelihood method.  Odds ratios with 95% confidence intervals.\nNumerical predictors scaled 0-1.\nDistrust of scientists not displayed to make x-axis scale readable, but has the following odds ratios: 13.2('No'), 2.6('Maybe')."
+    caption = "Note: Multinomial logit estimated using maximum likelihood method.\nRelative risk ratios, relative to 'Yes' with 95% confidence intervals. Numerical predictors scaled 0-1.\nDistrust of scientists not displayed to make x-axis scale readable, but has the following ratios: 13.2('No'), 2.6('Maybe')."
   )
 ```
 
