@@ -619,7 +619,7 @@ for(i in seq_along(plot_vars)){
 pca_df <- conspiracies %>% 
   dplyr::select(W2_Conspiracy_Theory1:W2_Conspiracy_Theory3)
 
-pca_fit <- prcomp(pca_df,scale = TRUE)
+pca_fit <- prcomp(pca_df)
 
 biplot(pca_fit,
        col = c("lightgrey","red"))
@@ -631,31 +631,45 @@ biplot(pca_fit,
 pca_fit$rotation
 ```
 
-    ##                              PC1        PC2        PC3
-    ## W2_Conspiracy_Theory1  0.6925726 -0.1003290  0.7143369
-    ## W2_Conspiracy_Theory2 -0.2646508 -0.9565657  0.1222372
-    ## W2_Conspiracy_Theory3  0.6710463 -0.2737080 -0.6890434
+    ##                              PC1         PC2         PC3
+    ## W2_Conspiracy_Theory1  0.9189189 -0.22407297  0.32462196
+    ## W2_Conspiracy_Theory2 -0.2413014 -0.97035961  0.01326171
+    ## W2_Conspiracy_Theory3  0.3120284 -0.09051817 -0.94575087
 
 ``` r
-components <- pca_fit$x[,1:3] %>% as.tibble()
+cov_pca_df <- cov(pca_df)
+cov_pca <- cov(pca_fit$x)
+total_var <- sum(cov_pca_df[1,1],cov_pca_df[2,2],cov_pca_df[3,3])
+
+var_exp <- rep(NA,3)
+
+for(i in seq_along(var_exp)){
+  var_exp[i] <- cov_pca[i,i] / total_var
+}
+var_exp
 ```
 
-    ## Warning: `as.tibble()` is deprecated as of tibble 2.0.0.
-    ## Please use `as_tibble()` instead.
-    ## The signature and semantics have changed, see `?as_tibble`.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
+    ## [1] 0.5024483 0.3323673 0.1651844
 
 Principal components are as follows:
 
   - PC1 = belief in Wuhan lab and 5G conspiracies  
   - PC2 = disbelief in all three origin theories, but especially strong
-    disbelief in meat market theory  
-  - PC3 = belief in Wuhan lab but not 5G
+    disbelief in meat market theory. Reversing the scale essentially
+    makes it a proxy for belief in meat market  
+  - PC3 = belief in Wuhan lab, and mild belief in meat market, but not
+    5G. Perhaps a measure of anti-Chinese sentiment
+
+They explain the following amount of variance:
+
+  - PC1 = 50.24%  
+  - PC2 = 33.24%  
+  - PC3 = 16.52%
 
 <!-- end list -->
 
 ``` r
+components <- pca_fit$x[,1:3] %>% as_tibble()
 pc <- cbind(conspiracies,components)
 pc$PC2 <- 0 - pc$PC2
 
@@ -717,12 +731,7 @@ pc1_full <- lm(PC1 ~
                   #conspiracies
                   W1_Conspiracy_Total,
                  data = pc)
-
-par(mfrow = c(2,2))
-plot(pc1_full)
 ```
-
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 summ(pc1_full, vifs = T)
@@ -734,32 +743,32 @@ summ(pc1_full, vifs = T)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(17,1381) = 36.43, p = 0.00
-    ## R² = 0.31
-    ## Adj. R² = 0.30 
+    ## F(17,1381) = 30.73, p = 0.00
+    ## R² = 0.27
+    ## Adj. R² = 0.27 
     ## 
     ## Standard errors: OLS
     ## ---------------------------------------------------------------
     ##                              Est.   S.E.   t val.      p    VIF
     ## ------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                 -0.03   0.03    -0.87   0.39       
-    ## W2_Gender_binary2            0.01   0.01     0.98   0.33   1.09
-    ## W1_Education_binary         -0.02   0.01    -2.19   0.03   1.20
-    ## W1_Income_2019              -0.06   0.01    -4.25   0.00   1.13
-    ## age_sc                      -0.07   0.03    -2.69   0.01   1.39
-    ## right                        0.01   0.03     0.39   0.69   1.49
-    ## ethno                        0.05   0.02     2.16   0.03   1.30
-    ## distrust_science             0.19   0.02    10.01   0.00   1.11
-    ## red_top_tabloid              0.06   0.01     5.28   0.00   1.09
-    ## mid_level_news               0.04   0.01     3.67   0.00   1.13
-    ## elite_news                  -0.00   0.01    -0.47   0.64   1.14
-    ## W2_INFO_5                    0.07   0.02     4.38   0.00   1.39
-    ## W2_INFO_9                    0.10   0.02     5.39   0.00   1.24
-    ## SDO                          0.22   0.03     7.11   0.00   1.48
-    ## RWA                          0.01   0.03     0.17   0.86   1.42
-    ## W2_IOU_Total                -0.03   0.03    -1.14   0.25   1.22
-    ## threat                       0.04   0.02     1.91   0.06   1.14
-    ## W1_Conspiracy_Total          0.14   0.02     5.67   0.00   1.10
+    ## (Intercept)                 -0.04   0.04    -1.08   0.28       
+    ## W2_Gender_binary2            0.02   0.01     1.25   0.21   1.09
+    ## W1_Education_binary         -0.03   0.01    -2.54   0.01   1.20
+    ## W1_Income_2019              -0.06   0.02    -3.70   0.00   1.13
+    ## age_sc                      -0.05   0.03    -1.68   0.09   1.39
+    ## right                        0.01   0.04     0.31   0.76   1.49
+    ## ethno                        0.06   0.03     2.40   0.02   1.30
+    ## distrust_science             0.19   0.02     7.64   0.00   1.11
+    ## red_top_tabloid              0.06   0.01     4.11   0.00   1.09
+    ## mid_level_news               0.07   0.01     5.09   0.00   1.13
+    ## elite_news                  -0.01   0.01    -0.87   0.39   1.14
+    ## W2_INFO_5                    0.07   0.02     3.33   0.00   1.39
+    ## W2_INFO_9                    0.11   0.02     4.81   0.00   1.24
+    ## SDO                          0.21   0.04     5.38   0.00   1.48
+    ## RWA                          0.08   0.04     2.04   0.04   1.42
+    ## W2_IOU_Total                -0.05   0.03    -1.45   0.15   1.22
+    ## threat                       0.06   0.02     2.65   0.01   1.14
+    ## W1_Conspiracy_Total          0.20   0.03     6.52   0.00   1.10
     ## ---------------------------------------------------------------
 
 ``` r
@@ -773,6 +782,232 @@ plot_coefs(pc1_full)
     ##   tidy.gamlss broom
 
 ![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+``` r
+par(mfrow = c(2,2))
+plot(pc1_full)
+```
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+``` r
+source("diagnostic_plots.R")
+pr_ggplot(pc1_full)
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-3.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-4.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-5.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-6.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-7.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-8.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-9.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-10.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-11.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-12.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+    ## Warning: Computation failed in `stat_smooth()`:
+    ## x has insufficient unique values to support 10 knots: reduce k.
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-13.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-14.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-15.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-16.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-17.png)<!-- -->
+
+    ## `geom_smooth()` using formula 'y ~ x'
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-18.png)<!-- -->
+
+## Interaction on PC1
+
+``` r
+pc1_int <- lm(PC1 ~ 
+                  #socio-economic variables
+                  W2_Gender_binary +
+                  W1_Education_binary +
+                  W1_Income_2019 +
+                  age_sc +
+                  
+                  #political and media variables
+                  right +
+                  ethno +
+                  distrust_science + 
+                  red_top_tabloid + 
+                  mid_level_news + 
+                  elite_news +
+                  W2_INFO_5 + #social media
+                  W2_INFO_9 + #family and friends
+                  
+                  #political-psychology variables
+                  #SDO +
+                  RWA +
+                  W2_IOU_Total +
+                  
+                  #covid-anxiety
+                  (SDO * threat) +
+                  
+                  #conspiracies
+                  W1_Conspiracy_Total,
+                 data = pc)
+
+par(mfrow = c(2,2))
+plot(pc1_int)
+```
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+``` r
+summ(pc1_int, vifs = T)
+```
+
+    ## MODEL INFO:
+    ## Observations: 1399 (7 missing obs. deleted)
+    ## Dependent Variable: PC1
+    ## Type: OLS linear regression 
+    ## 
+    ## MODEL FIT:
+    ## F(18,1380) = 29.56, p = 0.00
+    ## R² = 0.28
+    ## Adj. R² = 0.27 
+    ## 
+    ## Standard errors: OLS
+    ## ---------------------------------------------------------------
+    ##                              Est.   S.E.   t val.      p    VIF
+    ## ------------------------- ------- ------ -------- ------ ------
+    ## (Intercept)                  0.03   0.05     0.64   0.52       
+    ## W2_Gender_binary2            0.01   0.01     1.17   0.24   1.09
+    ## W1_Education_binary         -0.03   0.01    -2.57   0.01   1.20
+    ## W1_Income_2019              -0.07   0.02    -3.84   0.00   1.14
+    ## age_sc                      -0.05   0.03    -1.64   0.10   1.40
+    ## right                        0.01   0.03     0.40   0.69   1.49
+    ## ethno                        0.07   0.03     2.46   0.01   1.30
+    ## distrust_science             0.19   0.02     7.62   0.00   1.11
+    ## red_top_tabloid              0.06   0.01     4.20   0.00   1.09
+    ## mid_level_news               0.07   0.01     5.20   0.00   1.13
+    ## elite_news                  -0.01   0.01    -0.79   0.43   1.14
+    ## W2_INFO_5                    0.07   0.02     3.45   0.00   1.39
+    ## W2_INFO_9                    0.11   0.02     4.83   0.00   1.24
+    ## RWA                          0.08   0.04     2.05   0.04   1.42
+    ## W2_IOU_Total                -0.05   0.03    -1.45   0.15   1.22
+    ## SDO                          0.00   0.09     0.06   0.95   7.06
+    ## threat                      -0.06   0.05    -1.14   0.25   5.18
+    ## W1_Conspiracy_Total          0.21   0.03     6.66   0.00   1.10
+    ## SDO:threat                   0.34   0.12     2.71   0.01   9.64
+    ## ---------------------------------------------------------------
+
+``` r
+plot_coefs(pc1_int)
+```
+
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-29-2.png)<!-- -->
+
+Only moderate support for an interaction. Probably safer to revert to
+the simpler model.
+
+``` r
+AIC(pc1_full)
+```
+
+    ## [1] -258.2132
+
+``` r
+AIC(pc1_int)
+```
+
+    ## [1] -263.6269
 
 ## Modelling for belief in PC3
 
@@ -810,7 +1045,7 @@ par(mfrow = c(2,2))
 plot(pc3_full)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 summ(pc3_full, vifs = T)
@@ -822,39 +1057,39 @@ summ(pc3_full, vifs = T)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(17,1381) = 7.83, p = 0.00
-    ## R² = 0.09
-    ## Adj. R² = 0.08 
+    ## F(17,1381) = 10.31, p = 0.00
+    ## R² = 0.11
+    ## Adj. R² = 0.10 
     ## 
     ## Standard errors: OLS
     ## ---------------------------------------------------------------
     ##                              Est.   S.E.   t val.      p    VIF
     ## ------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  0.55   0.03    21.74   0.00       
-    ## W2_Gender_binary2            0.01   0.01     0.85   0.39   1.09
-    ## W1_Education_binary         -0.01   0.01    -1.64   0.10   1.20
-    ## W1_Income_2019               0.01   0.01     0.54   0.59   1.13
-    ## age_sc                       0.04   0.02     1.80   0.07   1.39
-    ## right                        0.00   0.02     0.04   0.97   1.49
-    ## ethno                        0.03   0.02     1.70   0.09   1.30
-    ## distrust_science            -0.05   0.02    -3.33   0.00   1.11
-    ## red_top_tabloid             -0.01   0.01    -1.30   0.19   1.09
-    ## mid_level_news               0.04   0.01     4.30   0.00   1.13
-    ## elite_news                  -0.01   0.01    -0.89   0.37   1.14
-    ## W2_INFO_5                   -0.02   0.01    -1.34   0.18   1.39
-    ## W2_INFO_9                    0.00   0.01     0.00   1.00   1.24
-    ## SDO                         -0.06   0.03    -2.17   0.03   1.48
-    ## RWA                          0.11   0.03     4.20   0.00   1.42
-    ## W2_IOU_Total                -0.01   0.02    -0.59   0.56   1.22
-    ## threat                       0.04   0.02     2.72   0.01   1.14
-    ## W1_Conspiracy_Total          0.07   0.02     3.44   0.00   1.10
+    ## (Intercept)                  0.77   0.03    28.76   0.00       
+    ## W2_Gender_binary2            0.00   0.01     0.46   0.64   1.09
+    ## W1_Education_binary         -0.00   0.01    -0.25   0.80   1.20
+    ## W1_Income_2019               0.02   0.01     1.50   0.13   1.13
+    ## age_sc                       0.05   0.02     2.44   0.01   1.39
+    ## right                       -0.01   0.02    -0.34   0.73   1.49
+    ## ethno                       -0.00   0.02    -0.22   0.83   1.30
+    ## distrust_science            -0.10   0.02    -6.19   0.00   1.11
+    ## red_top_tabloid             -0.03   0.01    -3.31   0.00   1.09
+    ## mid_level_news               0.02   0.01     2.50   0.01   1.13
+    ## elite_news                  -0.01   0.01    -0.91   0.36   1.14
+    ## W2_INFO_5                   -0.04   0.01    -2.81   0.00   1.39
+    ## W2_INFO_9                   -0.03   0.02    -1.98   0.05   1.24
+    ## SDO                         -0.13   0.03    -4.75   0.00   1.48
+    ## RWA                          0.12   0.03     4.12   0.00   1.42
+    ## W2_IOU_Total                -0.02   0.02    -0.85   0.40   1.22
+    ## threat                       0.02   0.02     0.94   0.35   1.14
+    ## W1_Conspiracy_Total          0.02   0.02     1.03   0.31   1.10
     ## ---------------------------------------------------------------
 
 ``` r
 plot_coefs(pc3_full)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 ## Interaction model
 
@@ -892,7 +1127,7 @@ par(mfrow = c(2,2))
 plot(pc3_int)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 summ(pc3_int, vifs = TRUE)
@@ -904,40 +1139,40 @@ summ(pc3_int, vifs = TRUE)
     ## Type: OLS linear regression 
     ## 
     ## MODEL FIT:
-    ## F(18,1380) = 7.43, p = 0.00
-    ## R² = 0.09
-    ## Adj. R² = 0.08 
+    ## F(18,1380) = 9.82, p = 0.00
+    ## R² = 0.11
+    ## Adj. R² = 0.10 
     ## 
     ## Standard errors: OLS
     ## ----------------------------------------------------------------
     ##                              Est.   S.E.   t val.      p     VIF
     ## ------------------------- ------- ------ -------- ------ -------
-    ## (Intercept)                  0.53   0.04    14.24   0.00        
-    ## W2_Gender_binary2            0.01   0.01     0.88   0.38    1.09
-    ## W1_Education_binary         -0.01   0.01    -1.64   0.10    1.20
-    ## W1_Income_2019               0.01   0.01     0.52   0.60    1.13
-    ## age_sc                       0.04   0.02     1.82   0.07    1.40
-    ## right                        0.00   0.02     0.06   0.95    1.49
-    ## ethno                        0.03   0.02     1.70   0.09    1.30
-    ## distrust_science            -0.05   0.02    -3.30   0.00    1.11
-    ## red_top_tabloid             -0.01   0.01    -1.32   0.19    1.09
-    ## mid_level_news               0.04   0.01     4.25   0.00    1.13
-    ## elite_news                  -0.01   0.01    -0.93   0.35    1.15
-    ## W2_INFO_5                   -0.02   0.01    -1.37   0.17    1.39
-    ## W2_INFO_9                    0.00   0.01     0.05   0.96    1.24
-    ## SDO                         -0.06   0.03    -2.19   0.03    1.48
-    ## W2_IOU_Total                -0.01   0.02    -0.61   0.54    1.22
-    ## RWA                          0.15   0.06     2.58   0.01    7.12
-    ## threat                       0.08   0.05     1.65   0.10   10.31
-    ## W1_Conspiracy_Total          0.07   0.02     3.43   0.00    1.10
-    ## RWA:threat                  -0.07   0.09    -0.78   0.43   17.08
+    ## (Intercept)                  0.73   0.04    18.73   0.00        
+    ## W2_Gender_binary2            0.00   0.01     0.51   0.61    1.09
+    ## W1_Education_binary         -0.00   0.01    -0.24   0.81    1.20
+    ## W1_Income_2019               0.02   0.01     1.48   0.14    1.13
+    ## age_sc                       0.05   0.02     2.47   0.01    1.40
+    ## right                       -0.01   0.02    -0.32   0.75    1.49
+    ## ethno                       -0.00   0.02    -0.22   0.83    1.30
+    ## distrust_science            -0.10   0.02    -6.14   0.00    1.11
+    ## red_top_tabloid             -0.03   0.01    -3.34   0.00    1.09
+    ## mid_level_news               0.02   0.01     2.43   0.02    1.13
+    ## elite_news                  -0.01   0.01    -0.96   0.34    1.15
+    ## W2_INFO_5                   -0.04   0.01    -2.85   0.00    1.39
+    ## W2_INFO_9                   -0.03   0.02    -1.91   0.06    1.24
+    ## SDO                         -0.13   0.03    -4.79   0.00    1.48
+    ## W2_IOU_Total                -0.02   0.02    -0.89   0.38    1.22
+    ## RWA                          0.18   0.06     2.90   0.00    7.12
+    ## threat                       0.07   0.05     1.43   0.15   10.31
+    ## W1_Conspiracy_Total          0.02   0.02     1.01   0.31    1.10
+    ## RWA:threat                  -0.11   0.09    -1.19   0.24   17.08
     ## ----------------------------------------------------------------
 
 ``` r
 plot_coefs(pc3_int)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ## IHS model
 
@@ -962,24 +1197,24 @@ ihs_loglik <- function(theta,x){
 ```
 
 ``` r
-best_theta <- optimize(ihs_loglik, 
+theta_pc1 <- optimize(ihs_loglik, 
                        lower = 0.00001, upper = 1e+06,
                        x = pc$PC1, 
                        maximum = TRUE)$maximum
-best_theta # continues to rise indefinitely
+theta_pc1 
 ```
 
-    ## [1] 9.297805
+    ## [1] 5.677164e-05
 
 ``` r
-pc$PC1_ihs <- ihs(pc$PC1, best_theta)
+pc$PC1_ihs <- ihs(pc$PC1, theta_pc1)
 
 pc %>% 
   ggplot(aes(x = PC1)) +
   geom_density()
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 pc %>% 
@@ -987,102 +1222,35 @@ pc %>%
   geom_density()
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-34-2.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
 
 ``` r
-pc1_ihs <- lm(PC1_ihs ~ 
-                  #socio-economic variables
-                  W2_Gender_binary +
-                  W1_Education_binary +
-                  W1_Income_2019 +
-                  age_sc +
-                  
-                  #political and media variables
-                  right +
-                  ethno +
-                  distrust_science + 
-                  red_top_tabloid + 
-                  mid_level_news + 
-                  elite_news +
-                  W2_INFO_5 + #social media
-                  W2_INFO_9 + #family and friends
-                  
-                  #political-psychology variables
-                  SDO +
-                  RWA +
-                  W2_IOU_Total +
-                  
-                  #covid-anxiety
-                  threat +
-                  
-                  #conspiracies
-                  W1_Conspiracy_Total,
-                 data = pc)
-
-par(mfrow = c(2,2))
-plot(pc1_ihs)
+theta_pc3 <- optimize(ihs_loglik, 
+                       lower = 0.001, upper = 1e+06,
+                       x = pc$PC3, 
+                       maximum = TRUE)$maximum
+theta_pc3 
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+    ## [1] 0.001052334
 
 ``` r
-summ(pc1_ihs, vifs = T)
+pc$PC3_ihs <- ihs(pc$PC3, theta_pc3)
+
+pc %>% 
+  ggplot(aes(x = PC3)) +
+  geom_density()
 ```
 
-    ## MODEL INFO:
-    ## Observations: 1399 (7 missing obs. deleted)
-    ## Dependent Variable: PC1_ihs
-    ## Type: OLS linear regression 
-    ## 
-    ## MODEL FIT:
-    ## F(17,1381) = 32.59, p = 0.00
-    ## R² = 0.29
-    ## Adj. R² = 0.28 
-    ## 
-    ## Standard errors: OLS
-    ## ---------------------------------------------------------------
-    ##                              Est.   S.E.   t val.      p    VIF
-    ## ------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  0.04   0.01     3.07   0.00       
-    ## W2_Gender_binary2            0.01   0.00     1.30   0.19   1.09
-    ## W1_Education_binary         -0.01   0.00    -2.13   0.03   1.20
-    ## W1_Income_2019              -0.02   0.01    -4.27   0.00   1.13
-    ## age_sc                      -0.03   0.01    -2.49   0.01   1.39
-    ## right                       -0.00   0.01    -0.13   0.90   1.49
-    ## ethno                        0.01   0.01     1.72   0.09   1.30
-    ## distrust_science             0.07   0.01     9.41   0.00   1.11
-    ## red_top_tabloid              0.02   0.00     4.57   0.00   1.09
-    ## mid_level_news               0.02   0.00     4.45   0.00   1.13
-    ## elite_news                  -0.01   0.00    -1.41   0.16   1.14
-    ## W2_INFO_5                    0.02   0.01     3.38   0.00   1.39
-    ## W2_INFO_9                    0.04   0.01     5.17   0.00   1.24
-    ## SDO                          0.08   0.01     6.40   0.00   1.48
-    ## RWA                          0.02   0.01     1.43   0.15   1.42
-    ## W2_IOU_Total                -0.02   0.01    -1.60   0.11   1.22
-    ## threat                       0.01   0.01     1.79   0.07   1.14
-    ## W1_Conspiracy_Total          0.05   0.01     5.18   0.00   1.10
-    ## ---------------------------------------------------------------
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 ``` r
-plot_coefs(pc1_ihs)
+pc %>% 
+  ggplot(aes(x = PC3_ihs)) +
+  geom_density()
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
-
-``` r
-coef(pc1_ihs)
-```
-
-    ##         (Intercept)   W2_Gender_binary2 W1_Education_binary      W1_Income_2019 
-    ##         0.038745792         0.005124018        -0.008846750        -0.023868112 
-    ##              age_sc               right               ethno    distrust_science 
-    ##        -0.025893935        -0.001431929         0.014852893         0.074773642 
-    ##     red_top_tabloid      mid_level_news          elite_news           W2_INFO_5 
-    ##         0.020356122         0.019082071        -0.005880048         0.023472011 
-    ##           W2_INFO_9                 SDO                 RWA        W2_IOU_Total 
-    ##         0.038306346         0.081887332         0.018998310        -0.016816752 
-    ##              threat W1_Conspiracy_Total 
-    ##         0.014004705         0.051650484
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-39-2.png)<!-- -->
 
 ## Social distancing
 
@@ -1155,7 +1323,7 @@ ggplot(public, aes(x = social_distance)) +
   geom_density()
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ``` r
 dist_full <- lm(social_distance ~ 
@@ -1206,7 +1374,7 @@ summ(dist_full, vifs = T)
     ## ---------------------------------------------------------------
     ##                              Est.   S.E.   t val.      p    VIF
     ## ------------------------- ------- ------ -------- ------ ------
-    ## (Intercept)                  0.60   0.03    17.90   0.00       
+    ## (Intercept)                  0.54   0.04    14.73   0.00       
     ## W2_Gender_binary2            0.04   0.01     4.02   0.00   1.09
     ## W1_Education_binary          0.00   0.01     0.42   0.68   1.22
     ## W1_Income_2019               0.03   0.01     1.99   0.05   1.15
@@ -1224,9 +1392,9 @@ summ(dist_full, vifs = T)
     ## W2_IOU_Total                 0.02   0.02     0.67   0.51   1.23
     ## threat                       0.02   0.02     1.37   0.17   1.17
     ## W1_Conspiracy_Total          0.05   0.02     1.99   0.05   1.13
-    ## PC1                         -0.14   0.03    -5.46   0.00   1.46
-    ## PC2                          0.05   0.02     2.27   0.02   1.10
-    ## PC3                          0.14   0.03     4.61   0.00   1.10
+    ## PC1                         -0.07   0.02    -3.69   0.00   1.41
+    ## PC2                          0.07   0.02     3.41   0.00   1.11
+    ## PC3                          0.17   0.03     5.96   0.00   1.14
     ## ---------------------------------------------------------------
 
 ``` r
@@ -1234,13 +1402,13 @@ par(mfrow = c(2,2))
 plot(dist_full)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ``` r
 plot_coefs(dist_full)
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-40-2.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
 
 ## Multinomial model for vaccine acceptance
 
@@ -1283,11 +1451,10 @@ vax_full <- multinom(W2_C19_Vax_Self ~
 
     ## # weights:  66 (42 variable)
     ## initial  value 1527.071081 
-    ## iter  10 value 1010.755681
-    ## iter  20 value 986.373263
-    ## iter  30 value 985.334894
-    ## iter  40 value 985.328574
-    ## final  value 985.328560 
+    ## iter  10 value 993.550666
+    ## iter  20 value 985.996473
+    ## iter  30 value 985.334746
+    ## final  value 985.328563 
     ## converged
 
 ``` r
@@ -1309,17 +1476,17 @@ p_value(vax_full)
 ```
 
     ##   (Intercept) W2_Gender_binary2 W1_Education_binary W1_Income_2019       age_sc
-    ## 2   0.1001782        0.34134953           0.5271656   0.2269016772 3.408978e-06
-    ## 3   0.7438046        0.07237896           0.5375818   0.0003229641 1.722901e-03
+    ## 2   0.9540027        0.34147918           0.5273325   0.2267792723 3.401490e-06
+    ## 3   0.7591651        0.07237617           0.5375358   0.0003227755 1.726357e-03
     ##       right      ethno distrust_science red_top_tabloid mid_level_news
-    ## 2 0.7961216 0.09953451     4.443083e-09       0.3497124      0.4400723
-    ## 3 0.1139616 0.07245597     1.205801e-03       0.4187590      0.5652486
+    ## 2 0.7955769 0.09961343     4.435872e-09       0.3492936      0.4400874
+    ## 3 0.1139075 0.07253745     1.207140e-03       0.4186014      0.5653787
     ##   elite_news W2_INFO_5 W2_INFO_9       SDO       RWA W2_IOU_Total       threat
-    ## 2  0.7774440 0.3496546 0.4833810 0.4536572 0.1880197    0.4720002 5.465262e-05
-    ## 3  0.1734472 0.4265736 0.8861823 0.3215145 0.1579246    0.2856178 3.308624e-06
-    ##   W1_Conspiracy_Total          PC1        PC2       PC3
-    ## 2          0.77018491 8.095648e-09 0.27976725 0.3258814
-    ## 3          0.05680113 4.383753e-01 0.06958108 0.9245713
+    ## 2  0.7773808 0.3495376 0.4835190 0.4536846 0.1881826    0.4714278 5.445589e-05
+    ## 3  0.1735484 0.4262865 0.8861011 0.3219343 0.1576612    0.2856597 3.310954e-06
+    ##   W1_Conspiracy_Total          PC1        PC2          PC3
+    ## 2          0.76965910 1.557679e-06 0.14488400 0.0001371725
+    ## 3          0.05693185 3.956616e-01 0.07418812 0.9203794935
 
 ``` r
 # table for plot of unstandardised coefficients
@@ -1396,7 +1563,7 @@ ggplot(data = tidies,
   ) 
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 Below is a plot of the average marginal effects for key variables.
 
@@ -1480,4 +1647,4 @@ rbind(
   )
 ```
 
-![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](covid_conspiracies_markdown4_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
