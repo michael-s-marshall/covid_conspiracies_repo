@@ -585,7 +585,7 @@ for(i in seq_along(plot_vars)){
 # Correlation between the origin theories
 
 Correlation between the origin theories below. Statistical significance
-tested via spearman’s rank, with bonferroni correction for 3 tests.
+tested via kendall’s tau, with bonferroni correction for 3 tests.
 
 ``` r
 pacman::p_load(knitr)
